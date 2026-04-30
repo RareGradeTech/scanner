@@ -23,7 +23,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
             overflow: hidden;
@@ -47,7 +47,6 @@
             display: none;
         }
         #login-view.active { display: flex; transform: translateY(0); opacity: 1; }
-        .blur-locked { filter: blur(8px); pointer-events: none; }
         
         #reader { width: 100% !important; border-radius: 1rem; overflow: hidden; }
         #reader video { width: 100% !important; object-fit: cover; display: block; }
@@ -119,14 +118,24 @@
         
         <!-- ================= HOME VIEW ================= -->
         <section id="view-home" class="space-y-4">
-            <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5 flex items-center gap-4">
-                <img id="home-avatar" src="" onerror="handleImgError(this)" class="w-14 h-14 rounded-full object-cover border-2 border-gray-100 dark:border-slate-600 shimmer" alt="Profile">
-                <div>
-                    <h2 class="text-lg font-bold shimmer rounded" id="home-name">Loading...</h2>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1" id="home-role">Employee Portal</p>
+            
+            <!-- Employee Profile & PIN Header -->
+            <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <img id="home-avatar" src="" onerror="handleImgError(this)" class="w-14 h-14 rounded-full object-cover border-2 border-gray-100 dark:border-slate-600 shimmer" alt="Profile">
+                    <div>
+                        <h2 class="text-lg font-bold shimmer rounded" id="home-name">Loading...</h2>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1">Employee Portal</p>
+                    </div>
+                </div>
+                <!-- 5-Digit Authentication PIN -->
+                <div class="text-center px-4 border-l border-gray-100 dark:border-slate-700">
+                    <p class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Auth PIN</p>
+                    <p id="emp-pin-display" class="font-mono text-xl font-black text-blue-600 dark:text-blue-400 shimmer rounded">-----</p>
                 </div>
             </div>
 
+            <!-- Attendance Card -->
             <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-bold text-sm"><i class="fa-regular fa-clock mr-2 text-blue-500 dark:text-blue-400"></i>Today's Shift</h3>
@@ -151,39 +160,75 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Recent Work Feed -->
+            <div class="mt-6 px-1">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-bold text-sm text-gray-700 dark:text-gray-200">Recent Tasks Signed</h3>
+                    <i class="fa-solid fa-list-check text-gray-400"></i>
+                </div>
+                <div id="work-history-list" class="space-y-3">
+                    <div class="text-center text-xs text-gray-400 py-4 italic">No tasks signed yet.</div>
+                </div>
+            </div>
+
         </section>
 
-        <!-- ================= SCANNER VIEW ================= -->
+        <!-- ================= SCANNER & UPLOAD VIEW ================= -->
         <section id="view-scanner" class="hidden space-y-4 h-full flex flex-col pb-6">
+            
             <div id="location-overlay" class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-6 text-center space-y-4 my-auto">
                 <div class="inline-block bg-blue-50 dark:bg-blue-900/30 p-4 rounded-full text-blue-500 dark:text-blue-400 mb-1">
                     <i class="fa-solid fa-location-dot text-2xl"></i>
                 </div>
                 <h3 class="text-lg font-bold">Verify Location</h3>
-                <p class="text-xs text-gray-500 dark:text-gray-400 px-4">You must be at the office coordinates to log your attendance.</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 px-4">You must be at the office coordinates to log attendance or upload evidence.</p>
                 <button onclick="detectAndVerifyLocation()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-colors mt-2 text-sm shadow-md">
                     Check GPS Lock
                 </button>
             </div>
 
-            <div id="scanner-interface" class="hidden flex-1 flex flex-col space-y-4">
-                <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4">
+            <div id="scanner-interface" class="hidden flex-1 flex flex-col space-y-4 overflow-y-auto">
+                
+                <!-- QR Attendance Scanner -->
+                <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 shrink-0">
                     <div class="flex justify-between items-center mb-3 px-1">
-                        <h2 class="font-bold text-sm">Scan Office QR</h2>
+                        <h2 class="font-bold text-sm"><i class="fa-solid fa-qrcode mr-2 text-blue-500"></i>Scan Office QR</h2>
                     </div>
-                    <div id="reader-container" class="w-full aspect-square overflow-hidden relative shadow-inner bg-gray-100 dark:bg-slate-900 rounded-xl">
+                    <div id="reader-container" class="w-full aspect-video overflow-hidden relative shadow-inner bg-gray-100 dark:bg-slate-900 rounded-xl">
                         <div id="reader"></div>
                     </div>
+                    <button onclick="logWithBiometrics()" class="w-full py-3.5 bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-xl font-bold shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 text-xs mt-3">
+                        <i class="fa-solid fa-fingerprint text-blue-500 dark:text-blue-400 text-lg"></i> Check in with Biometrics
+                    </button>
                 </div>
 
-                <div class="flex items-center justify-center gap-4 text-xs text-gray-400 dark:text-gray-500 font-bold uppercase mt-2">
-                    <hr class="w-1/4 border-gray-200 dark:border-slate-700"> OR <hr class="w-1/4 border-gray-200 dark:border-slate-700">
+                <div class="flex items-center justify-center gap-4 text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase mt-2">
+                    <hr class="w-1/4 border-gray-200 dark:border-slate-700"> WORKSPACE UPLOAD <hr class="w-1/4 border-gray-200 dark:border-slate-700">
                 </div>
 
-                <button onclick="logWithBiometrics()" class="w-full py-4 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl font-bold shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 text-sm mt-2">
-                    <i class="fa-solid fa-fingerprint text-blue-500 dark:text-blue-400 text-xl"></i>
-                    Use Device Biometrics
-                </button>
+                <!-- Remote Image Upload Link -->
+                <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5 shrink-0 mb-4">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">Capture evidence directly from this device. It will sync real-time to the main workspace.</p>
+                    
+                    <div class="space-y-4">
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-mono font-bold text-sm">RGT/SFT-</span>
+                            <input type="text" id="upload-job-id" placeholder="1234" class="w-full pl-24 pr-4 py-3 bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-xl font-mono font-bold focus:ring-2 focus:ring-blue-500 outline-none dark:text-white" inputmode="numeric">
+                        </div>
+
+                        <select id="upload-phase" class="w-full p-3 bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-blue-500 outline-none dark:text-white">
+                            <option value="photosBefore">Pre-Repair Evidence</option>
+                            <option value="photosAfter">Post-Repair Evidence</option>
+                        </select>
+
+                        <button onclick="document.getElementById('evidence-upload').click()" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold shadow-md hover:bg-blue-700 active:scale-95 transition-all flex justify-center items-center gap-2">
+                            <i class="fa-solid fa-camera"></i> Capture & Link Image
+                        </button>
+                        <input type="file" id="evidence-upload" accept="image/*" capture="environment" class="hidden" onchange="uploadEvidenceToWorkspace(event)">
+                    </div>
+                </div>
+
             </div>
         </section>
 
@@ -273,7 +318,7 @@
                         </div>
                         <div>
                             <p class="text-sm font-semibold">App Version</p>
-                            <p class="text-[10px] text-gray-500 dark:text-gray-400">RareGradeHub v2.3.0</p>
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400">RareGradeHub v2.4.0</p>
                         </div>
                     </div>
                     <span class="text-xs text-gray-400 font-mono">Up to date</span>
@@ -441,44 +486,6 @@
             }
         }
 
-        // --- SWIPE GESTURE LOGIC ---
-        let touchstartX = 0;
-        let touchendX = 0;
-        const TABS_ARRAY = ['home', 'chat', 'profile', 'settings'];
-        
-        const mainContent = document.getElementById('app-content');
-        mainContent.addEventListener('touchstart', e => { touchstartX = e.changedTouches[0].screenX; }, {passive: true});
-        mainContent.addEventListener('touchend', e => {
-            touchendX = e.changedTouches[0].screenX;
-            handleSwipe();
-        }, {passive: true});
-
-        const chatView = document.getElementById('view-chat');
-        chatView.addEventListener('touchstart', e => { touchstartX = e.changedTouches[0].screenX; }, {passive: true});
-        chatView.addEventListener('touchend', e => {
-            touchendX = e.changedTouches[0].screenX;
-            handleSwipe();
-        }, {passive: true});
-
-        function handleSwipe() {
-            const isScannerActive = !document.getElementById('view-scanner').classList.contains('hidden');
-            if (isScannerActive) return;
-
-            const currentTabEl = document.querySelector('.nav-item.active');
-            if(!currentTabEl) return;
-            
-            const currentTabId = currentTabEl.id.replace('nav-', '');
-            let currentIdx = TABS_ARRAY.indexOf(currentTabId);
-            const swipeThreshold = 60; 
-            
-            if (touchendX < touchstartX - swipeThreshold) { 
-                if (currentIdx !== -1 && currentIdx < TABS_ARRAY.length - 1) switchTab(TABS_ARRAY[currentIdx + 1]);
-            }
-            if (touchendX > touchstartX + swipeThreshold) { 
-                if (currentIdx !== -1 && currentIdx > 0) switchTab(TABS_ARRAY[currentIdx - 1]);
-            }
-        }
-
         // --- UI ROUTING ---
         function switchTab(tabId) {
             document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
@@ -551,8 +558,16 @@
                     const key = Object.keys(data)[0];
                     currentUserData = { ...data[key], id: key };
                     
+                    // Generate PIN if missing
+                    if (!currentUserData.employeeNumber) {
+                        const pin = Math.floor(10000 + Math.random() * 90000).toString();
+                        await db.ref(`employees/${key}`).update({ employeeNumber: pin });
+                        currentUserData.employeeNumber = pin;
+                    }
+                    
                     updateUIWithUserData();
                     listenToAttendance();
+                    listenToWorkHistory();
                     initChat();
                     closePortal();
                 } else {
@@ -609,6 +624,9 @@
             document.getElementById('profile-img').src = dp;
             document.getElementById('edit-name').value = name;
             document.getElementById('edit-email').value = currentUserData.email;
+            
+            // Display PIN
+            document.getElementById('emp-pin-display').innerText = currentUserData.employeeNumber || 'ERROR';
         }
 
         async function saveProfile() {
@@ -620,31 +638,6 @@
                 updateUIWithUserData();
                 showToast("Profile Updated");
             } catch(e) { showToast("Failed to update profile"); }
-        }
-
-        async function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if(!file) return;
-
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-            
-            showToast("Uploading picture...");
-            try {
-                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await res.json();
-                
-                if(data.secure_url) {
-                    await db.ref(`employees/${currentUserData.id}`).update({ profilePic: data.secure_url });
-                    currentUserData.profilePic = data.secure_url;
-                    updateUIWithUserData();
-                    showToast("Picture Updated");
-                } else { throw new Error(data.error.message); }
-            } catch(e) { showToast("Upload Failed. Check connection."); }
         }
 
         function generateCalendar() {
@@ -670,6 +663,107 @@
                 let isToday = (i === today) ? 'day-today' : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300';
                 container.innerHTML += `<div class="calendar-day ${isToday}">${i}</div>`;
             }
+        }
+
+        // --- WORK HISTORY LOGIC ---
+        function listenToWorkHistory() {
+            if (!currentUserData) return;
+            const historyRef = db.ref(`employees/${currentUserData.id}/work_history`).orderByChild('timestamp').limitToLast(10);
+            
+            historyRef.on('value', (snap) => {
+                const list = document.getElementById('work-history-list');
+                list.innerHTML = '';
+                
+                if (!snap.exists()) {
+                    list.innerHTML = `<div class="text-center text-xs text-gray-400 py-4 italic">No tasks signed yet.</div>`;
+                    return;
+                }
+                
+                let records = [];
+                snap.forEach(child => { records.push(child.val()); });
+                records.reverse(); // Newest first
+
+                records.forEach(rec => {
+                    const timeString = new Date(rec.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    const dateString = new Date(rec.timestamp).toLocaleDateString([], {day:'numeric', month:'short'});
+                    
+                    list.innerHTML += `
+                        <div class="bg-gray-50 dark:bg-slate-700/50 border border-gray-100 dark:border-slate-700 rounded-xl p-3 flex justify-between items-center">
+                            <div>
+                                <h4 class="font-bold text-sm text-gray-800 dark:text-gray-200 truncate w-40">${rec.title}</h4>
+                                <span class="font-mono text-[10px] text-blue-600 dark:text-blue-400">${rec.refId}</span>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs text-gray-500 font-medium">${timeString}</p>
+                                <p class="text-[9px] text-gray-400 uppercase tracking-widest">${dateString}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+        }
+
+        // --- REMOTE EVIDENCE UPLOAD (Cloudinary to Tech App Sync) ---
+        async function uploadEvidenceToWorkspace(event) {
+            const file = event.target.files[0];
+            const rawRef = document.getElementById('upload-job-id').value.trim().toUpperCase();
+            const targetArrayName = document.getElementById('upload-phase').value; // 'photosBefore' or 'photosAfter'
+            
+            if (!file || !rawRef) {
+                showToast("ID and Image required", "error");
+                document.getElementById('evidence-upload').value = '';
+                return;
+            }
+
+            const cleanRef = rawRef.replace('RGT-', '').replace('SFT-', '');
+
+            showToast("Uploading safely...");
+            document.getElementById('global-spinner').classList.add('active');
+            document.getElementById('spinner-text').innerText = "Routing Image to Workspace...";
+
+            try {
+                // 1. Upload to Cloudinary
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
+                if(!res.ok) throw new Error("Cloudinary upload failed");
+                const cloudData = await res.json();
+                const secureUrl = cloudData.secure_url;
+
+                // 2. Find Record in RTDB
+                let targetDb = 'reports';
+                let snap = await db.ref('reports').orderByChild('refId').equalTo(cleanRef).once('value');
+                
+                if (!snap.exists()) {
+                    snap = await db.ref('software_projects').orderByChild('refId').equalTo(cleanRef).once('value');
+                    targetDb = 'software_projects';
+                }
+
+                if (!snap.exists()) {
+                    throw new Error("Job ID not found in system.");
+                }
+
+                // 3. Append to correct array
+                const key = Object.keys(snap.val())[0];
+                const record = snap.val()[key];
+                
+                let currentPhotos = record[targetArrayName] || [];
+                currentPhotos.push(secureUrl);
+
+                await db.ref(`${targetDb}/${key}`).update({ [targetArrayName]: currentPhotos });
+
+                document.getElementById('global-spinner').classList.remove('active');
+                showToast("Linked successfully to Workspace!");
+                document.getElementById('upload-job-id').value = '';
+
+            } catch(e) {
+                document.getElementById('global-spinner').classList.remove('active');
+                showToast(e.message || "Failed to link image", "error");
+            }
+            
+            document.getElementById('evidence-upload').value = ''; // clear input
         }
 
         // --- TEAM CHAT LOGIC (WhatsApp Style) ---
@@ -896,7 +990,6 @@
             if (checkCooldown()) return; // Block if in cooldown
             
             // Assuming standard WebAuthn logic triggers successfully here.
-            // Bypassing native credential calls in demo for immediate processing
             processAttendanceUpdate(currentUserData.id);
         }
 
@@ -930,9 +1023,16 @@
         }
 
         // --- UTILS ---
-        function showToast(msg) {
+        function showToast(msg, type="success") {
             const t = document.getElementById('toast');
             document.getElementById('toastMsg').innerHTML = msg;
+            
+            if(type==="error") {
+                t.classList.add('bg-red-500'); t.classList.remove('bg-gray-900', 'dark:bg-white');
+            } else {
+                t.classList.remove('bg-red-500'); t.classList.add('bg-gray-900', 'dark:bg-white');
+            }
+
             t.classList.remove('opacity-0', 'translate-y-10', 'pointer-events-none');
             setTimeout(() => t.classList.add('opacity-0', 'translate-y-10', 'pointer-events-none'), 3000);
         }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -8,25 +8,34 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Employee Attendance Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        whatsapp: { light: '#e5ddd5', dark: '#0b141a', msgOut: '#d9fdd3', msgOutDark: '#005c4b', msgIn: '#ffffff', msgInDark: '#202c33' }
+                    }
+                }
+            }
+        }
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         body {
             font-family: 'Inter', sans-serif;
-            background: #f8fafc;
             overflow: hidden;
             overscroll-behavior-y: contain;
             -webkit-tap-highlight-color: transparent;
             padding-top: env(safe-area-inset-top);
             padding-bottom: env(safe-area-inset-bottom);
-            color: #0f172a;
         }
         .app-card {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
             border-radius: 1.5rem;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            transition: background-color 0.3s, border-color 0.3s;
         }
         #login-view {
             transition: all 0.4s ease-in-out;
@@ -36,181 +45,189 @@
             position: fixed;
             inset: 0;
             display: none;
-            background: #f8fafc;
         }
-        #login-view.active {
-            display: flex;
-            transform: translateY(0);
-            opacity: 1;
-        }
-        .blur-locked {
-            filter: blur(8px);
-            pointer-events: none;
-        }
-        #reader {
-            width: 100% !important;
-            border-radius: 1rem;
-            overflow: hidden;
-            background: #f1f5f9;
-        }
-        #reader video {
-            width: 100% !important;
-            object-fit: cover;
-            display: block;
-        }
-        .nav-item {
-            color: #64748b;
-            transition: color 0.2s;
-        }
-        .nav-item.active {
-            color: #2563eb;
-        }
-        .log-box {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            padding: 12px;
-            border-radius: 1rem;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        #toast {
-            bottom: max(80px, env(safe-area-inset-bottom) + 80px);
-        }
+        #login-view.active { display: flex; transform: translateY(0); opacity: 1; }
+        .blur-locked { filter: blur(8px); pointer-events: none; }
+        
+        #reader { width: 100% !important; border-radius: 1rem; overflow: hidden; }
+        #reader video { width: 100% !important; object-fit: cover; display: block; }
+        
+        .nav-item { transition: color 0.2s, transform 0.1s; }
+        .nav-item.active { color: #2563eb; }
+        .dark .nav-item.active { color: #60a5fa; }
+        
+        #toast { bottom: max(90px, env(safe-area-inset-bottom) + 90px); z-index: 9999; }
         input[type="file"] { display: none; }
         
-        /* Chat & Scrollbar Styling */
+        /* Chat & Scrollbar Styling (WhatsApp Style) */
         #chat-messages::-webkit-scrollbar { width: 4px; }
         #chat-messages::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        .chat-bubble { max-width: 80%; padding: 10px 14px; border-radius: 1.2rem; font-size: 0.875rem; line-height: 1.4; word-wrap: break-word;}
-        .chat-mine { background: #2563eb; color: white; border-bottom-right-radius: 0.2rem; align-self: flex-end; }
-        .chat-theirs { background: #f1f5f9; color: #1e293b; border-bottom-left-radius: 0.2rem; align-self: flex-start; }
+        .dark #chat-messages::-webkit-scrollbar-thumb { background: #475569; }
         
+        .chat-bubble { max-width: 85%; padding: 8px 12px; font-size: 0.9rem; line-height: 1.3; word-wrap: break-word; position: relative; box-shadow: 0 1px 1px rgba(0,0,0,0.1);}
+        .chat-mine { border-radius: 12px 0 12px 12px; }
+        .chat-theirs { border-radius: 0 12px 12px 12px; }
+        .chat-mine::after { content: ''; position: absolute; top: 0; right: -8px; width: 0; height: 0; border: 8px solid transparent; border-top-color: inherit; border-right: 0; border-bottom: 0; }
+        .chat-theirs::after { content: ''; position: absolute; top: 0; left: -8px; width: 0; height: 0; border: 8px solid transparent; border-top-color: inherit; border-left: 0; border-bottom: 0; }
+
         /* Calendar Styling */
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
         .calendar-day { padding: 8px 0; font-size: 0.75rem; border-radius: 0.5rem; font-weight: 500; }
-        .calendar-header { font-size: 0.65rem; text-transform: uppercase; font-weight: 700; color: #64748b; margin-bottom: 4px;}
+        .calendar-header { font-size: 0.65rem; text-transform: uppercase; font-weight: 700; margin-bottom: 4px;}
         .day-today { background: #2563eb; color: white; font-weight: bold; box-shadow: 0 2px 4px rgba(37,99,235,0.3); }
         .day-empty { color: transparent; pointer-events: none; }
+
+        /* Shimmer Loading Animation */
+        .shimmer {
+            position: relative;
+            overflow: hidden;
+            background-color: #e2e8f0;
+            color: transparent !important;
+            border-color: transparent !important;
+        }
+        .dark .shimmer { background-color: #334155; }
+        .shimmer::after {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+            transform: translateX(-100%);
+            background-image: linear-gradient(90deg, rgba(255,255,255, 0) 0, rgba(255,255,255, 0.3) 20%, rgba(255,255,255, 0.6) 60%, rgba(255,255,255, 0));
+            animation: shimmer-animation 1.5s infinite;
+        }
+        .dark .shimmer::after { background-image: linear-gradient(90deg, rgba(255,255,255, 0) 0, rgba(255,255,255, 0.05) 20%, rgba(255,255,255, 0.1) 60%, rgba(255,255,255, 0)); }
+        @keyframes shimmer-animation { 100% { transform: translateX(100%); } }
+        
+        /* Toggle Switch CSS */
+        .toggle-checkbox:checked { right: 0; border-color: #2563eb; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #2563eb; }
     </style>
 </head>
-<body class="h-screen flex flex-col relative bg-gray-50">
+<body class="h-screen flex flex-col relative bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
 
     <!-- Top Header -->
-    <header class="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center z-10 shrink-0">
+    <header class="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-6 py-4 flex justify-between items-center z-10 shrink-0 transition-colors duration-300">
         <div class="flex items-center gap-2">
-            <div class="bg-blue-100 p-2 rounded-lg text-blue-600">
+            <div class="bg-blue-100 dark:bg-blue-900/50 p-2 rounded-lg text-blue-600 dark:text-blue-400">
                 <i class="fa-solid fa-layer-group"></i>
             </div>
-            <span class="font-bold tracking-wide text-gray-800">RareGrade<span class="text-blue-600">Hub</span></span>
+            <span class="font-bold tracking-wide">RareGrade<span class="text-blue-600 dark:text-blue-400">Hub</span></span>
         </div>
-        <div class="text-xs font-semibold text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full" id="clock">00:00:00</div>
+        <div class="text-xs font-semibold text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-slate-700 px-3 py-1.5 rounded-full transition-colors" id="clock">00:00:00</div>
     </header>
 
     <!-- Main Content Area (Swipeable) -->
-    <main id="app-content" class="flex-1 overflow-y-auto pb-20 px-4 pt-4 w-full max-w-lg mx-auto transition-all relative">
+    <!-- pb-28 ensures the nav bar never covers the bottom elements -->
+    <main id="app-content" class="flex-1 overflow-y-auto pb-28 px-4 pt-4 w-full max-w-lg mx-auto transition-all relative">
         
         <!-- ================= HOME VIEW ================= -->
-        <section id="view-home" class="space-y-4 pb-4">
-            <div class="app-card p-5 flex items-center gap-4">
-                <img id="home-avatar" src="" onerror="handleImgError(this)" class="w-14 h-14 rounded-full object-cover border-2 border-gray-100" alt="Profile bg-gray-200">
+        <section id="view-home" class="space-y-4">
+            <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5 flex items-center gap-4">
+                <img id="home-avatar" src="" onerror="handleImgError(this)" class="w-14 h-14 rounded-full object-cover border-2 border-gray-100 dark:border-slate-600 shimmer" alt="Profile">
                 <div>
-                    <h2 class="text-lg font-bold text-gray-900" id="home-name">Loading...</h2>
-                    <p class="text-xs text-gray-500 font-medium" id="home-role">Employee Portal</p>
+                    <h2 class="text-lg font-bold shimmer rounded" id="home-name">Loading...</h2>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1" id="home-role">Employee Portal</p>
                 </div>
             </div>
 
-            <div class="app-card p-5">
+            <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-gray-800 text-sm"><i class="fa-regular fa-clock mr-2 text-blue-500"></i>Today's Shift</h3>
-                    <span id="hours-worked" class="text-xs font-bold bg-green-100 text-green-700 px-2.5 py-1 rounded-md">0h 0m</span>
+                    <h3 class="font-bold text-sm"><i class="fa-regular fa-clock mr-2 text-blue-500 dark:text-blue-400"></i>Today's Shift</h3>
+                    <span id="hours-worked" class="text-xs font-bold bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 px-2.5 py-1 rounded-md shimmer">0h 0m</span>
                 </div>
                 <div class="grid grid-cols-2 gap-2.5">
-                    <div class="log-box">
-                        <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1">Time In</span>
-                        <span id="log-in" class="text-sm font-semibold text-gray-800">--:--</span>
+                    <div class="p-3 rounded-xl bg-gray-50 dark:bg-slate-700/50 border border-gray-100 dark:border-slate-700 flex flex-col">
+                        <span class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Time In</span>
+                        <span id="log-in" class="text-sm font-semibold shimmer rounded w-12">--:--</span>
                     </div>
-                    <div class="log-box">
-                        <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1">Lunch Out</span>
-                        <span id="log-lout" class="text-sm font-semibold text-gray-800">--:--</span>
+                    <div class="p-3 rounded-xl bg-gray-50 dark:bg-slate-700/50 border border-gray-100 dark:border-slate-700 flex flex-col">
+                        <span class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Lunch Out</span>
+                        <span id="log-lout" class="text-sm font-semibold shimmer rounded w-12">--:--</span>
                     </div>
-                    <div class="log-box">
-                        <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1">Lunch Back</span>
-                        <span id="log-lback" class="text-sm font-semibold text-gray-800">--:--</span>
+                    <div class="p-3 rounded-xl bg-gray-50 dark:bg-slate-700/50 border border-gray-100 dark:border-slate-700 flex flex-col">
+                        <span class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Lunch Back</span>
+                        <span id="log-lback" class="text-sm font-semibold shimmer rounded w-12">--:--</span>
                     </div>
-                    <div class="log-box">
-                        <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1">Time Out</span>
-                        <span id="log-out" class="text-sm font-semibold text-gray-800">--:--</span>
+                    <div class="p-3 rounded-xl bg-gray-50 dark:bg-slate-700/50 border border-gray-100 dark:border-slate-700 flex flex-col">
+                        <span class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Time Out</span>
+                        <span id="log-out" class="text-sm font-semibold shimmer rounded w-12">--:--</span>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- ================= SCANNER VIEW ================= -->
-        <section id="view-scanner" class="hidden space-y-4 h-full flex flex-col pb-4">
-            <div id="location-overlay" class="app-card p-6 text-center space-y-4 my-auto">
-                <div class="inline-block bg-blue-50 p-4 rounded-full text-blue-500 mb-1">
+        <section id="view-scanner" class="hidden space-y-4 h-full flex flex-col">
+            <div id="location-overlay" class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-6 text-center space-y-4 my-auto">
+                <div class="inline-block bg-blue-50 dark:bg-blue-900/30 p-4 rounded-full text-blue-500 dark:text-blue-400 mb-1">
                     <i class="fa-solid fa-location-dot text-2xl"></i>
                 </div>
                 <h3 class="text-lg font-bold">Verify Location</h3>
-                <p class="text-xs text-gray-500 px-4">You must be at the office coordinates to log your attendance.</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 px-4">You must be at the office coordinates to log your attendance.</p>
                 <button onclick="detectAndVerifyLocation()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-colors mt-2 text-sm shadow-md">
                     Check GPS Lock
                 </button>
             </div>
 
             <div id="scanner-interface" class="hidden flex-1 flex flex-col space-y-4">
-                <div class="app-card p-4">
+                <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4">
                     <div class="flex justify-between items-center mb-3 px-1">
-                        <h2 class="font-bold text-gray-800 text-sm">Scan Office QR</h2>
+                        <h2 class="font-bold text-sm">Scan Office QR</h2>
                     </div>
-                    <div id="reader-container" class="w-full aspect-square overflow-hidden relative shadow-inner bg-gray-100 rounded-xl">
+                    <div id="reader-container" class="w-full aspect-square overflow-hidden relative shadow-inner bg-gray-100 dark:bg-slate-900 rounded-xl">
                         <div id="reader"></div>
                     </div>
                 </div>
 
-                <div class="flex items-center justify-center gap-4 text-xs text-gray-400 font-bold uppercase">
-                    <hr class="w-1/4 border-gray-200"> OR <hr class="w-1/4 border-gray-200">
+                <div class="flex items-center justify-center gap-4 text-xs text-gray-400 dark:text-gray-500 font-bold uppercase">
+                    <hr class="w-1/4 border-gray-200 dark:border-slate-700"> OR <hr class="w-1/4 border-gray-200 dark:border-slate-700">
                 </div>
 
-                <button onclick="logWithBiometrics()" class="w-full py-3.5 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 text-sm">
-                    <i class="fa-solid fa-fingerprint text-blue-500 text-lg"></i>
+                <button onclick="logWithBiometrics()" class="w-full py-3.5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl font-bold shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 text-sm">
+                    <i class="fa-solid fa-fingerprint text-blue-500 dark:text-blue-400 text-lg"></i>
                     Device Biometrics
                 </button>
             </div>
         </section>
 
-        <!-- ================= CHAT VIEW ================= -->
-        <section id="view-chat" class="hidden flex-col h-full absolute inset-0 pt-4 pb-20 px-4 bg-gray-50">
-            <div class="bg-white rounded-t-2xl shadow-sm border border-gray-200 border-b-0 p-3 flex items-center gap-3 shrink-0">
-                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+        <!-- ================= CHAT VIEW (WhatsApp Style) ================= -->
+        <!-- Negative margins to pull to edges, filling the screen when nav is hidden -->
+        <section id="view-chat" class="hidden flex-col h-full absolute inset-0 -mx-4 -mt-4 bg-[#e5ddd5] dark:bg-[#0b141a]">
+            <!-- Chat Header -->
+            <div class="bg-[#075e54] dark:bg-slate-800 shadow-sm p-3 flex items-center gap-3 shrink-0 text-white transition-colors z-10">
+                <div class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
                     <i class="fa-solid fa-users text-sm"></i>
                 </div>
                 <div>
-                    <h3 class="font-bold text-sm text-gray-800">Team Hub</h3>
-                    <p class="text-[10px] text-green-500 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-green-500 block"></span>Online</p>
+                    <h3 class="font-bold text-sm">Rare Grade Team</h3>
+                    <p class="text-[10px] font-semibold flex items-center gap-1 opacity-80">Tap here for group info</p>
                 </div>
             </div>
             
-            <div id="chat-messages" class="flex-1 overflow-y-auto bg-white border-x border-gray-200 p-4 flex flex-col gap-3">
-                <!-- Messages populate here -->
-                <div class="text-center text-xs text-gray-400 my-4">Loading messages...</div>
+            <!-- Chat Body -->
+            <!-- pb-20 leaves room for the floating input -->
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 flex flex-col gap-2 pb-20 relative z-0">
+                <div class="text-center text-xs text-gray-500 bg-white/50 dark:bg-slate-800/50 rounded-full px-3 py-1 mx-auto my-2 backdrop-blur-sm shadow-sm">Loading messages...</div>
             </div>
 
-            <div class="bg-white p-3 border border-gray-200 rounded-b-2xl shadow-sm flex items-center gap-2 shrink-0">
-                <input type="text" id="chat-input" placeholder="Type a message..." class="flex-1 bg-gray-100 border-none rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" onkeypress="handleChatKeyPress(event)">
-                <button onclick="sendChatMessage()" class="bg-blue-600 text-white w-10 h-10 rounded-xl flex items-center justify-center hover:bg-blue-700 active:scale-95 transition-transform shadow-md">
-                    <i class="fa-solid fa-paper-plane text-sm -ml-0.5"></i>
+            <!-- Fixed Input Bar at bottom -->
+            <div class="fixed bottom-0 left-0 right-0 bg-[#f0f0f0] dark:bg-slate-800 p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] flex items-end gap-2 shadow-[0_-1px_3px_rgba(0,0,0,0.1)] z-20">
+                <div class="flex-1 bg-white dark:bg-slate-700 rounded-2xl flex items-center px-2 py-1 shadow-sm">
+                    <i class="fa-regular fa-face-smile text-gray-400 dark:text-gray-300 p-2 text-xl"></i>
+                    <textarea id="chat-input" placeholder="Message" rows="1" class="flex-1 bg-transparent border-none focus:ring-0 resize-none outline-none text-sm py-2 max-h-24 dark:text-white" oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'" onkeypress="handleChatKeyPress(event)"></textarea>
+                    <i class="fa-solid fa-paperclip text-gray-400 dark:text-gray-300 p-2 text-xl"></i>
+                </div>
+                <button onclick="sendChatMessage()" class="bg-[#00a884] text-white w-12 h-12 rounded-full flex items-center justify-center hover:bg-[#008f6f] active:scale-95 transition-transform shadow-md shrink-0 mb-0.5">
+                    <i class="fa-solid fa-paper-plane text-lg ml-[-2px]"></i>
                 </button>
             </div>
         </section>
 
         <!-- ================= PROFILE VIEW ================= -->
-        <section id="view-profile" class="hidden space-y-4 pb-4">
-            <div class="app-card p-5 text-center">
+        <section id="view-profile" class="hidden space-y-4">
+            <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5 text-center">
                 <div class="relative inline-block mb-3">
-                    <img id="profile-img" src="" onerror="handleImgError(this)" class="w-20 h-20 rounded-full object-cover border-4 border-white shadow-md mx-auto bg-gray-200">
-                    <label for="image-upload" class="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full cursor-pointer shadow-md hover:bg-blue-700 transition transform hover:scale-105 active:scale-95">
+                    <img id="profile-img" src="" onerror="handleImgError(this)" class="w-20 h-20 rounded-full object-cover border-4 border-white dark:border-slate-800 shadow-md mx-auto shimmer">
+                    <label for="image-upload" class="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full cursor-pointer shadow-md hover:bg-blue-700 transition transform hover:scale-105 active:scale-95 z-10">
                         <i class="fa-solid fa-camera text-xs"></i>
                     </label>
                     <input type="file" id="image-upload" accept="image/*" onchange="handleImageUpload(event)">
@@ -218,26 +235,26 @@
                 
                 <div class="space-y-3 text-left mt-2">
                     <div>
-                        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Full Name</label>
-                        <input type="text" id="edit-name" class="w-full mt-1 p-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition">
+                        <label class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Full Name</label>
+                        <input type="text" id="edit-name" class="w-full mt-1 p-2.5 text-sm bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition dark:text-white shimmer">
                     </div>
                     <div>
-                        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Email</label>
-                        <input type="email" id="edit-email" readonly class="w-full mt-1 p-2.5 text-sm bg-gray-100 border border-gray-200 rounded-lg text-gray-500 outline-none cursor-not-allowed">
+                        <label class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Email</label>
+                        <input type="email" id="edit-email" readonly class="w-full mt-1 p-2.5 text-sm bg-gray-100 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg text-gray-500 outline-none cursor-not-allowed shimmer">
                     </div>
-                    <button onclick="saveProfile()" class="w-full py-2.5 bg-gray-900 text-white rounded-lg font-semibold text-sm hover:bg-gray-800 transition-colors shadow-sm">
+                    <button onclick="saveProfile()" class="w-full py-2.5 bg-gray-900 dark:bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-gray-800 dark:hover:bg-blue-700 transition-colors shadow-sm">
                         Save Profile
                     </button>
                 </div>
             </div>
 
             <!-- Calendar Module -->
-            <div class="app-card p-5">
+            <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-gray-800 text-sm" id="cal-month-title">Calendar</h3>
-                    <i class="fa-regular fa-calendar text-blue-500"></i>
+                    <h3 class="font-bold text-sm" id="cal-month-title">Calendar</h3>
+                    <i class="fa-regular fa-calendar text-blue-500 dark:text-blue-400"></i>
                 </div>
-                <div class="calendar-grid calendar-header">
+                <div class="calendar-grid calendar-header text-gray-500">
                     <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
                 </div>
                 <div id="calendar-days" class="calendar-grid mt-1">
@@ -245,49 +262,120 @@
                 </div>
             </div>
 
-            <button onclick="signOutUser()" class="w-full py-3 text-red-600 bg-white border border-red-100 font-bold text-sm rounded-xl hover:bg-red-50 shadow-sm transition-colors mt-2">
+            <button onclick="signOutUser()" class="w-full py-3 text-red-600 dark:text-red-400 bg-white dark:bg-slate-800 border border-red-100 dark:border-red-900/30 font-bold text-sm rounded-xl hover:bg-red-50 dark:hover:bg-red-900/10 shadow-sm transition-colors mt-4">
                 Sign Out Account
             </button>
+        </section>
+
+        <!-- ================= SETTINGS VIEW ================= -->
+        <section id="view-settings" class="hidden space-y-4">
+            <h2 class="text-xl font-bold mb-2 px-1">Settings</h2>
+            
+            <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-2 shadow-sm divide-y divide-gray-100 dark:divide-slate-700">
+                
+                <!-- Dark Mode Toggle -->
+                <div class="flex items-center justify-between p-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300">
+                            <i class="fa-solid fa-moon text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold">Dark Theme</p>
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400">Reduce glare and save battery</p>
+                        </div>
+                    </div>
+                    <div class="relative inline-block w-12 align-middle select-none transition duration-200 ease-in">
+                        <input type="checkbox" name="toggle" id="theme-toggle" onchange="toggleTheme()" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-gray-300 dark:border-gray-600 z-10 top-0 left-0 transition-all duration-300"/>
+                        <label for="theme-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 dark:bg-gray-600 cursor-pointer transition-colors duration-300"></label>
+                    </div>
+                </div>
+
+                <!-- Notifications Toggle -->
+                <div class="flex items-center justify-between p-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                            <i class="fa-solid fa-bell text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold">Push Notifications</p>
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400">Shift reminders & chat alerts</p>
+                        </div>
+                    </div>
+                    <div class="relative inline-block w-12 align-middle select-none transition duration-200 ease-in">
+                        <input type="checkbox" checked class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-blue-600 z-10 top-0 right-0 transition-all duration-300"/>
+                        <label class="toggle-label block overflow-hidden h-6 rounded-full bg-blue-600 cursor-pointer transition-colors duration-300"></label>
+                    </div>
+                </div>
+
+                <!-- App Version -->
+                <div class="flex items-center justify-between p-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-green-50 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
+                            <i class="fa-solid fa-code-branch text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold">App Version</p>
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400">RareGradeHub v2.1.0</p>
+                        </div>
+                    </div>
+                    <span class="text-xs text-gray-400 font-mono">Up to date</span>
+                </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="mt-6 px-1">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">System Actions</p>
+                <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700">
+                    <button onclick="clearCache()" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-xl transition-colors">
+                        <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">Clear Local Cache</span>
+                        <i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i>
+                    </button>
+                </div>
+            </div>
         </section>
     </main>
 
     <!-- Bottom Navigation Bar -->
-    <nav class="bg-white border-t border-gray-200 fixed bottom-0 w-full z-20 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.02)]">
+    <nav id="bottom-nav" class="bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 fixed bottom-0 w-full z-20 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.02)] transition-transform duration-300">
         <div class="flex justify-around items-center h-16">
-            <button onclick="switchTab('home')" class="nav-item active flex flex-col items-center justify-center w-full h-full" id="nav-home">
+            <button onclick="switchTab('home')" class="nav-item active text-gray-500 dark:text-gray-400 flex flex-col items-center justify-center w-full h-full" id="nav-home">
                 <i class="fa-solid fa-house text-lg mb-1"></i>
                 <span class="text-[9px] font-bold uppercase tracking-wide">Home</span>
             </button>
-            <button onclick="switchTab('scanner')" class="nav-item flex flex-col items-center justify-center w-full h-full relative" id="nav-scanner">
-                <div class="absolute -top-5 bg-blue-600 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/40 border-4 border-gray-50 transform transition active:scale-95">
+            <button onclick="switchTab('scanner')" class="nav-item text-gray-500 dark:text-gray-400 flex flex-col items-center justify-center w-full h-full relative" id="nav-scanner">
+                <div class="absolute -top-5 bg-blue-600 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/40 border-4 border-gray-50 dark:border-slate-900 transform transition active:scale-95">
                     <i class="fa-solid fa-qrcode text-xl"></i>
                 </div>
                 <span class="text-[9px] font-bold uppercase tracking-wide mt-6">Scan</span>
             </button>
-            <button onclick="switchTab('chat')" class="nav-item flex flex-col items-center justify-center w-full h-full relative" id="nav-chat">
+            <button onclick="switchTab('chat')" class="nav-item text-gray-500 dark:text-gray-400 flex flex-col items-center justify-center w-full h-full relative" id="nav-chat">
                 <i class="fa-regular fa-comments text-lg mb-1"></i>
                 <span class="text-[9px] font-bold uppercase tracking-wide">Chat</span>
-                <span id="chat-badge" class="absolute top-2 right-6 w-2 h-2 bg-red-500 rounded-full hidden"></span>
+                <span id="chat-badge" class="absolute top-2 right-4 w-2 h-2 bg-red-500 rounded-full hidden"></span>
             </button>
-            <button onclick="switchTab('profile')" class="nav-item flex flex-col items-center justify-center w-full h-full" id="nav-profile">
+            <button onclick="switchTab('profile')" class="nav-item text-gray-500 dark:text-gray-400 flex flex-col items-center justify-center w-full h-full" id="nav-profile">
                 <i class="fa-regular fa-user text-lg mb-1"></i>
                 <span class="text-[9px] font-bold uppercase tracking-wide">Profile</span>
+            </button>
+            <button onclick="switchTab('settings')" class="nav-item text-gray-500 dark:text-gray-400 flex flex-col items-center justify-center w-full h-full" id="nav-settings">
+                <i class="fa-solid fa-gear text-lg mb-1"></i>
+                <span class="text-[9px] font-bold uppercase tracking-wide">Set</span>
             </button>
         </div>
     </nav>
 
     <!-- Login View -->
-    <div id="login-view" class="flex-col justify-center items-center p-6">
+    <div id="login-view" class="flex-col justify-center items-center p-6 bg-gray-50 dark:bg-slate-900">
         <div class="w-full max-w-md text-center space-y-8">
-            <div class="bg-blue-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto shadow-sm">
-                <i class="fa-solid fa-fingerprint text-blue-600 text-4xl"></i>
+            <div class="bg-blue-100 dark:bg-blue-900/50 w-24 h-24 rounded-full flex items-center justify-center mx-auto shadow-sm">
+                <i class="fa-solid fa-fingerprint text-blue-600 dark:text-blue-400 text-4xl"></i>
             </div>
             <div>
-                <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Portal Access</h1>
-                <p class="text-gray-500 mt-2 text-sm">Sign in with your registered company account.</p>
+                <h1 class="text-3xl font-extrabold tracking-tight">Portal Access</h1>
+                <p class="text-gray-500 dark:text-gray-400 mt-2 text-sm">Sign in with your registered company account.</p>
             </div>
             <button onclick="signInWithGoogle()"
-                    class="w-full py-3.5 bg-white border border-gray-200 text-gray-800 rounded-xl font-bold flex items-center justify-center gap-3 shadow-sm hover:bg-gray-50 active:scale-95 transition-all">
+                    class="w-full py-3.5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl font-bold flex items-center justify-center gap-3 shadow-sm hover:bg-gray-50 dark:hover:bg-slate-700 active:scale-95 transition-all">
                 <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google">
                 Continue with Google
             </button>
@@ -295,7 +383,7 @@
     </div>
 
     <!-- Toast Notification -->
-    <div id="toast" class="fixed left-4 right-4 bg-gray-900 text-white px-4 py-3 rounded-xl shadow-2xl transition-all duration-300 opacity-0 translate-y-10 pointer-events-none z-[200] font-semibold text-sm text-center flex justify-center items-center max-w-sm mx-auto">
+    <div id="toast" class="fixed left-4 right-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-4 py-3 rounded-xl shadow-2xl transition-all duration-300 opacity-0 translate-y-10 pointer-events-none font-semibold text-sm text-center flex justify-center items-center max-w-sm mx-auto">
         <span id="toastMsg">Notification</span>
     </div>
 
@@ -329,10 +417,31 @@
         let locationVerified = false;
         let chatInitialized = false;
 
+        // --- THEME INIT ---
+        function initTheme() {
+            const isDark = localStorage.getItem('theme') === 'dark';
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                document.getElementById('theme-toggle').checked = true;
+            }
+        }
+        initTheme();
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
         // --- SWIPE GESTURE LOGIC ---
         let touchstartX = 0;
         let touchendX = 0;
-        const TABS_ARRAY = ['home', 'scanner', 'chat', 'profile'];
+        const TABS_ARRAY = ['home', 'scanner', 'chat', 'profile', 'settings'];
         
         const mainContent = document.getElementById('app-content');
         mainContent.addEventListener('touchstart', e => { touchstartX = e.changedTouches[0].screenX; }, {passive: true});
@@ -342,18 +451,17 @@
         }, {passive: true});
 
         function handleSwipe() {
-            // Prevent swipe switching if currently interacting with chat messages or map
             const currentTabEl = document.querySelector('.nav-item.active');
             if(!currentTabEl) return;
             
             const currentTabId = currentTabEl.id.replace('nav-', '');
             let currentIdx = TABS_ARRAY.indexOf(currentTabId);
-            const swipeThreshold = 60; // minimum pixel distance to trigger swipe
+            const swipeThreshold = 60; 
             
-            if (touchendX < touchstartX - swipeThreshold) { // Swipe Left (Next Tab)
+            if (touchendX < touchstartX - swipeThreshold) { // Swipe Left
                 if (currentIdx < TABS_ARRAY.length - 1) switchTab(TABS_ARRAY[currentIdx + 1]);
             }
-            if (touchendX > touchstartX + swipeThreshold) { // Swipe Right (Prev Tab)
+            if (touchendX > touchstartX + swipeThreshold) { // Swipe Right
                 if (currentIdx > 0) switchTab(TABS_ARRAY[currentIdx - 1]);
             }
         }
@@ -363,13 +471,18 @@
             document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
             document.getElementById(`view-${tabId}`).classList.remove('hidden');
             
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active', 'text-blue-600'));
-            document.getElementById(`nav-${tabId}`).classList.add('active', 'text-blue-600');
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active', 'text-blue-600', 'dark:text-blue-400'));
+            document.getElementById(`nav-${tabId}`).classList.add('active', 'text-blue-600', 'dark:text-blue-400');
             window.scrollTo(0,0);
 
+            const bottomNav = document.getElementById('bottom-nav');
+            
             if (tabId === 'chat') {
+                bottomNav.style.transform = 'translateY(100%)'; // Hide nav
                 document.getElementById('chat-badge').classList.add('hidden');
                 scrollToBottomChat();
+            } else {
+                bottomNav.style.transform = 'translateY(0)'; // Show nav
             }
 
             if (tabId === 'scanner' && locationVerified) {
@@ -427,6 +540,13 @@
             locationVerified = false;
             document.getElementById('location-overlay').classList.remove('hidden');
             document.getElementById('scanner-interface').classList.add('hidden');
+            
+            // Re-add shimmer for next login
+            document.querySelectorAll('.shimmer').forEach(el => {
+                if(el.tagName === 'INPUT') el.value = '';
+                else if(el.tagName !== 'IMG') el.innerText = 'Loading...';
+                el.classList.add('shimmer');
+            });
             showPortal();
         }
 
@@ -447,6 +567,9 @@
             const name = currentUserData.name || "Employee";
             const dp = currentUserData.profilePic || generateFallbackAvatarUrl(name);
             
+            // Remove Shimmer Classes
+            document.querySelectorAll('.shimmer').forEach(el => el.classList.remove('shimmer'));
+
             document.getElementById('home-name').innerText = name;
             document.getElementById('home-avatar').src = dp;
             document.getElementById('profile-img').src = dp;
@@ -506,19 +629,16 @@
             const firstDay = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-            // Pad blank days
             for(let i = 0; i < firstDay; i++) {
                 container.innerHTML += `<div class="calendar-day day-empty">0</div>`;
             }
-            
-            // Build actual days
             for(let i = 1; i <= daysInMonth; i++) {
-                let isToday = (i === today) ? 'day-today' : 'bg-gray-100 text-gray-700';
+                let isToday = (i === today) ? 'day-today' : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300';
                 container.innerHTML += `<div class="calendar-day ${isToday}">${i}</div>`;
             }
         }
 
-        // --- TEAM CHAT LOGIC ---
+        // --- TEAM CHAT LOGIC (WhatsApp Style) ---
         function initChat() {
             if(chatInitialized) return;
             chatInitialized = true;
@@ -527,30 +647,29 @@
             const container = document.getElementById('chat-messages');
             
             chatRef.on('child_added', (snap) => {
-                if(container.querySelector('.my-4')) container.innerHTML = ''; // remove loading
+                if(container.querySelector('.text-center')) container.innerHTML = ''; // remove loading
                 
                 const msg = snap.val();
                 const isMine = msg.senderId === currentUserData.id;
                 const timeString = new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                const safeAvatar = msg.avatar || generateFallbackAvatarUrl(msg.senderName);
                 
+                // Color mapping for WhatsApp styles defined in Tailwind Config
+                const bubbleColor = isMine ? 'bg-[#d9fdd3] dark:bg-[#005c4b] chat-mine' : 'bg-[#ffffff] dark:bg-[#202c33] chat-theirs';
+                const textColor = isMine ? 'text-gray-900 dark:text-gray-100' : 'text-gray-900 dark:text-gray-100';
+
                 const msgHTML = `
-                    <div class="flex flex-col ${isMine ? 'items-end' : 'items-start'} animate-fade-in">
-                        ${!isMine ? `<span class="text-[10px] text-gray-400 ml-2 mb-1">${msg.senderName}</span>` : ''}
-                        <div class="flex items-end gap-2 ${isMine ? 'flex-row-reverse' : ''}">
-                            ${!isMine ? `<img src="${safeAvatar}" onerror="handleImgError(this)" class="w-6 h-6 rounded-full shrink-0 object-cover bg-gray-200">` : ''}
-                            <div class="chat-bubble ${isMine ? 'chat-mine' : 'chat-theirs'}">
-                                ${msg.text}
-                            </div>
+                    <div class="flex flex-col ${isMine ? 'items-end' : 'items-start'} mb-1">
+                        <div class="chat-bubble ${bubbleColor} ${textColor} flex flex-col">
+                            ${!isMine ? `<span class="text-[10px] font-bold text-blue-500 dark:text-blue-400 mb-0.5">${msg.senderName}</span>` : ''}
+                            <span>${msg.text}</span>
+                            <span class="text-[9px] text-gray-400 self-end mt-1 ml-4 -mb-1 block opacity-80">${timeString} ${isMine ? '<i class="fa-solid fa-check-double text-blue-400 ml-1"></i>' : ''}</span>
                         </div>
-                        <span class="text-[9px] text-gray-300 mt-1 mx-2">${timeString}</span>
                     </div>
                 `;
                 
                 container.insertAdjacentHTML('beforeend', msgHTML);
                 scrollToBottomChat();
 
-                // Show badge if chat is not active tab
                 const currentTab = document.querySelector('.nav-item.active').id;
                 if(currentTab !== 'nav-chat' && !isMine) {
                     document.getElementById('chat-badge').classList.remove('hidden');
@@ -564,7 +683,10 @@
         }
 
         function handleChatKeyPress(e) {
-            if (e.key === 'Enter') sendChatMessage();
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendChatMessage();
+            }
         }
 
         async function sendChatMessage() {
@@ -573,14 +695,26 @@
             if(!text || !currentUserData) return;
             
             input.value = '';
+            input.style.height = ''; // reset textarea height
             
             await db.ref('team_chat').push({
                 text: text,
                 senderId: currentUserData.id,
                 senderName: currentUserData.name || "Employee",
-                avatar: currentUserData.profilePic || "",
                 timestamp: firebase.database.ServerValue.TIMESTAMP
             });
+        }
+
+        // --- SETTINGS LOGIC ---
+        function clearCache() {
+            showToast("Clearing local data...");
+            setTimeout(() => {
+                const theme = localStorage.getItem('theme'); // preserve theme
+                localStorage.clear();
+                if(theme) localStorage.setItem('theme', theme);
+                showToast("Cache cleared. Reloading...");
+                setTimeout(() => window.location.reload(), 1000);
+            }, 800);
         }
 
         // --- ATTENDANCE & HOURS LOGIC ---

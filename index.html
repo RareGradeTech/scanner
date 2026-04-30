@@ -3,233 +3,265 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#020617">
+    <meta name="theme-color" content="#f8fafc">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Employee Attendance Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: #0f172a;
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
             overflow: hidden;
             overscroll-behavior-y: contain;
             -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
             padding-top: env(safe-area-inset-top);
             padding-bottom: env(safe-area-inset-bottom);
+            color: #0f172a;
         }
-        .bg-gradient {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
-            background: radial-gradient(circle at 0% 0%, #1e293b 0%, transparent 50%),
-                        radial-gradient(circle at 100% 100%, #1e3a8a 0%, transparent 50%),
-                        radial-gradient(circle at 100% 0%, #0f172a 0%, transparent 50%),
-                        radial-gradient(circle at 0% 100%, #312e81 0%, transparent 50%);
-            background-color: #020617;
-        }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 2rem;
+        .app-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
         }
         #login-view {
-            transition: all 0.5s ease-in-out;
+            transition: all 0.4s ease-in-out;
             transform: translateY(100%);
             opacity: 0;
             z-index: 100;
             position: fixed;
             inset: 0;
             display: none;
-            overflow-y: auto;
+            background: #f8fafc;
         }
         #login-view.active {
             display: flex;
             transform: translateY(0);
             opacity: 1;
         }
-        #app-content {
-            transition: filter 0.5s ease;
-            width: 100%;
-            max-width: 28rem;
-        }
         .blur-locked {
-            filter: blur(15px);
+            filter: blur(8px);
             pointer-events: none;
         }
         #reader {
             width: 100% !important;
-            height: 100% !important;
-            border-radius: 1.5rem;
+            border-radius: 1rem;
             overflow: hidden;
-            background: #000;
+            background: #f1f5f9;
         }
         #reader video {
             width: 100% !important;
-            height: 100% !important;
             object-fit: cover;
             display: block;
         }
-        .location-lock {
-            background: rgba(2, 6, 23, 0.85);
-            backdrop-filter: blur(12px);
-            z-index: 50;
-        }
-        .debug-info {
-            font-size: 10px;
+        .nav-item {
             color: #64748b;
-            background: rgba(255,255,255,0.05);
-            padding: 8px 12px;
-            border-radius: 12px;
-            margin-top: 12px;
-            text-align: left;
-            word-break: break-all;
+            transition: color 0.2s;
         }
-        button {
-            min-height: 48px;
-            -webkit-appearance: none;
+        .nav-item.active {
+            color: #2563eb;
+        }
+        .log-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            border-radius: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
         }
         #toast {
-            bottom: max(24px, env(safe-area-inset-bottom));
+            bottom: max(80px, env(safe-area-inset-bottom) + 80px);
         }
-        .log-pill {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 8px 12px;
-            border-radius: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        /* Hide file input */
+        input[type="file"] {
+            display: none;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center p-4 relative">
-    <div class="bg-gradient"></div>
-  
-    <div id="app-content" class="flex-1 flex flex-col z-10 w-full max-w-md">
-        <div class="pt-4 pb-6 flex justify-between items-center px-2">
-            <div class="flex items-center gap-2">
-                <div class="bg-blue-600/20 p-2 rounded-lg border border-blue-500/30">
-                    <i class="fa-solid fa-fingerprint text-blue-400 text-xl"></i>
-                </div>
-                <span class="font-extrabold text-white tracking-widest text-sm uppercase">Attendance<span class="text-blue-500">Hub</span></span>
+<body class="h-screen flex flex-col relative">
+
+    <!-- Top Header -->
+    <header class="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center z-10 shrink-0">
+        <div class="flex items-center gap-2">
+            <div class="bg-blue-100 p-2 rounded-lg text-blue-600">
+                <i class="fa-solid fa-layer-group"></i>
             </div>
-            <div class="text-[10px] font-bold font-mono text-blue-100 bg-blue-500/10 border border-blue-500/20 px-3 py-1.5 rounded-full" id="clock">00:00:00</div>
+            <span class="font-bold tracking-wide text-gray-800">Attendance<span class="text-blue-600">Hub</span></span>
         </div>
-        <div id="view-scan" class="glass-card p-6 text-center space-y-4 relative overflow-hidden flex-1 flex flex-col justify-start">
+        <div class="text-xs font-semibold text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full" id="clock">00:00:00</div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main id="app-content" class="flex-1 overflow-y-auto pb-24 px-4 pt-6 w-full max-w-lg mx-auto transition-all">
+        
+        <!-- ================= HOME VIEW ================= -->
+        <section id="view-home" class="space-y-6">
+            <div class="app-card p-6 flex items-center gap-4">
+                <img id="home-avatar" src="https://ui-avatars.com/api/?name=User&background=eff6ff&color=2563eb" class="w-16 h-16 rounded-full object-cover border-2 border-gray-100" alt="Profile">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-900" id="home-name">Welcome</h2>
+                    <p class="text-sm text-gray-500" id="home-role">Employee Portal</p>
+                </div>
+            </div>
+
+            <div class="app-card p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-gray-800"><i class="fa-regular fa-clock mr-2 text-blue-500"></i>Today's Activity</h3>
+                    <span id="hours-worked" class="text-xs font-bold bg-green-100 text-green-700 px-2 py-1 rounded">0h 0m</span>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="log-box">
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Time In</span>
+                        <span id="log-in" class="text-sm font-semibold text-gray-800">--:--</span>
+                    </div>
+                    <div class="log-box">
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Lunch Out</span>
+                        <span id="log-lout" class="text-sm font-semibold text-gray-800">--:--</span>
+                    </div>
+                    <div class="log-box">
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Lunch Back</span>
+                        <span id="log-lback" class="text-sm font-semibold text-gray-800">--:--</span>
+                    </div>
+                    <div class="log-box">
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Time Out</span>
+                        <span id="log-out" class="text-sm font-semibold text-gray-800">--:--</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SCANNER VIEW ================= -->
+        <section id="view-scanner" class="hidden space-y-6 h-full flex flex-col">
             
-            <div id="location-overlay" class="absolute inset-0 location-lock flex items-center justify-center p-4">
-                <div class="glass-card p-8 text-center space-y-6 w-full max-w-[320px] border-blue-500/30 border-2">
-                    <div class="flex justify-center">
-                        <div class="bg-blue-600/20 p-5 rounded-3xl border border-blue-500/30">
-                            <i class="fa-solid fa-location-crosshairs text-blue-400 text-5xl animate-pulse"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="text-2xl font-black text-white tracking-tight">Location Locked</h3>
-                        <p class="text-white/60 mt-2 text-sm leading-relaxed">Verification is required to ensure you are at the designated site.</p>
-                    </div>
-                    <div class="space-y-4">
-                        <button onclick="detectAndVerifyLocation()" class="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold text-sm uppercase tracking-widest shadow-xl active:scale-95 transition-all">
-                            Verify GPS
-                        </button>
-                        <button onclick="signOutUser()" class="w-full text-white/40 text-[10px] font-bold uppercase tracking-[0.2em] hover:text-white transition-colors">
-                            Sign Out Account
-                        </button>
-                    </div>
+            <div id="location-overlay" class="app-card p-8 text-center space-y-4">
+                <div class="inline-block bg-blue-50 p-4 rounded-full text-blue-500 mb-2">
+                    <i class="fa-solid fa-location-dot text-3xl"></i>
                 </div>
+                <h3 class="text-xl font-bold">Verify Location</h3>
+                <p class="text-sm text-gray-500">You must be at the office to log attendance.</p>
+                <button onclick="detectAndVerifyLocation()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-colors mt-4">
+                    Check GPS
+                </button>
             </div>
 
-            <div id="success-modal" class="absolute inset-0 z-[110] flex items-center justify-center bg-emerald-950/40 backdrop-blur-xl hidden p-4">
-                <div class="glass-card p-8 text-center space-y-6 w-full max-w-[300px] border-emerald-500/30 border-2 bg-emerald-500/10">
-                    <div class="flex justify-center">
-                        <div class="bg-emerald-500/20 p-5 rounded-full border border-emerald-500/30">
-                            <i class="fa-solid fa-check text-emerald-400 text-5xl"></i>
-                        </div>
+            <div id="scanner-interface" class="hidden flex-1 flex flex-col space-y-6">
+                <div class="app-card p-4">
+                    <div class="flex justify-between items-center mb-4 px-2">
+                        <h2 class="font-bold text-gray-800">Scan QR Code</h2>
                     </div>
-                    <div>
-                        <h3 class="text-3xl font-black text-white uppercase tracking-tighter" id="modal-action-text">Success</h3>
-                        <p class="text-emerald-200/60 text-xs font-bold uppercase tracking-widest mt-2">Log Recorded</p>
+                    <div id="reader-container" class="w-full aspect-square overflow-hidden relative">
+                        <div id="reader"></div>
                     </div>
                 </div>
-            </div>
 
-            <div class="py-2">
-                <div class="flex justify-between items-center mb-2">
-                    <h2 class="text-xl font-extrabold text-white">Identity Scanner</h2>
-                    <button onclick="signOutUser()" class="bg-white/5 border border-white/10 text-white px-3 py-1 rounded-lg text-[9px] font-bold uppercase tracking-tighter">
-                        Sign Out
+                <div class="text-center text-sm text-gray-400 font-semibold uppercase">OR</div>
+
+                <button onclick="logWithBiometrics()" class="w-full py-4 bg-white border-2 border-gray-200 text-gray-700 rounded-2xl font-bold shadow-sm active:scale-95 transition-all flex items-center justify-center gap-3">
+                    <i class="fa-solid fa-fingerprint text-blue-500 text-xl"></i>
+                    Use Device Biometrics
+                </button>
+            </div>
+        </section>
+
+        <!-- ================= PROFILE VIEW ================= -->
+        <section id="view-profile" class="hidden space-y-6">
+            <div class="app-card p-6 text-center">
+                <div class="relative inline-block mb-4">
+                    <img id="profile-img" src="https://ui-avatars.com/api/?name=User" class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg mx-auto">
+                    <label for="image-upload" class="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full cursor-pointer shadow-md hover:bg-blue-700 transition">
+                        <i class="fa-solid fa-camera text-sm"></i>
+                    </label>
+                    <input type="file" id="image-upload" accept="image/*" onchange="handleImageUpload(event)">
+                </div>
+                
+                <div class="space-y-4 text-left mt-6">
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Full Name</label>
+                        <input type="text" id="edit-name" class="w-full mt-1 p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="Your Name">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Email Address</label>
+                        <input type="email" id="edit-email" readonly class="w-full mt-1 p-3 bg-gray-100 border border-gray-200 rounded-xl text-gray-500 outline-none cursor-not-allowed">
+                    </div>
+                    <button onclick="saveProfile()" class="w-full py-3 bg-gray-900 text-white rounded-xl font-semibold hover:bg-gray-800 transition-colors">
+                        Save Changes
                     </button>
                 </div>
             </div>
-        
-            <div class="flex justify-center">
-                <div id="reader-container" class="p-1 bg-white/5 rounded-[2rem] w-full aspect-square max-w-[260px] overflow-hidden relative border border-white/10 min-h-[260px]">
-                    <div id="reader"></div>
-                </div>
-            </div>
 
-            <div class="space-y-2 mt-4">
-                <p class="text-[9px] uppercase tracking-widest text-blue-400/50 font-black text-left ml-1">Today's Logs</p>
-                <div id="daily-logs" class="grid grid-cols-2 gap-2">
-                    <div class="log-pill"><span class="text-[9px] text-white/40 uppercase">In</span><span id="log-in" class="text-xs text-white font-mono">--:--</span></div>
-                    <div class="log-pill"><span class="text-[9px] text-white/40 uppercase">L-Out</span><span id="log-lout" class="text-xs text-white font-mono">--:--</span></div>
-                    <div class="log-pill"><span class="text-[9px] text-white/40 uppercase">L-Back</span><span id="log-lback" class="text-xs text-white font-mono">--:--</span></div>
-                    <div class="log-pill"><span class="text-[9px] text-white/40 uppercase">Out</span><span id="log-out" class="text-xs text-white font-mono">--:--</span></div>
-                </div>
-            </div>
+            <button onclick="signOutUser()" class="w-full py-3 text-red-600 bg-red-50 font-bold rounded-xl hover:bg-red-100 transition-colors">
+                Sign Out
+            </button>
+        </section>
 
-            <div id="debug-info" class="debug-info hidden">
-                ID: <span id="logged-id" class="font-mono text-emerald-400"></span>
-            </div>
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bg-white border-t border-gray-200 fixed bottom-0 w-full z-20 pb-[env(safe-area-inset-bottom)]">
+        <div class="flex justify-around items-center h-16">
+            <button onclick="switchTab('home')" class="nav-item active flex flex-col items-center justify-center w-full h-full" id="nav-home">
+                <i class="fa-solid fa-house text-lg mb-1"></i>
+                <span class="text-[10px] font-semibold">Home</span>
+            </button>
+            <button onclick="switchTab('scanner')" class="nav-item flex flex-col items-center justify-center w-full h-full relative" id="nav-scanner">
+                <div class="absolute -top-5 bg-blue-600 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/30">
+                    <i class="fa-solid fa-qrcode text-xl"></i>
+                </div>
+                <span class="text-[10px] font-semibold mt-6">Scan</span>
+            </button>
+            <button onclick="switchTab('profile')" class="nav-item flex flex-col items-center justify-center w-full h-full" id="nav-profile">
+                <i class="fa-regular fa-user text-lg mb-1"></i>
+                <span class="text-[10px] font-semibold">Profile</span>
+            </button>
         </div>
-    </div>
+    </nav>
 
-    <div id="login-view" class="flex-col justify-center items-center p-4">
-        <div class="glass-card p-10 text-center space-y-6 w-full max-w-md shadow-2xl border-blue-500/30 border-2 my-auto">
-            <div class="flex justify-center">
-                <div class="bg-blue-600/20 p-5 rounded-3xl border border-blue-500/30">
-                    <i class="fa-brands fa-google text-blue-400 text-6xl"></i>
-                </div>
+    <!-- Login View -->
+    <div id="login-view" class="flex-col justify-center items-center p-6">
+        <div class="w-full max-w-md text-center space-y-8">
+            <div class="bg-blue-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto shadow-sm">
+                <i class="fa-solid fa-fingerprint text-blue-600 text-4xl"></i>
             </div>
             <div>
-                <h1 class="text-3xl font-black text-white tracking-tight">Sign In Required</h1>
-                <p class="text-white/60 mt-2">Use your Google account registered by Admin</p>
+                <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Portal Access</h1>
+                <p class="text-gray-500 mt-2">Sign in with your registered company account.</p>
             </div>
             <button onclick="signInWithGoogle()"
-                    class="w-full py-5 bg-white hover:bg-gray-100 active:scale-95 transition-all text-slate-900 rounded-2xl font-semibold flex items-center justify-center gap-4 text-lg shadow-xl">
-                <i class="fa-brands fa-google text-2xl"></i>
+                    class="w-full py-4 bg-white border border-gray-200 text-gray-800 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-sm hover:bg-gray-50 active:scale-95 transition-all">
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google">
                 Continue with Google
             </button>
-            <p class="text-xs text-white/40 pt-6">
-                Only accounts pre-approved by Admin can access the scanner
-            </p>
         </div>
     </div>
 
-    <div id="toast" class="fixed bottom-6 left-4 right-4 bg-white text-slate-900 px-6 py-4 rounded-xl shadow-2xl transition-all duration-500 opacity-0 translate-y-10 pointer-events-none z-[200] font-bold text-[10px] uppercase text-center flex justify-center items-center">
-        <span id="toastMsg" class="max-w-full break-words">Notification</span>
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed left-4 right-4 bg-gray-900 text-white px-4 py-3 rounded-xl shadow-2xl transition-all duration-300 opacity-0 translate-y-10 pointer-events-none z-[200] font-semibold text-sm text-center flex justify-center items-center max-w-sm mx-auto">
+        <span id="toastMsg">Notification</span>
     </div>
-    
+
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script>
+        // --- CONFIGURATION ---
         const firebaseConfig = {
-  apiKey: "AIzaSyCh7Ute6LeSAxcNDEQwZg5m0cA4ujnLCfg",
-  authDomain: "test-17881.firebaseapp.com",
-  projectId: "test-17881",
-  storageBucket: "test-17881.firebasestorage.app",
-  messagingSenderId: "1057428047643",
-  appId: "1:1057428047643:web:f3801c0d933225a5cd35be"
-};
+            apiKey: "AIzaSyCh7Ute6LeSAxcNDEQwZg5m0cA4ujnLCfg",
+            authDomain: "test-17881.firebaseapp.com",
+            projectId: "test-17881",
+            storageBucket: "test-17881.firebasestorage.app",
+            messagingSenderId: "1057428047643",
+            appId: "1:1057428047643:web:f3801c0d933225a5cd35be"
+        };
+        
+        // Cloudinary Config (Required for Image Upload)
+        const CLOUDINARY_UPLOAD_PRESET = "banter_box";
+        const CLOUDINARY_CLOUD_NAME = "dqkujefxj";
+
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const auth = firebase.auth();
@@ -239,52 +271,38 @@
         let html5QrCode = null;
         let lastScannedId = null;
         let scanTimeout = null;
-        
+        let locationVerified = false;
+
+        // --- UI ROUTING ---
+        function switchTab(tabId) {
+            document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`view-${tabId}`).classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active', 'text-blue-600'));
+            document.getElementById(`nav-${tabId}`).classList.add('active', 'text-blue-600');
+
+            // Handle scanner lifecycle to save battery
+            if (tabId === 'scanner' && locationVerified) {
+                startScanner();
+            } else if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().catch(() => {});
+            }
+        }
+
         function showPortal() {
             document.getElementById('login-view').classList.add('active');
-            document.getElementById('app-content').classList.add('blur-locked');
+            document.getElementById('app-content').classList.add('hidden');
+            document.querySelector('nav').classList.add('hidden');
         }
         
         function closePortal() {
             document.getElementById('login-view').classList.remove('active');
-            document.getElementById('app-content').classList.remove('blur-locked');
+            document.getElementById('app-content').classList.remove('hidden');
+            document.querySelector('nav').classList.remove('hidden');
+            switchTab('home'); // Default to home
         }
 
-        async function signOutUser() {
-            try {
-                if (html5QrCode) await html5QrCode.stop().catch(() => {});
-                await auth.signOut();
-                currentUserData = null;
-                document.getElementById('location-overlay').classList.remove('hidden');
-                document.getElementById('debug-info').classList.add('hidden');
-                showPortal();
-            } catch (error) {
-                showToast("Sign out failed");
-            }
-        }
-        
-        async function signInWithGoogle() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            try { await auth.signInWithPopup(provider); } catch (error) { showToast("Login failed"); }
-        }
-        
-        async function logUnauthorizedAttempt(user) {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
-            const deviceInfo = navigator.userAgent.match(/(iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini|Windows Phone|Desktop)/i)?.[0] || 'Unknown Device';
-            
-            const attemptData = {
-                attemptedEmail: user.email,
-                time: timeString,
-                timestamp: firebase.database.ServerValue.TIMESTAMP,
-                device: deviceInfo,
-                severity: 'critical',
-                ip: 'pending'
-            };
-            
-            await db.ref('unauthorized_attempts').push(attemptData);
-        }
-        
+        // --- AUTHENTICATION ---
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 const snap = await db.ref('employees').orderByChild('email').equalTo(user.email.toLowerCase()).once('value');
@@ -292,51 +310,161 @@
                     const data = snap.val();
                     const key = Object.keys(data)[0];
                     currentUserData = { ...data[key], id: key };
-                    closePortal();
-                    document.getElementById('logged-id').textContent = currentUserData.id;
-                    document.getElementById('debug-info').classList.remove('hidden');
+                    
+                    // Populate Profile & Home UI
+                    updateUIWithUserData();
                     listenToAttendance();
+                    closePortal();
                 } else {
-                    await logUnauthorizedAttempt(user);
                     showToast("Not registered - Alert sent to admin");
                     await auth.signOut();
                     showPortal();
                 }
-            } else { showPortal(); }
+            } else { 
+                showPortal(); 
+            }
         });
 
+        async function signInWithGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            try { await auth.signInWithPopup(provider); } 
+            catch (error) { showToast(error.message ? error.message.split('.')[0] : "Login failed"); }
+        }
+
+        async function signOutUser() {
+            if (html5QrCode && html5QrCode.isScanning) await html5QrCode.stop().catch(() => {});
+            await auth.signOut();
+            currentUserData = null;
+            locationVerified = false;
+            document.getElementById('location-overlay').classList.remove('hidden');
+            document.getElementById('scanner-interface').classList.add('hidden');
+            showPortal();
+        }
+
+        // --- PROFILE & UPLOAD LOGIC ---
+        function updateUIWithUserData() {
+            const name = currentUserData.name || "Employee";
+            const dp = currentUserData.profilePic || `https://ui-avatars.com/api/?name=${name}&background=eff6ff&color=2563eb`;
+            
+            document.getElementById('home-name').innerText = name;
+            document.getElementById('home-avatar').src = dp;
+            document.getElementById('profile-img').src = dp;
+            document.getElementById('edit-name').value = name;
+            document.getElementById('edit-email').value = currentUserData.email;
+        }
+
+        async function saveProfile() {
+            const newName = document.getElementById('edit-name').value.trim();
+            if(!newName) return showToast("Name cannot be empty");
+            
+            try {
+                await db.ref(`employees/${currentUserData.id}`).update({ name: newName });
+                currentUserData.name = newName;
+                updateUIWithUserData();
+                showToast("Profile Updated");
+            } catch(e) { showToast("Failed to update profile"); }
+        }
+
+        async function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if(!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            
+            showToast("Uploading picture...");
+            try {
+                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                
+                if(data.secure_url) {
+                    await db.ref(`employees/${currentUserData.id}`).update({ profilePic: data.secure_url });
+                    currentUserData.profilePic = data.secure_url;
+                    updateUIWithUserData();
+                    showToast("Picture Updated Successfully");
+                } else {
+                    throw new Error(data.error.message);
+                }
+            } catch(e) {
+                console.error(e);
+                showToast("Upload Failed. Ensure your preset is 'Unsigned'.");
+            }
+        }
+
+        // --- ATTENDANCE & HOURS LOGIC ---
         function listenToAttendance() {
             if (!currentUserData) return;
             const today = new Date().toISOString().split('T')[0];
             db.ref(`attendance/${today}/${currentUserData.id}`).on('value', (snap) => {
                 const data = snap.val() || {};
-                document.getElementById('log-in').innerText = data.TimeIn || '--:--';
+                const tIn = data.TimeIn || '--:--';
+                const tOut = data.TimeOut || '--:--';
+                
+                document.getElementById('log-in').innerText = tIn;
                 document.getElementById('log-lout').innerText = data.LunchOut || '--:--';
                 document.getElementById('log-lback').innerText = data.LunchBack || '--:--';
-                document.getElementById('log-out').innerText = data.TimeOut || '--:--';
+                document.getElementById('log-out').innerText = tOut;
+
+                calculateHours(data.TimeIn, data.TimeOut);
             });
         }
-        
+
+        function calculateHours(timeIn, timeOut) {
+            const display = document.getElementById('hours-worked');
+            if (!timeIn) {
+                display.innerText = "0h 0m";
+                return;
+            }
+
+            const [inH, inM] = timeIn.split(':').map(Number);
+            let outH, outM;
+
+            if (timeOut) {
+                [outH, outM] = timeOut.split(':').map(Number);
+            } else {
+                const now = new Date();
+                outH = now.getHours();
+                outM = now.getMinutes();
+            }
+
+            let diffMins = (outH * 60 + outM) - (inH * 60 + inM);
+            if (diffMins < 0) diffMins = 0; // Prevent negative if cross midnight logic isn't needed
+
+            const h = Math.floor(diffMins / 60);
+            const m = diffMins % 60;
+            display.innerText = `${h}h ${m}m`;
+        }
+
+        // --- SCANNER & LOCATION LOGIC ---
         async function detectAndVerifyLocation() {
-            showToast("Detecting...");
+            showToast("Verifying location...");
             if (!navigator.geolocation) return showToast("GPS Not Supported");
+            
             navigator.geolocation.getCurrentPosition(async (pos) => {
                 const userLat = pos.coords.latitude;
                 const userLon = pos.coords.longitude;
                 const snap = await db.ref('settings/officeLocation').once('value');
-                if (!snap.exists()) return showToast("Office location not set");
+                
+                if (!snap.exists()) return showToast("Admin hasn't set office location");
+                
                 const adminConfig = snap.val();
                 const distance = calculateDistance(userLat, userLon, adminConfig.lat, adminConfig.lng);
+                
                 if (distance <= (adminConfig.radius || 150)) {
-                    showToast("Location Verified ✓");
+                    locationVerified = true;
                     document.getElementById('location-overlay').classList.add('hidden');
+                    document.getElementById('scanner-interface').classList.remove('hidden');
                     startScanner();
                 } else {
                     showToast(`Outside Range (${Math.round(distance)}m)`);
                 }
-            }, (err) => { showToast("Grant GPS permission"); }, { enableHighAccuracy: true });
+            }, () => { showToast("Please grant GPS permission"); }, { enableHighAccuracy: true });
         }
-        
+
         function calculateDistance(lat1, lon1, lat2, lon2) {
             const R = 6371e3;
             const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -344,97 +472,129 @@
             const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         }
-        
+
         async function startScanner() {
             if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
-            try { await html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 220, aspectRatio: 1.0 }, onScanSuccess); } catch (e) {}
+            if (!html5QrCode.isScanning) {
+                try { await html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, onScanSuccess); } 
+                catch (e) { console.error("Scanner failed to start"); }
+            }
         }
-        
+
         function onScanSuccess(decodedText) {
-            // FIX: Clean the scanned text thoroughly and ensure string comparison
             const scannedId = decodedText.trim().toString();
+            if (scannedId === lastScannedId) return;
             
-            if (scannedId === lastScannedId) {
-                return;
-            }
-            
-            if (!currentUserData) {
-                if (!window.errorToastThrottled) {
-                    showToast("Not authenticated");
-                    window.errorToastThrottled = true;
-                    setTimeout(() => window.errorToastThrottled = false, 3000);
-                }
-                return;
-            }
-            
-            // FIX: Ensure the ID from DB is also treated as a string for comparison
             const storedId = currentUserData.id.toString().trim();
-            
             if (scannedId !== storedId) {
-                if (!window.errorToastThrottled) {
-                    showToast(`ID Mismatch`);
-                    window.errorToastThrottled = true;
-                    setTimeout(() => window.errorToastThrottled = false, 3000);
-                }
+                showToast(`ID Mismatch`);
                 return;
             }
 
             lastScannedId = scannedId;
             clearTimeout(scanTimeout);
-            scanTimeout = setTimeout(() => {
-                lastScannedId = null;
-            }, 5000);
+            scanTimeout = setTimeout(() => { lastScannedId = null; }, 5000);
 
-            const now = Date.now();
-            const lastScanKey = 'lastScanTime_' + storedId;
-            const lastScan = localStorage.getItem(lastScanKey);
-            const cooldownTime = 15 * 60 * 1000;
+            processAttendanceUpdate(storedId);
+        }
 
-            if (lastScan && (now - parseInt(lastScan)) < cooldownTime) {
-                if (!window.cooldownToastThrottled) {
-                    const remainingMinutes = Math.ceil((cooldownTime - (now - parseInt(lastScan))) / 60000);
-                    showToast(`Wait ${remainingMinutes}m`);
-                    window.cooldownToastThrottled = true;
-                    setTimeout(() => window.cooldownToastThrottled = false, 5000);
-                }
-                return;
+        async function logWithBiometrics() {
+            if (!currentUserData) return showToast("Not authenticated");
+            
+            if (!window.PublicKeyCredential) {
+                return showToast("Biometrics not supported in this browser");
             }
 
+            try {
+                const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+                if (!available) {
+                    return showToast("No biometric sensor detected");
+                }
+
+                const userIdString = currentUserData.id.toString();
+                const credKey = 'biometric_cred_' + userIdString;
+                let credentialId = localStorage.getItem(credKey);
+                
+                const challenge = new Uint8Array(32);
+                window.crypto.getRandomValues(challenge);
+                
+                const rpDomain = window.location.hostname || "localhost";
+
+                if (!credentialId) {
+                    const publicKey = {
+                        challenge: challenge,
+                        rp: { name: "AttendanceHub", id: rpDomain },
+                        user: {
+                            id: new Uint8Array(16), 
+                            name: currentUserData.email,
+                            displayName: currentUserData.name || "Employee"
+                        },
+                        pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
+                        authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" },
+                        timeout: 60000
+                    };
+                    
+                    const cred = await navigator.credentials.create({ publicKey });
+                    const base64Id = btoa(String.fromCharCode.apply(null, new Uint8Array(cred.rawId)));
+                    localStorage.setItem(credKey, base64Id);
+                    
+                } else {
+                    const binaryId = Uint8Array.from(atob(credentialId), c => c.charCodeAt(0));
+                    const publicKey = {
+                        challenge: challenge,
+                        rpId: rpDomain,
+                        allowCredentials: [{ type: "public-key", id: binaryId }],
+                        userVerification: "required",
+                        timeout: 60000
+                    };
+                    
+                    await navigator.credentials.get({ publicKey });
+                }
+
+                processAttendanceUpdate(currentUserData.id);
+
+            } catch (error) {
+                console.error("Biometric Error:", error);
+                showToast("Biometric verification cancelled or failed");
+            }
+        }
+
+        function processAttendanceUpdate(employeeId) {
             if (window.isProcessingScan) return;
             window.isProcessingScan = true;
 
             const today = new Date().toISOString().split('T')[0];
             const nowTime = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
             
-            db.ref(`attendance/${today}/${storedId}`).once('value', (attSnap) => {
+            db.ref(`attendance/${today}/${employeeId}`).once('value', (attSnap) => {
                 let update = { name: currentUserData.name || "Employee", timestamp: firebase.database.ServerValue.TIMESTAMP };
                 const att = attSnap.val();
                 let actionLabel = "Logged";
                 
-                if (!att) { actionLabel = "Time In"; update.TimeIn = nowTime; } 
-                else if (!att.LunchOut) { actionLabel = "Lunch Out"; update.LunchOut = nowTime; } 
-                else if (!att.LunchBack) { actionLabel = "Lunch Back"; update.LunchBack = nowTime; } 
-                else if (!att.TimeOut) { actionLabel = "Time Out"; update.TimeOut = nowTime; } 
-                else { window.isProcessingScan = false; return showToast("Shift complete"); }
+                if (!att) { actionLabel = "Time In Recorded"; update.TimeIn = nowTime; } 
+                else if (!att.LunchOut) { actionLabel = "Lunch Out Recorded"; update.LunchOut = nowTime; } 
+                else if (!att.LunchBack) { actionLabel = "Lunch Back Recorded"; update.LunchBack = nowTime; } 
+                else if (!att.TimeOut) { actionLabel = "Time Out Recorded"; update.TimeOut = nowTime; } 
+                else { window.isProcessingScan = false; return showToast("Shift complete for today"); }
                 
-                db.ref(`attendance/${today}/${storedId}`).update(update).then(() => {
-                    localStorage.setItem(lastScanKey, Date.now());
-                    document.getElementById('modal-action-text').innerText = actionLabel;
-                    document.getElementById('success-modal').classList.remove('hidden');
-                    setTimeout(() => { document.getElementById('success-modal').classList.add('hidden'); window.isProcessingScan = false; }, 2800);
+                db.ref(`attendance/${today}/${employeeId}`).update(update).then(() => {
+                    showToast(`✅ ${actionLabel}`);
+                    switchTab('home'); // Send them back to home to see the update
+                    setTimeout(() => window.isProcessingScan = false, 2000);
                 }).catch(() => { window.isProcessingScan = false; });
             });
         }
-        
+
+        // --- UTILS ---
         function showToast(msg) {
             const t = document.getElementById('toast');
             document.getElementById('toastMsg').innerHTML = msg;
             t.classList.remove('opacity-0', 'translate-y-10', 'pointer-events-none');
-            setTimeout(() => t.classList.add('opacity-0', 'translate-y-10', 'pointer-events-none'), 4000);
+            setTimeout(() => t.classList.add('opacity-0', 'translate-y-10', 'pointer-events-none'), 3000);
         }
-        
+
         setInterval(() => {
-            document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
         }, 1000);
     </script>
 </body>

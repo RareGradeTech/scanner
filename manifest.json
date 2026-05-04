@@ -9,13 +9,13 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "icon-192x192.png",
+      "src": "https://i.postimg.cc/TPmHPqxh/Whats-App-Image-2026-04-23-at-10-39-54.jpg",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icon-512x512.png",
+      "src": "https://i.postimg.cc/TPmHPqxh/Whats-App-Image-2026-04-23-at-10-39-54.jpg",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

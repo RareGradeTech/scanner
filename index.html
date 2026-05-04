@@ -115,6 +115,13 @@
             border-radius: 50%; animation: spin 1s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Signature Canvas Support */
+        .sig-pad {
+            border: 2px dashed #cbd5e1; background: #f8fafc; border-radius: 0.75rem;
+            width: 100%; height: 140px; touch-action: none; cursor: crosshair;
+        }
+        .dark .sig-pad { border-color: #475569; background: #1e293b; }
     </style>
 </head>
 <body class="h-screen flex flex-col relative bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
@@ -213,6 +220,64 @@
                 </div>
                 <div id="work-history-list" class="space-y-3">
                     <div class="text-center text-xs text-gray-400 py-4 italic">No tasks signed yet.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SUPPORT CLIENT REGISTRATION VIEW -->
+        <section id="view-support" class="hidden space-y-4">
+            <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="bg-emerald-100 dark:bg-emerald-900/50 p-2 rounded-lg text-emerald-600 dark:text-emerald-400">
+                        <i class="fa-solid fa-handshake"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-gray-800 dark:text-gray-200">Add Support Client</h2>
+                        <p class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">Register a new maintenance SLA</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Business Details -->
+                    <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
+                        <h3 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Business Info</h3>
+                        <input type="text" id="sup-biz-name" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white transition-all" placeholder="Business Name *">
+                        <input type="text" id="sup-sector" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white transition-all" placeholder="Industry / Sector">
+                    </div>
+
+                    <!-- Contact Details -->
+                    <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
+                        <h3 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Primary Contact</h3>
+                        <input type="text" id="sup-contact-name" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white transition-all" placeholder="Contact Name *">
+                        <input type="tel" id="sup-contact-phone" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white transition-all" placeholder="Contact Phone *">
+                    </div>
+
+                    <!-- Contract Details -->
+                    <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
+                        <h3 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Contract Details</h3>
+                        <select id="sup-contract-type" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white transition-all">
+                            <option value="Monthly Maintenance">Monthly Maintenance</option>
+                            <option value="Quarterly Maintenance">Quarterly Maintenance</option>
+                            <option value="Ad-hoc Support">Ad-hoc Support</option>
+                            <option value="Annual Support Contract">Annual Support Contract</option>
+                            <option value="Break-Fix Only">Break-Fix Only</option>
+                        </select>
+                        <textarea id="sup-notes" rows="2" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white transition-all resize-none" placeholder="Initial contract notes / requirements..."></textarea>
+                    </div>
+
+                    <!-- Digital Signature -->
+                    <div class="bg-emerald-50 dark:bg-emerald-900/10 p-4 rounded-xl border border-emerald-100 dark:border-emerald-900/30 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">Client Signature</h3>
+                            <button onclick="clearSupportSignature()" class="text-[10px] text-red-500 font-bold hover:underline">Clear</button>
+                        </div>
+                        <p class="text-[10px] text-emerald-600 dark:text-emerald-500 leading-tight">By signing below, the client agrees to the maintenance SLA terms.</p>
+                        <canvas id="sup-sig-canvas" class="sig-pad w-full block"></canvas>
+                    </div>
+
+                    <button onclick="submitSupportClient()" class="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold shadow-md hover:bg-emerald-700 active:scale-95 transition-all flex justify-center items-center gap-2">
+                        <i class="fa-solid fa-paper-plane"></i> Register Client
+                    </button>
                 </div>
             </div>
         </section>
@@ -324,7 +389,7 @@
                         </div>
                         <div>
                             <p class="text-sm font-semibold">App Version</p>
-                            <p class="text-[10px] text-gray-500 dark:text-gray-400">RareGradeHub v2.4.0</p>
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400">RareGradeHub v2.5.0</p>
                         </div>
                     </div>
                     <span class="text-xs text-gray-400 font-mono">Up to date</span>
@@ -381,10 +446,14 @@
 
     <!-- Bottom Navigation Bar -->
     <nav id="bottom-nav" class="bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 fixed bottom-0 w-full z-20 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.02)] transition-transform duration-300">
-        <div class="flex justify-around items-center h-16 px-2">
+        <div class="flex justify-around items-center h-16 px-1">
             <button onclick="switchTab('home')" class="nav-item active text-gray-500 dark:text-gray-400 flex flex-col items-center justify-center w-full h-full" id="nav-home">
                 <i class="fa-solid fa-house text-lg mb-1"></i>
                 <span class="text-[9px] font-bold uppercase tracking-wide">Home</span>
+            </button>
+            <button onclick="switchTab('support')" class="nav-item text-gray-500 dark:text-gray-400 flex flex-col items-center justify-center w-full h-full" id="nav-support">
+                <i class="fa-solid fa-building text-lg mb-1"></i>
+                <span class="text-[9px] font-bold uppercase tracking-wide">Support</span>
             </button>
             <button onclick="switchTab('chat')" class="nav-item text-gray-500 dark:text-gray-400 flex flex-col items-center justify-center w-full h-full relative" id="nav-chat">
                 <i class="fa-regular fa-comments text-lg mb-1"></i>
@@ -467,6 +536,11 @@
         let chatInitialized = false;
         let cooldownTimerInterval = null;
 
+        // Support Signature Variables
+        let supCtx = null;
+        let isSigningSupport = false;
+        let hasSupportSignature = false;
+
         // --- THEME INIT ---
         function initTheme() {
             const isDark = localStorage.getItem('theme') === 'dark';
@@ -492,9 +566,8 @@
         let touchStartX = 0;
         let touchEndX = 0;
         const swipeThreshold = 50; 
-        const navTabs = ['home', 'chat', 'profile', 'settings'];
+        const navTabs = ['home', 'support', 'chat', 'profile', 'settings'];
 
-        // Add event listeners to the entire document for swiping
         document.addEventListener('touchstart', e => {
             touchStartX = e.changedTouches[0].screenX;
         }, { passive: true });
@@ -505,15 +578,12 @@
         }, { passive: true });
 
         function handleSwipeGesture() {
-            // Prevent swiping if in Login View or Scanner View
             const loginView = document.getElementById('login-view');
             const scannerView = document.getElementById('view-scanner');
             if (!loginView.classList.contains('hidden') && loginView.classList.contains('active')) return;
             if (!scannerView.classList.contains('hidden')) return;
 
-            // Determine which tab is currently active
-            let currentTabId = 'home'; // default fallback
-            // Check if chat overlay is active
+            let currentTabId = 'home';
             if (!document.getElementById('view-chat').classList.contains('hidden')) {
                 currentTabId = 'chat';
             } else {
@@ -524,11 +594,9 @@
             const currentIndex = navTabs.indexOf(currentTabId);
             if (currentIndex === -1) return;
 
-            // Detect Swipe Left (Go to Next Tab)
             if (touchEndX < touchStartX - swipeThreshold) {
                 if (currentIndex < navTabs.length - 1) switchTab(navTabs[currentIndex + 1]);
             }
-            // Detect Swipe Right (Go to Previous Tab)
             if (touchEndX > touchStartX + swipeThreshold) {
                 if (currentIndex > 0) switchTab(navTabs[currentIndex - 1]);
             }
@@ -561,6 +629,10 @@
                     fab.style.transform = 'scale(0)';
                 } else {
                     fab.style.transform = 'scale(1)';
+                }
+                
+                if (tabId === 'support') {
+                    initSupportSignaturePad();
                 }
             }
             
@@ -770,6 +842,137 @@
                     `;
                 });
             });
+        }
+
+        // --- SUPPORT CLIENT INTAKE LOGIC ---
+        function initSupportSignaturePad() {
+            const canvas = document.getElementById('sup-sig-canvas');
+            if (!canvas || supCtx) return;
+
+            // Size canvas based on parent to fix blur/skew
+            setTimeout(() => {
+                const rect = canvas.parentElement.getBoundingClientRect();
+                canvas.width = rect.width - 32; // Account for padding
+                canvas.height = 140;
+                supCtx = canvas.getContext('2d');
+            }, 50);
+
+            const getPos = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return { x: clientX - rect.left, y: clientY - rect.top };
+            };
+
+            const startDraw = (e) => {
+                if(e.type !== 'mousedown') e.preventDefault();
+                isSigningSupport = true;
+                hasSupportSignature = true;
+                supCtx.beginPath();
+                const pos = getPos(e);
+                supCtx.moveTo(pos.x, pos.y);
+            };
+
+            const draw = (e) => {
+                if (!isSigningSupport) return;
+                if(e.type !== 'mousemove') e.preventDefault();
+                const pos = getPos(e);
+                supCtx.lineWidth = 2.5;
+                supCtx.lineCap = 'round';
+                supCtx.lineJoin = 'round';
+                supCtx.strokeStyle = document.documentElement.classList.contains('dark') ? '#ffffff' : '#0f172a';
+                supCtx.lineTo(pos.x, pos.y);
+                supCtx.stroke();
+            };
+
+            const stopDraw = () => {
+                if (isSigningSupport) {
+                    isSigningSupport = false;
+                    supCtx.closePath();
+                }
+            };
+
+            canvas.addEventListener('mousedown', startDraw);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDraw);
+            canvas.addEventListener('mouseout', stopDraw);
+
+            canvas.addEventListener('touchstart', startDraw, { passive: false });
+            canvas.addEventListener('touchmove', draw, { passive: false });
+            canvas.addEventListener('touchend', stopDraw, { passive: false });
+        }
+
+        function clearSupportSignature() {
+            const canvas = document.getElementById('sup-sig-canvas');
+            if (supCtx && canvas) {
+                supCtx.clearRect(0, 0, canvas.width, canvas.height);
+                hasSupportSignature = false;
+            }
+        }
+
+        async function submitSupportClient() {
+            const bizName = document.getElementById('sup-biz-name').value.trim();
+            const sector = document.getElementById('sup-sector').value.trim();
+            const contactName = document.getElementById('sup-contact-name').value.trim();
+            const contactPhone = document.getElementById('sup-contact-phone').value.trim();
+            const contractType = document.getElementById('sup-contract-type').value;
+            const notes = document.getElementById('sup-notes').value.trim();
+            
+            if (!bizName || !contactName || !contactPhone) {
+                return showToast("Please fill all required fields", "error");
+            }
+            if (!hasSupportSignature) {
+                return showToast("Client signature is required", "error");
+            }
+
+            document.getElementById('global-spinner').classList.add('active');
+            document.getElementById('spinner-text').innerText = "Registering Support Client...";
+
+            try {
+                const refId = Math.floor(1000 + Math.random() * 9000).toString();
+                const canvas = document.getElementById('sup-sig-canvas');
+                
+                // Save to Realtime Database
+                await db.ref('support_businesses').push({
+                    refId: refId,
+                    bizName: bizName,
+                    sector: sector,
+                    contractType: contractType,
+                    contactName: contactName,
+                    contactPhone: contactPhone,
+                    sigName: contactName, 
+                    signatureBase64: canvas.toDataURL('image/png'),
+                    status: 'Active',
+                    maintenanceNotes: notes,
+                    devices: [],
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+
+                // Update employee work history
+                await db.ref(`employees/${currentUserData.id}/work_history`).push({
+                    refId: `SUP-${refId}`,
+                    title: `SLA: ${bizName}`,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+
+                document.getElementById('global-spinner').classList.remove('active');
+                showToast(`Client Registered! Ref: SUP-${refId}`);
+                
+                // Clear Form
+                document.getElementById('sup-biz-name').value = '';
+                document.getElementById('sup-sector').value = '';
+                document.getElementById('sup-contact-name').value = '';
+                document.getElementById('sup-contact-phone').value = '';
+                document.getElementById('sup-notes').value = '';
+                clearSupportSignature();
+
+                // Swap back to home view
+                switchTab('home');
+            } catch (err) {
+                document.getElementById('global-spinner').classList.remove('active');
+                showToast("Failed to register client", "error");
+                console.error(err);
+            }
         }
 
         // --- REMOTE EVIDENCE UPLOAD ---

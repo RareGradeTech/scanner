@@ -3,10 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#f8fafc">
+    <meta name="theme-color" content="#2563eb">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="RareGrade">
     <title>Employee Attendance Portal</title>
+    
+    <!-- PWA Setup -->
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="./icon-192x192.png">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -48,7 +54,6 @@
         }
         #login-view.active { display: flex; transform: translateY(0); opacity: 1; }
         
-        /* Scanner specific styles for perfect centering */
         #reader { width: 100% !important; border-radius: 1rem; overflow: hidden; position: relative; border: none !important;}
         #reader video { width: 100% !important; height: 100% !important; object-fit: cover; display: block; }
         #reader__dashboard_section_csr span, #reader__dashboard_section_swaplink { display: none !important; }
@@ -60,7 +65,6 @@
         #toast { bottom: max(90px, env(safe-area-inset-bottom) + 90px); z-index: 9999; }
         input[type="file"] { display: none; }
         
-        /* Chat & Scrollbar Styling */
         #chat-messages::-webkit-scrollbar { width: 4px; }
         #chat-messages::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         .dark #chat-messages::-webkit-scrollbar-thumb { background: #475569; }
@@ -71,14 +75,12 @@
         .chat-mine::after { content: ''; position: absolute; top: 0; right: -8px; width: 0; height: 0; border: 8px solid transparent; border-top-color: inherit; border-right: 0; border-bottom: 0; }
         .chat-theirs::after { content: ''; position: absolute; top: 0; left: -8px; width: 0; height: 0; border: 8px solid transparent; border-top-color: inherit; border-left: 0; border-bottom: 0; }
 
-        /* Calendar Styling */
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
         .calendar-day { padding: 8px 0; font-size: 0.75rem; border-radius: 0.5rem; font-weight: 500; }
         .calendar-header { font-size: 0.65rem; text-transform: uppercase; font-weight: 700; margin-bottom: 4px;}
         .day-today { background: #2563eb; color: white; font-weight: bold; box-shadow: 0 2px 4px rgba(37,99,235,0.3); }
         .day-empty { color: transparent; pointer-events: none; }
 
-        /* Shimmer Loading Animation */
         .shimmer {
             position: relative;
             overflow: hidden;
@@ -101,7 +103,6 @@
         .toggle-checkbox:checked { right: 0; border-color: #2563eb; }
         .toggle-checkbox:checked + .toggle-label { background-color: #2563eb; }
 
-        /* Global Spinner Overlay */
         #global-spinner {
             position: fixed; inset: 0; background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(4px);
             z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -124,7 +125,7 @@
         <p id="spinner-text" class="text-gray-800 dark:text-gray-200 mt-4 font-bold text-sm tracking-wide">Processing...</p>
     </div>
 
-    <!-- Top Header (Hidden in Chat) -->
+    <!-- Top Header -->
     <header id="main-header" class="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-6 py-4 flex justify-between items-center z-10 shrink-0 transition-colors duration-300">
         <div class="flex items-center gap-2">
             <div class="bg-blue-100 dark:bg-blue-900/50 p-2 rounded-lg text-blue-600 dark:text-blue-400">
@@ -138,10 +139,9 @@
     <!-- Main Content Area -->
     <main id="app-content" class="flex-1 overflow-y-auto pb-28 px-4 pt-4 w-full max-w-lg mx-auto transition-all relative">
         
-        <!-- ================= HOME VIEW ================= -->
+        <!-- HOME VIEW -->
         <section id="view-home" class="space-y-4">
-            
-            <!-- Employee Profile & PIN Header -->
+            <!-- Employee Profile & PIN -->
             <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5 flex items-center justify-between">
                 <div class="flex items-center gap-4">
                     <img id="home-avatar" src="" onerror="handleImgError(this)" class="w-14 h-14 rounded-full object-cover border-2 border-gray-100 dark:border-slate-600 shimmer" alt="Profile">
@@ -150,7 +150,6 @@
                         <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1">Employee Portal</p>
                     </div>
                 </div>
-                <!-- 5-Digit Authentication PIN -->
                 <div class="text-center px-4 border-l border-gray-100 dark:border-slate-700">
                     <p class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Auth PIN</p>
                     <p id="emp-pin-display" class="font-mono text-xl font-black text-blue-600 dark:text-blue-400 shimmer rounded">-----</p>
@@ -183,25 +182,22 @@
                 </div>
             </div>
 
-            <!-- Remote Image Upload Link -->
+            <!-- Remote Image Upload -->
             <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5 mt-4">
                 <div class="flex justify-between items-center mb-3">
                     <h3 class="font-bold text-sm text-gray-700 dark:text-gray-200">Workspace Upload</h3>
                     <i class="fa-solid fa-cloud-arrow-up text-blue-500 dark:text-blue-400"></i>
                 </div>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">Capture evidence directly from this device. It will sync real-time to the main workspace.</p>
-                
                 <div class="space-y-4">
                     <div class="relative">
                         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-mono font-bold text-sm">RGT/SFT-</span>
                         <input type="text" id="upload-job-id" placeholder="1234" class="w-full pl-24 pr-4 py-3 bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-xl font-mono font-bold focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all" inputmode="numeric">
                     </div>
-
                     <select id="upload-phase" class="w-full p-3 bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all">
                         <option value="photosBefore">Pre-Repair Evidence</option>
                         <option value="photosAfter">Post-Repair Evidence</option>
                     </select>
-
                     <button onclick="document.getElementById('evidence-upload').click()" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold shadow-md hover:bg-blue-700 active:scale-95 transition-all flex justify-center items-center gap-2">
                         <i class="fa-solid fa-camera"></i> Capture & Link Image
                     </button>
@@ -219,12 +215,10 @@
                     <div class="text-center text-xs text-gray-400 py-4 italic">No tasks signed yet.</div>
                 </div>
             </div>
-
         </section>
 
-        <!-- ================= SCANNER VIEW ================= -->
+        <!-- SCANNER VIEW -->
         <section id="view-scanner" class="hidden space-y-4 h-full flex flex-col pb-6">
-            
             <div id="location-overlay" class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-6 text-center space-y-4 my-auto">
                 <div class="inline-block bg-blue-50 dark:bg-blue-900/30 p-4 rounded-full text-blue-500 dark:text-blue-400 mb-1">
                     <i class="fa-solid fa-location-dot text-2xl"></i>
@@ -235,9 +229,7 @@
                     Check GPS Lock
                 </button>
             </div>
-
             <div id="scanner-interface" class="hidden flex-1 flex flex-col space-y-4 overflow-y-auto">
-                <!-- QR Attendance Scanner -->
                 <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 shrink-0">
                     <div class="flex justify-between items-center mb-3 px-1">
                         <h2 class="font-bold text-sm"><i class="fa-solid fa-qrcode mr-2 text-blue-500"></i>Scan Office QR</h2>
@@ -252,7 +244,7 @@
             </div>
         </section>
 
-        <!-- ================= PROFILE VIEW ================= -->
+        <!-- PROFILE VIEW -->
         <section id="view-profile" class="hidden space-y-4">
             <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5 text-center">
                 <div class="relative inline-block mb-3">
@@ -262,7 +254,6 @@
                     </label>
                     <input type="file" id="image-upload" accept="image/*" onchange="handleImageUpload(event)">
                 </div>
-                
                 <div class="space-y-3 text-left mt-2">
                     <div>
                         <label class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Full Name</label>
@@ -277,7 +268,6 @@
                     </button>
                 </div>
             </div>
-
             <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-bold text-sm" id="cal-month-title">Calendar</h3>
@@ -288,16 +278,14 @@
                 </div>
                 <div id="calendar-days" class="calendar-grid mt-1"></div>
             </div>
-
             <button onclick="signOutUser()" class="w-full py-3 text-red-600 dark:text-red-400 bg-white dark:bg-slate-800 border border-red-100 dark:border-red-900/30 font-bold text-sm rounded-xl hover:bg-red-50 dark:hover:bg-red-900/10 shadow-sm transition-colors mt-4">
                 Sign Out Account
             </button>
         </section>
 
-        <!-- ================= SETTINGS VIEW ================= -->
+        <!-- SETTINGS VIEW -->
         <section id="view-settings" class="hidden space-y-4">
             <h2 class="text-xl font-bold mb-2 px-1">Settings</h2>
-            
             <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-2 shadow-sm divide-y divide-gray-100 dark:divide-slate-700">
                 <div class="flex items-center justify-between p-3">
                     <div class="flex items-center gap-3">
@@ -314,7 +302,6 @@
                         <label for="theme-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 dark:bg-gray-600 cursor-pointer transition-colors duration-300"></label>
                     </div>
                 </div>
-
                 <div class="flex items-center justify-between p-3">
                     <div class="flex items-center gap-3">
                         <div class="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
@@ -330,7 +317,6 @@
                         <label class="toggle-label block overflow-hidden h-6 rounded-full bg-blue-600 cursor-pointer transition-colors duration-300"></label>
                     </div>
                 </div>
-
                 <div class="flex items-center justify-between p-3">
                     <div class="flex items-center gap-3">
                         <div class="w-8 h-8 rounded-full bg-green-50 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
@@ -344,7 +330,6 @@
                     <span class="text-xs text-gray-400 font-mono">Up to date</span>
                 </div>
             </div>
-
             <div class="mt-6 px-1">
                 <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">System Actions</p>
                 <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700">
@@ -357,7 +342,7 @@
         </section>
     </main>
 
-    <!-- ================= CHAT VIEW (Full Screen Overlay) ================= -->
+    <!-- CHAT VIEW (Full Screen Overlay) -->
     <section id="view-chat" class="hidden fixed inset-0 z-40 bg-[#e5ddd5] dark:bg-[#0b141a] flex-col">
         <div class="bg-[#075e54] dark:bg-slate-800 shadow-sm p-3 pt-[calc(0.75rem+env(safe-area-inset-top))] flex items-center gap-3 shrink-0 text-white transition-colors z-10">
             <button onclick="switchTab('home')" class="text-white p-2 -ml-2 active:scale-95 transition-transform">
@@ -374,11 +359,9 @@
                 </p>
             </div>
         </div>
-        
         <div id="chat-messages" class="flex-1 overflow-y-auto p-4 flex flex-col gap-2 pb-20 relative z-0">
             <div class="text-center text-xs text-gray-500 bg-white/50 dark:bg-slate-800/50 rounded-full px-3 py-1 mx-auto my-2 backdrop-blur-sm shadow-sm">Loading messages...</div>
         </div>
-
         <div class="fixed bottom-0 left-0 right-0 bg-[#f0f0f0] dark:bg-slate-800 p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] flex items-end gap-2 shadow-[0_-1px_3px_rgba(0,0,0,0.1)] z-20">
             <div class="flex-1 bg-white dark:bg-slate-700 rounded-2xl flex items-center px-2 py-1 shadow-sm">
                 <i class="fa-regular fa-face-smile text-gray-400 dark:text-gray-300 p-2 text-xl"></i>
@@ -391,7 +374,7 @@
         </div>
     </section>
 
-    <!-- Floating Action Button (Scanner) -->
+    <!-- Floating Action Button -->
     <button onclick="switchTab('scanner')" id="fab-scanner" class="fixed bottom-20 right-4 bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/40 z-30 transform transition-transform duration-300 active:scale-95">
         <i class="fa-solid fa-qrcode text-2xl"></i>
     </button>
@@ -437,7 +420,7 @@
         </div>
     </div>
 
-    <!-- Custom 5-Minute Cooldown Modal -->
+    <!-- Custom Cooldown Modal -->
     <div id="cooldown-modal" class="fixed inset-0 bg-black/50 z-[999] hidden flex items-center justify-center backdrop-blur-sm p-4 transition-opacity opacity-0 duration-300">
         <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 w-full max-w-[320px] text-center shadow-2xl transform transition-transform duration-300 scale-100">
             <div class="w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-orange-500">
@@ -468,7 +451,6 @@
             appId: "1:1057428047643:web:f3801c0d933225a5cd35be"
         };
         
-        // Cloudinary Config
         const CLOUDINARY_UPLOAD_PRESET = "banter_box";
         const CLOUDINARY_CLOUD_NAME = "dqkujefxj";
 
@@ -506,6 +488,52 @@
             }
         }
 
+        // --- SWIPE GESTURE NAVIGATION LOGIC ---
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const swipeThreshold = 50; 
+        const navTabs = ['home', 'chat', 'profile', 'settings'];
+
+        // Add event listeners to the entire document for swiping
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipeGesture();
+        }, { passive: true });
+
+        function handleSwipeGesture() {
+            // Prevent swiping if in Login View or Scanner View
+            const loginView = document.getElementById('login-view');
+            const scannerView = document.getElementById('view-scanner');
+            if (!loginView.classList.contains('hidden') && loginView.classList.contains('active')) return;
+            if (!scannerView.classList.contains('hidden')) return;
+
+            // Determine which tab is currently active
+            let currentTabId = 'home'; // default fallback
+            // Check if chat overlay is active
+            if (!document.getElementById('view-chat').classList.contains('hidden')) {
+                currentTabId = 'chat';
+            } else {
+                const activeNav = document.querySelector('.nav-item.active');
+                if (activeNav) currentTabId = activeNav.id.replace('nav-', '');
+            }
+
+            const currentIndex = navTabs.indexOf(currentTabId);
+            if (currentIndex === -1) return;
+
+            // Detect Swipe Left (Go to Next Tab)
+            if (touchEndX < touchStartX - swipeThreshold) {
+                if (currentIndex < navTabs.length - 1) switchTab(navTabs[currentIndex + 1]);
+            }
+            // Detect Swipe Right (Go to Previous Tab)
+            if (touchEndX > touchStartX + swipeThreshold) {
+                if (currentIndex > 0) switchTab(navTabs[currentIndex - 1]);
+            }
+        }
+
         // --- UI ROUTING ---
         function switchTab(tabId) {
             document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
@@ -517,14 +545,14 @@
             if (tabId === 'chat') {
                 chatOverlay.classList.remove('hidden');
                 chatOverlay.classList.add('flex');
-                mainHeader.style.display = 'none'; // Hide main header
+                mainHeader.style.display = 'none'; 
                 fab.style.transform = 'scale(0)';
                 document.getElementById('chat-badge').classList.add('hidden');
                 scrollToBottomChat();
             } else {
                 chatOverlay.classList.add('hidden');
                 chatOverlay.classList.remove('flex');
-                mainHeader.style.display = 'flex'; // Restore main header
+                mainHeader.style.display = 'flex'; 
                 
                 const targetView = document.getElementById(`view-${tabId}`);
                 if(targetView) targetView.classList.remove('hidden');
@@ -578,7 +606,6 @@
                     const key = Object.keys(data)[0];
                     currentUserData = { ...data[key], id: key };
                     
-                    // Generate PIN if missing
                     if (!currentUserData.employeeNumber) {
                         const pin = Math.floor(10000 + Math.random() * 90000).toString();
                         await db.ref(`employees/${key}`).update({ employeeNumber: pin });
@@ -644,8 +671,6 @@
             document.getElementById('profile-img').src = dp;
             document.getElementById('edit-name').value = name;
             document.getElementById('edit-email').value = currentUserData.email;
-            
-            // Display PIN
             document.getElementById('emp-pin-display').innerText = currentUserData.employeeNumber || 'ERROR';
         }
 
@@ -671,8 +696,7 @@
             showToast("Uploading picture...");
             try {
                 const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
-                    method: 'POST',
-                    body: formData
+                    method: 'POST', body: formData
                 });
                 const data = await res.json();
                 
@@ -726,7 +750,7 @@
                 
                 let records = [];
                 snap.forEach(child => { records.push(child.val()); });
-                records.reverse(); // Newest first
+                records.reverse(); 
 
                 records.forEach(rec => {
                     const timeString = new Date(rec.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
@@ -748,11 +772,11 @@
             });
         }
 
-        // --- REMOTE EVIDENCE UPLOAD (Cloudinary to Tech App Sync) ---
+        // --- REMOTE EVIDENCE UPLOAD ---
         async function uploadEvidenceToWorkspace(event) {
             const file = event.target.files[0];
             const rawRef = document.getElementById('upload-job-id').value.trim().toUpperCase();
-            const targetArrayName = document.getElementById('upload-phase').value; // 'photosBefore' or 'photosAfter'
+            const targetArrayName = document.getElementById('upload-phase').value; 
             
             if (!file || !rawRef) {
                 showToast("ID and Image required", "error");
@@ -761,8 +785,6 @@
             }
 
             const cleanRef = rawRef.replace('RGT-', '').replace('SFT-', '');
-
-            // Verify the spinner exists before calling it
             const spinner = document.getElementById('global-spinner');
             const spinnerText = document.getElementById('spinner-text');
             
@@ -770,7 +792,6 @@
             if (spinnerText) spinnerText.innerText = "Routing Image to Workspace...";
 
             try {
-                // 1. Upload to Cloudinary
                 const formData = new FormData();
                 formData.append('file', file);
                 formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
@@ -780,7 +801,6 @@
                 const cloudData = await res.json();
                 const secureUrl = cloudData.secure_url;
 
-                // 2. Find Record in RTDB
                 let targetDb = 'reports';
                 let snap = await db.ref('reports').orderByChild('refId').equalTo(cleanRef).once('value');
                 
@@ -793,10 +813,8 @@
                     throw new Error("Job ID not found in system.");
                 }
 
-                // 3. Append to correct array
                 const key = Object.keys(snap.val())[0];
                 const record = snap.val()[key];
-                
                 let currentPhotos = record[targetArrayName] || [];
                 currentPhotos.push(secureUrl);
 
@@ -811,10 +829,10 @@
                 showToast(e.message || "Failed to link image", "error");
             }
             
-            document.getElementById('evidence-upload').value = ''; // clear input
+            document.getElementById('evidence-upload').value = ''; 
         }
 
-        // --- TEAM CHAT LOGIC (WhatsApp Style) ---
+        // --- TEAM CHAT LOGIC ---
         function initChat() {
             if(chatInitialized) return;
             chatInitialized = true;
@@ -846,7 +864,7 @@
                 scrollToBottomChat();
 
                 const currentTab = document.querySelector('.nav-item.active').id;
-                if(currentTab !== 'nav-chat' && !isMine) {
+                if(currentTab !== 'nav-chat' && !isMine && document.getElementById('view-chat').classList.contains('hidden')) {
                     document.getElementById('chat-badge').classList.remove('hidden');
                 }
             });
@@ -933,12 +951,11 @@
             display.innerText = `${h}h ${m}m`;
         }
 
-        // Check if user is in 5-min cooldown
         function checkCooldown() {
             if (!currentUserData) return false;
             const lastScanKey = 'lastScanTime_' + currentUserData.id;
             const lastScan = localStorage.getItem(lastScanKey);
-            const cooldownMs = 5 * 60 * 1000; // 5 minutes
+            const cooldownMs = 5 * 60 * 1000; 
 
             if (lastScan && (Date.now() - parseInt(lastScan)) < cooldownMs) {
                 const remainingMs = cooldownMs - (Date.now() - parseInt(lastScan));
@@ -1012,21 +1029,14 @@
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         }
 
-        // --- UPDATED: CENTERED QR SCANNER ---
         async function startScanner() {
             if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
             if (!html5QrCode.isScanning) {
                 try { 
-                    const qrConfig = { 
-                        fps: 10, 
-                        qrbox: { width: 250, height: 250 }, 
-                        aspectRatio: 1.0 
-                    };
+                    const qrConfig = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
                     await html5QrCode.start({ facingMode: "environment" }, qrConfig, onScanSuccess); 
                 } 
-                catch (e) {
-                    console.error("Scanner startup error:", e);
-                }
+                catch (e) { console.error("Scanner startup error:", e); }
             }
         }
 
@@ -1036,7 +1046,7 @@
             const storedId = currentUserData.id.toString().trim();
             if (scannedId !== storedId) { showToast(`ID Mismatch`, "error"); return; }
             
-            if (checkCooldown()) return; // Block if in cooldown
+            if (checkCooldown()) return; 
             
             lastScannedId = scannedId;
             clearTimeout(scanTimeout);
@@ -1044,9 +1054,7 @@
             processAttendanceUpdate(storedId);
         }
 
-        // --- UPDATED: NATIVE WEBAUTHN BIOMETRICS ---
-        
-        // Base64Url Helpers for WebAuthn
+        // --- BIOMETRICS ---
         function bufferToBase64url(buffer) {
             const bytes = new Uint8Array(buffer);
             let str = '';
@@ -1065,19 +1073,17 @@
         }
 
         async function logWithBiometrics() {
-            if (checkCooldown()) return; // Block if in cooldown
+            if (checkCooldown()) return; 
             
             if (!window.PublicKeyCredential) {
                 return showToast("Biometrics not supported on this device/browser", "error");
             }
 
             try {
-                // Check if user has already registered a fingerprint on their device
                 const snap = await db.ref(`employees/${currentUserData.id}/biometricCred`).once('value');
                 const savedCred = snap.val();
 
                 if (!savedCred) {
-                    // --- REGISTRATION FLOW (First Time) ---
                     showToast("Registering biometrics...");
                     
                     const challenge = new Uint8Array(32);
@@ -1088,15 +1094,15 @@
 
                     const createOptions = {
                         challenge: challenge,
-                        rp: { name: "RareGrade Hub" }, // Uses current domain by default
+                        rp: { name: "RareGrade Hub" },
                         user: {
                             id: userID,
                             name: currentUserData.email,
                             displayName: currentUserData.name || "Employee"
                         },
                         pubKeyCredParams: [
-                            { alg: -7, type: "public-key" }, // ES256
-                            { alg: -257, type: "public-key" } // RS256
+                            { alg: -7, type: "public-key" },
+                            { alg: -257, type: "public-key" }
                         ],
                         authenticatorSelection: { 
                             authenticatorAttachment: "platform", 
@@ -1108,7 +1114,6 @@
 
                     const credential = await navigator.credentials.create({ publicKey: createOptions });
                     
-                    // Save secure credential ID to Firebase
                     const credIdBase64 = bufferToBase64url(credential.rawId);
                     await db.ref(`employees/${currentUserData.id}/biometricCred`).set(credIdBase64);
                     
@@ -1116,7 +1121,6 @@
                     processAttendanceUpdate(currentUserData.id);
 
                 } else {
-                    // --- AUTHENTICATION FLOW (Returning User) ---
                     showToast("Verify identity...");
                     
                     const challenge = new Uint8Array(32);
@@ -1164,9 +1168,7 @@
                 else { window.isProcessingScan = false; return showToast("Shift complete for today", "error"); }
                 
                 db.ref(`attendance/${today}/${employeeId}`).update(update).then(() => {
-                    // Set Cooldown Timestamp
                     localStorage.setItem('lastScanTime_' + employeeId, Date.now());
-                    
                     showToast(`✅ ${actionLabel}`);
                     switchTab('home'); 
                     setTimeout(() => window.isProcessingScan = false, 2000);
@@ -1174,7 +1176,6 @@
             });
         }
 
-        // --- UTILS ---
         function showToast(msg, type="success") {
             const t = document.getElementById('toast');
             document.getElementById('toastMsg').innerHTML = msg;
@@ -1192,6 +1193,19 @@
         setInterval(() => {
             document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
         }, 1000);
+
+        // --- PWA SERVICE WORKER REGISTRATION ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then((registration) => {
+                        console.log('ServiceWorker registration successful');
+                    })
+                    .catch((err) => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
     </script>
 </body>
 </html>

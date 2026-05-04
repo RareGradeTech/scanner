@@ -198,7 +198,7 @@
             </div>
 
             <!-- Remote Image Upload -->
-            <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5 mt-4 hidden" id="home-upload-widget">
+            <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5 mt-4" id="home-upload-widget">
                 <div class="flex justify-between items-center mb-3">
                     <h3 class="font-bold text-sm text-gray-700 dark:text-gray-200">Workspace Upload</h3>
                     <i class="fa-solid fa-cloud-arrow-up text-blue-500 dark:text-blue-400"></i>
@@ -240,7 +240,7 @@
                     <i class="fa-solid fa-user-plus mr-1"></i> Register Client
                 </button>
                 <button onclick="switchSupTab('maintenance')" id="tab-sup-maintenance" class="flex-1 py-3 text-center sup-tab text-gray-500 dark:text-gray-400">
-                    <i class="fa-solid fa-screwdriver-wrench mr-1"></i> Log Visit
+                    <i class="fa-solid fa-clipboard-check mr-1"></i> Log Visit
                 </button>
             </div>
 
@@ -328,7 +328,7 @@
                     <div class="bg-emerald-50 dark:bg-emerald-900/10 p-4 rounded-xl border border-emerald-100 dark:border-emerald-900/30 space-y-3 shadow-inner">
                         <div class="flex justify-between items-center">
                             <h3 class="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">Client Signature</h3>
-                            <button onclick="clearSupportSignature()" class="text-[10px] text-red-500 font-bold hover:underline bg-white dark:bg-slate-800 px-2 py-1 rounded shadow-sm border border-red-100 dark:border-slate-600">Clear</button>
+                            <button onclick="clearSupportSignature('sup-sig-canvas')" class="text-[10px] text-red-500 font-bold hover:underline bg-white dark:bg-slate-800 px-2 py-1 rounded shadow-sm border border-red-100 dark:border-slate-600">Clear</button>
                         </div>
                         <div class="grid grid-cols-2 gap-3 pb-2 border-b border-emerald-200/50 dark:border-slate-600">
                             <input type="text" id="sup-sig-name" class="w-full p-2 text-xs bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg outline-none dark:text-white" placeholder="Signatory Name *">
@@ -348,38 +348,74 @@
             <div id="sup-view-maintenance" class="hidden space-y-4">
                 <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-bold text-sm text-gray-700 dark:text-gray-200"><i class="fa-solid fa-cloud-arrow-up text-emerald-500 mr-2"></i>Log Visit & Upload</h3>
+                        <h3 class="font-bold text-sm text-gray-700 dark:text-gray-200"><i class="fa-solid fa-clipboard-check text-emerald-500 mr-2"></i>Log Visit & Upload</h3>
                     </div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">Update the maintenance log and sync on-site evidence for an existing client.</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">Complete an on-site digital job card for an existing client.</p>
                     
-                    <div class="space-y-4">
+                    <div class="space-y-5">
+                        
                         <div class="relative">
                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-mono font-bold text-sm">SUP-</span>
                             <input type="text" id="maint-job-id" placeholder="1234" class="w-full pl-16 pr-4 py-3 bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-xl font-mono font-bold focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white transition-all shadow-sm" inputmode="numeric">
                         </div>
 
+                        <!-- Essential Data Section -->
                         <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
-                            <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">1. Update Status</span>
+                            <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">1. Visit Details</span>
+                            <select id="maint-visit-type" class="w-full p-3 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white transition-all shadow-sm">
+                                <option value="Routine Maintenance">Routine Maintenance</option>
+                                <option value="Emergency Callout">Emergency Callout</option>
+                                <option value="Installation / Setup">Installation / Setup</option>
+                                <option value="Assessment / Audit">Assessment / Audit</option>
+                            </select>
+                            
+                            <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mt-4 border-t border-gray-200 dark:border-slate-600 pt-3">2. Checklist / Tasks Performed</span>
+                            <div class="grid grid-cols-2 gap-3 text-xs text-gray-700 dark:text-gray-300">
+                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-600 shadow-sm"><input type="checkbox" id="chk-maint-os" class="custom-checkbox shrink-0"> OS Updates</label>
+                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-600 shadow-sm"><input type="checkbox" id="chk-maint-av" class="custom-checkbox shrink-0"> Antivirus Checked</label>
+                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-600 shadow-sm"><input type="checkbox" id="chk-maint-backup" class="custom-checkbox shrink-0"> Backups Verified</label>
+                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-600 shadow-sm"><input type="checkbox" id="chk-maint-clean" class="custom-checkbox shrink-0"> Hardware Cleaned</label>
+                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-600 shadow-sm col-span-2"><input type="checkbox" id="chk-maint-net" class="custom-checkbox shrink-0"> Network Tested</label>
+                            </div>
+
+                            <input type="text" id="maint-parts" class="w-full mt-2 p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Parts / Consumables Used (if any)">
+                            <input type="text" id="maint-next-steps" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Recommendations / Next Steps">
+                        </div>
+
+                        <!-- Notes & Status -->
+                        <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
+                            <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">3. Detailed Visit Log / Notes</span>
+                            <textarea id="maint-notes" rows="3" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white transition-all resize-none shadow-sm" placeholder="Detail the work performed today..."></textarea>
+                            
+                            <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mt-2 border-t border-gray-200 dark:border-slate-600 pt-3">4. Update Contract Status</span>
                             <select id="maint-status" class="w-full p-3 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white transition-all shadow-sm">
                                 <option value="Active">Active</option>
                                 <option value="On Hold">On Hold</option>
                                 <option value="Terminated">Terminated</option>
                             </select>
-
-                            <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mt-3">2. Visit Log / Notes</span>
-                            <textarea id="maint-notes" rows="4" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white transition-all resize-none shadow-sm" placeholder="Describe the maintenance performed, issues resolved, or hardware deployed..."></textarea>
                         </div>
 
+                        <!-- Photo Upload -->
                         <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
-                            <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">3. Capture Evidence (Optional)</span>
+                            <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">5. Capture Evidence (Optional)</span>
                             <button onclick="document.getElementById('maint-evidence-upload').click()" class="w-full py-3.5 bg-gray-800 dark:bg-slate-600 text-white rounded-xl font-bold shadow-md active:scale-95 transition-all flex justify-center items-center gap-2 text-sm border border-gray-700 dark:border-slate-500">
                                 <i class="fa-solid fa-camera text-emerald-400"></i> Capture On-Site Image
                             </button>
                             <input type="file" id="maint-evidence-upload" accept="image/*" capture="environment" class="hidden" onchange="uploadEvidenceToWorkspace(event, 'support')">
                         </div>
 
+                        <!-- Sign-off Job Card -->
+                        <div class="bg-emerald-50 dark:bg-emerald-900/10 p-4 rounded-xl border border-emerald-100 dark:border-emerald-900/30 space-y-3 shadow-inner">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">6. Client Sign-off (Job Card)</h3>
+                                <button onclick="clearSupportSignature('maint-sig-canvas')" class="text-[10px] text-red-500 font-bold hover:underline bg-white dark:bg-slate-800 px-2 py-1 rounded shadow-sm border border-red-100 dark:border-slate-600">Clear</button>
+                            </div>
+                            <input type="text" id="maint-sig-name" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-emerald-200 dark:border-slate-600 rounded-lg outline-none dark:text-white mb-2 shadow-sm" placeholder="Signatory Name *">
+                            <canvas id="maint-sig-canvas" class="sig-pad w-full block shadow-sm"></canvas>
+                        </div>
+
                         <button onclick="submitMaintenanceLog()" class="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold shadow-lg shadow-emerald-500/30 hover:bg-emerald-700 active:scale-[0.98] transition-all flex justify-center items-center gap-2 text-base mt-2">
-                            <i class="fa-solid fa-floppy-disk"></i> Save Maintenance Log
+                            <i class="fa-solid fa-floppy-disk"></i> Submit Job Card & Notes
                         </button>
                     </div>
                 </div>
@@ -493,7 +529,7 @@
                         </div>
                         <div>
                             <p class="text-sm font-semibold">App Version</p>
-                            <p class="text-[10px] text-gray-500 dark:text-gray-400">RareGradeHub v2.6.0</p>
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400">RareGradeHub v2.7.0</p>
                         </div>
                     </div>
                     <span class="text-xs text-gray-400 font-mono">Up to date</span>
@@ -640,11 +676,15 @@
         let chatInitialized = false;
         let cooldownTimerInterval = null;
 
-        // Support Variables
+        // Signature Variables
         let supCtx = null;
         let isSigningSupport = false;
         let hasSupportSignature = false;
         let supportDeviceCount = 0;
+
+        let maintCtx = null;
+        let isSigningMaint = false;
+        let hasMaintSignature = false;
 
         // --- THEME INIT ---
         function initTheme() {
@@ -665,9 +705,8 @@
                 html.classList.add('dark');
                 localStorage.setItem('theme', 'dark');
             }
-            if (supCtx) {
-                supCtx.strokeStyle = html.classList.contains('dark') ? '#ffffff' : '#0f172a';
-            }
+            if (supCtx) supCtx.strokeStyle = html.classList.contains('dark') ? '#ffffff' : '#0f172a';
+            if (maintCtx) maintCtx.strokeStyle = html.classList.contains('dark') ? '#ffffff' : '#0f172a';
         }
 
         // --- SWIPE GESTURE NAVIGATION LOGIC ---
@@ -740,7 +779,10 @@
                 }
                 
                 if (tabId === 'support') {
-                    initSupportSignaturePad();
+                    // Check which sub-tab is active and init the correct canvas
+                    const isRegisterActive = document.getElementById('tab-sup-register').classList.contains('active');
+                    if (isRegisterActive) initSupportSignaturePad('sup-sig-canvas', 'register');
+                    else initSupportSignaturePad('maint-sig-canvas', 'maintenance');
                 }
             }
             
@@ -971,23 +1013,31 @@
             if (tab === 'register') {
                 document.getElementById('sup-view-register').classList.remove('hidden');
                 document.getElementById('sup-view-maintenance').classList.add('hidden');
-                initSupportSignaturePad();
+                initSupportSignaturePad('sup-sig-canvas', 'register');
             } else {
                 document.getElementById('sup-view-register').classList.add('hidden');
                 document.getElementById('sup-view-maintenance').classList.remove('hidden');
+                initSupportSignaturePad('maint-sig-canvas', 'maintenance');
             }
         }
 
-        // --- SUPPORT CLIENT INTAKE LOGIC ---
-        function initSupportSignaturePad() {
-            const canvas = document.getElementById('sup-sig-canvas');
-            if (!canvas || supCtx) return;
+        // --- SUPPORT & MAINTENANCE SIGNATURE PAD LOGIC ---
+        function initSupportSignaturePad(canvasId, mode) {
+            const canvas = document.getElementById(canvasId);
+            
+            // Prevent double init
+            if (mode === 'register' && supCtx) return;
+            if (mode === 'maintenance' && maintCtx) return;
+            
+            if (!canvas) return;
 
             setTimeout(() => {
                 const rect = canvas.parentElement.getBoundingClientRect();
                 canvas.width = rect.width - 32; 
                 canvas.height = 140;
-                supCtx = canvas.getContext('2d');
+                
+                if (mode === 'register') supCtx = canvas.getContext('2d');
+                else maintCtx = canvas.getContext('2d');
             }, 50);
 
             const getPos = (e) => {
@@ -999,29 +1049,42 @@
 
             const startDraw = (e) => {
                 if(e.type !== 'mousedown') e.preventDefault();
-                isSigningSupport = true;
-                hasSupportSignature = true;
-                supCtx.beginPath();
+                
+                const ctx = mode === 'register' ? supCtx : maintCtx;
+                if (!ctx) return;
+                
+                if (mode === 'register') { isSigningSupport = true; hasSupportSignature = true; }
+                else { isSigningMaint = true; hasMaintSignature = true; }
+                
+                ctx.beginPath();
                 const pos = getPos(e);
-                supCtx.moveTo(pos.x, pos.y);
+                ctx.moveTo(pos.x, pos.y);
             };
 
             const draw = (e) => {
-                if (!isSigningSupport) return;
+                const isSigning = mode === 'register' ? isSigningSupport : isSigningMaint;
+                const ctx = mode === 'register' ? supCtx : maintCtx;
+                
+                if (!isSigning || !ctx) return;
                 if(e.type !== 'mousemove') e.preventDefault();
+                
                 const pos = getPos(e);
-                supCtx.lineWidth = 2.5;
-                supCtx.lineCap = 'round';
-                supCtx.lineJoin = 'round';
-                supCtx.strokeStyle = document.documentElement.classList.contains('dark') ? '#ffffff' : '#0f172a';
-                supCtx.lineTo(pos.x, pos.y);
-                supCtx.stroke();
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.strokeStyle = document.documentElement.classList.contains('dark') ? '#ffffff' : '#0f172a';
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
             };
 
             const stopDraw = () => {
-                if (isSigningSupport) {
-                    isSigningSupport = false;
-                    supCtx.closePath();
+                const isSigning = mode === 'register' ? isSigningSupport : isSigningMaint;
+                const ctx = mode === 'register' ? supCtx : maintCtx;
+                
+                if (isSigning && ctx) {
+                    if (mode === 'register') isSigningSupport = false;
+                    else isSigningMaint = false;
+                    ctx.closePath();
                 }
             };
 
@@ -1035,14 +1098,20 @@
             canvas.addEventListener('touchend', stopDraw, { passive: false });
         }
 
-        function clearSupportSignature() {
-            const canvas = document.getElementById('sup-sig-canvas');
-            if (supCtx && canvas) {
+        function clearSupportSignature(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            
+            if (canvasId === 'sup-sig-canvas' && supCtx) {
                 supCtx.clearRect(0, 0, canvas.width, canvas.height);
                 hasSupportSignature = false;
+            } else if (canvasId === 'maint-sig-canvas' && maintCtx) {
+                maintCtx.clearRect(0, 0, canvas.width, canvas.height);
+                hasMaintSignature = false;
             }
         }
 
+        // --- DEVICE SETUP ---
         function addDeviceField() {
             supportDeviceCount++;
             const container = document.getElementById('sup-devices-container');
@@ -1085,6 +1154,7 @@
             return devices;
         }
 
+        // --- SUBMIT REGISTRATION ---
         async function submitSupportClient() {
             const bizName = document.getElementById('sup-biz-name').value.trim();
             const sector = document.getElementById('sup-sector').value.trim();
@@ -1159,7 +1229,7 @@
                 document.querySelectorAll('#sup-view-register input[type="checkbox"]').forEach(i => i.checked = false);
                 document.getElementById('sup-devices-container').innerHTML = '<p class="text-xs text-gray-400 text-center italic py-2" id="no-devices-msg">No devices added yet. Click Add to include devices.</p>';
                 supportDeviceCount = 0;
-                clearSupportSignature();
+                clearSupportSignature('sup-sig-canvas');
 
                 switchTab('home');
             } catch (err) {
@@ -1170,21 +1240,55 @@
         }
 
         // --- SUPPORT MAINTENANCE LOG LOGIC ---
+        async function uploadCanvasToCloudinary(canvas) {
+            // Upload signature canvas image to Cloudinary for reliable URL storage
+            return new Promise((resolve, reject) => {
+                canvas.toBlob(async (blob) => {
+                    const formData = new FormData();
+                    formData.append('file', blob);
+                    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+                    
+                    try {
+                        const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
+                        if(!res.ok) throw new Error("Upload failed");
+                        const data = await res.json();
+                        resolve(data.secure_url);
+                    } catch(e) {
+                        resolve(null); // Fallback if upload fails
+                    }
+                }, 'image/png');
+            });
+        }
+
         async function submitMaintenanceLog() {
             const rawRef = document.getElementById('maint-job-id').value.trim().toUpperCase();
             const status = document.getElementById('maint-status').value;
+            const visitType = document.getElementById('maint-visit-type').value;
+            const partsUsed = document.getElementById('maint-parts').value.trim() || 'None';
+            const nextSteps = document.getElementById('maint-next-steps').value.trim() || 'None';
             const notes = document.getElementById('maint-notes').value.trim();
+            const sigName = document.getElementById('maint-sig-name').value.trim();
 
-            if (!rawRef) {
-                return showToast("Please enter a SUP ID", "error");
-            }
+            if (!rawRef) return showToast("Please enter a SUP ID", "error");
+            if (!notes) return showToast("Please enter Visit Log / Notes", "error");
+            if (!sigName || !hasMaintSignature) return showToast("Client Sign-off required", "error");
 
             const cleanRef = rawRef.replace('SUP-', '');
 
+            // Build Checklist array
+            const checklist = [];
+            if(document.getElementById('chk-maint-os').checked) checklist.push("OS & Software Updated");
+            if(document.getElementById('chk-maint-av').checked) checklist.push("Antivirus Checked");
+            if(document.getElementById('chk-maint-backup').checked) checklist.push("Backups Verified");
+            if(document.getElementById('chk-maint-clean').checked) checklist.push("Hardware Cleaned/Inspected");
+            if(document.getElementById('chk-maint-net').checked) checklist.push("Network/Connectivity Tested");
+            const checklistStr = checklist.length > 0 ? checklist.map(t => `  - ${t}`).join('\n') : "  - No standard checklist items selected.";
+
             document.getElementById('global-spinner').classList.add('active');
-            document.getElementById('spinner-text').innerText = "Saving Maintenance Log...";
+            document.getElementById('spinner-text').innerText = "Generating Digital Job Card...";
 
             try {
+                // Find existing support business
                 const snap = await db.ref('support_businesses').orderByChild('refId').equalTo(cleanRef).once('value');
                 if (!snap.exists()) {
                     document.getElementById('global-spinner').classList.remove('active');
@@ -1194,27 +1298,69 @@
                 const key = Object.keys(snap.val())[0];
                 const record = snap.val()[key];
 
+                // Attempt to upload signature for Job Card linking
+                document.getElementById('spinner-text').innerText = "Uploading Signature securely...";
+                const sigCanvas = document.getElementById('maint-sig-canvas');
+                let sigUrl = await uploadCanvasToCloudinary(sigCanvas);
+                if (!sigUrl) sigUrl = "[Image Upload Failed - Verify locally]";
+
+                // Format the string log to append to existing notes
+                const dateStr = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+                const newLogEntry = `
+====================================
+VISIT LOG: ${dateStr}
+TYPE: ${visitType}
+TECHNICIAN: ${currentUserData.name || 'Employee'}
+------------------------------------
+TASKS COMPLETED:
+${checklistStr}
+
+PARTS USED: ${partsUsed}
+NEXT STEPS: ${nextSteps}
+
+NOTES: 
+${notes}
+
+CLIENT SIG (${sigName}): 
+${sigUrl}
+====================================
+`;
+                // Prepend the new log to any existing notes so it appears at the top
+                const existingNotes = record.maintenanceNotes ? record.maintenanceNotes + "\n" : "";
+                const updatedNotes = newLogEntry + existingNotes;
+
+                document.getElementById('spinner-text').innerText = "Saving to Database...";
+
                 await db.ref(`support_businesses/${key}`).update({
                     status: status,
-                    maintenanceNotes: notes,
+                    maintenanceNotes: updatedNotes,
                     lastUpdated: Date.now()
                 });
 
                 await db.ref(`employees/${currentUserData.id}/work_history`).push({
                     refId: `SUP-${cleanRef}`,
-                    title: `Maintenance: ${record.bizName || 'Client'}`,
+                    title: `Job Card: ${record.bizName || 'Client'}`,
                     timestamp: firebase.database.ServerValue.TIMESTAMP
                 });
 
                 document.getElementById('global-spinner').classList.remove('active');
-                showToast("Maintenance Log Saved!");
+                showToast("Job Card Saved & Synced!");
                 
+                // Clear Form
                 document.getElementById('maint-job-id').value = '';
+                document.getElementById('maint-parts').value = '';
+                document.getElementById('maint-next-steps').value = '';
                 document.getElementById('maint-notes').value = '';
+                document.getElementById('maint-sig-name').value = '';
+                document.querySelectorAll('#sup-view-maintenance input[type="checkbox"]').forEach(c => c.checked = false);
+                clearSupportSignature('maint-sig-canvas');
+
+                switchTab('home');
 
             } catch(e) {
                 document.getElementById('global-spinner').classList.remove('active');
-                showToast("Failed to update log", "error");
+                showToast("Failed to submit Job Card", "error");
+                console.error(e);
             }
         }
 

@@ -3,8 +3,8 @@ const ASSETS_TO_CACHE = [
     './',
     './index.html',
     './manifest.json',
-    './icon-192x192.png',
-    './icon-512x512.png'
+    'https://i.postimg.cc/TPmHPqxh/Whats-App-Image-2026-04-23-at-10-39-54.jpg',
+    'https://i.postimg.cc/TPmHPqxh/Whats-App-Image-2026-04-23-at-10-39-54.jpg'
 ];
 
 // Install Event

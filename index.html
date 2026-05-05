@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#10b981">
+    <meta name="theme-color" content="#2563eb">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="RareGrade">
@@ -61,8 +61,6 @@
         .nav-item { transition: color 0.2s, transform 0.1s; }
         .nav-item.active { color: #2563eb; }
         .dark .nav-item.active { color: #60a5fa; }
-        .nav-item.active.emerald-theme { color: #10b981; }
-        .dark .nav-item.active.emerald-theme { color: #34d399; }
         
         #toast { bottom: max(90px, env(safe-area-inset-bottom) + 90px); z-index: 9999; }
         input[type="file"] { display: none; }
@@ -80,7 +78,6 @@
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
         .calendar-day { padding: 8px 0; font-size: 0.75rem; border-radius: 0.5rem; font-weight: 500; }
         .calendar-header { font-size: 0.65rem; text-transform: uppercase; font-weight: 700; margin-bottom: 4px;}
-        .day-today { background: #2563eb; color: white; font-weight: bold; box-shadow: 0 2px 4px rgba(37,99,235,0.3); }
         .day-empty { color: transparent; pointer-events: none; }
 
         .shimmer {
@@ -125,11 +122,12 @@
         }
         .dark .sig-pad { border-color: #475569; background: #1e293b; }
 
-        .custom-checkbox { width: 18px; height: 18px; border-radius: 4px; border: 2px solid #cbd5e1; cursor: pointer; accent-color: #10b981; }
+        .custom-checkbox { width: 18px; height: 18px; border-radius: 4px; border: 2px solid #cbd5e1; cursor: pointer; accent-color: #2563eb; }
         
         /* Support Sub-tabs */
         .sup-tab { transition: all 0.3s; border-bottom: 2px solid transparent; }
-        .sup-tab.active { border-bottom-color: #10b981; color: #10b981; font-weight: bold; }
+        .sup-tab.active { border-bottom-color: #2563eb; color: #2563eb; font-weight: bold; }
+        .dark .sup-tab.active { border-bottom-color: #60a5fa; color: #60a5fa; }
     </style>
 </head>
 <body class="h-screen flex flex-col relative bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
@@ -247,7 +245,7 @@
             <!-- SUB-VIEW: REGISTER CLIENT -->
             <div id="sup-view-register" class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5">
                 <div class="flex items-center gap-3 mb-5">
-                    <div class="bg-emerald-100 dark:bg-emerald-900/50 p-2 rounded-lg text-emerald-600 dark:text-emerald-400">
+                    <div class="bg-blue-100 dark:bg-blue-900/50 p-2 rounded-lg text-blue-600 dark:text-blue-400">
                         <i class="fa-solid fa-handshake"></i>
                     </div>
                     <div>
@@ -260,21 +258,21 @@
                     <!-- Business Details -->
                     <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
                         <h3 class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-slate-600 pb-2">1. Business Info</h3>
-                        <input type="text" id="sup-biz-name" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Business / Company Name *">
-                        <input type="text" id="sup-sector" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Industry / Sector (e.g. Retail)">
-                        <input type="text" id="sup-address" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Physical Address">
+                        <input type="text" id="sup-biz-name" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Business / Company Name *">
+                        <input type="text" id="sup-sector" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Industry / Sector (e.g. Retail)">
+                        <input type="text" id="sup-address" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Physical Address">
                     </div>
 
                     <!-- Contact Details -->
                     <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
                         <h3 class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-slate-600 pb-2">2. Primary Contact</h3>
                         <div class="grid grid-cols-2 gap-3">
-                            <input type="text" id="sup-contact-name" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Full Name *">
-                            <input type="text" id="sup-contact-title" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Position / Title">
+                            <input type="text" id="sup-contact-name" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Full Name *">
+                            <input type="text" id="sup-contact-title" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Position / Title">
                         </div>
                         <div class="grid grid-cols-2 gap-3">
-                            <input type="tel" id="sup-contact-phone" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Phone *">
-                            <input type="email" id="sup-contact-email" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Email Address">
+                            <input type="tel" id="sup-contact-phone" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Phone *">
+                            <input type="email" id="sup-contact-email" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Email Address">
                         </div>
                     </div>
 
@@ -284,7 +282,7 @@
                         <div class="grid grid-cols-2 gap-3">
                             <div class="flex flex-col">
                                 <span class="text-[9px] font-bold text-gray-400 mb-1 ml-1">Type</span>
-                                <select id="sup-contract-type" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white transition-all shadow-sm">
+                                <select id="sup-contract-type" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm">
                                     <option value="Monthly Maintenance">Monthly Maintenance</option>
                                     <option value="Quarterly Maintenance">Quarterly Maintenance</option>
                                     <option value="Ad-hoc Support">Ad-hoc Support</option>
@@ -294,7 +292,7 @@
                             </div>
                             <div class="flex flex-col">
                                 <span class="text-[9px] font-bold text-gray-400 mb-1 ml-1">Start Date</span>
-                                <input type="date" id="sup-start-date" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white transition-all shadow-sm">
+                                <input type="date" id="sup-start-date" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm">
                             </div>
                         </div>
 
@@ -310,14 +308,14 @@
                             </div>
                         </div>
 
-                        <textarea id="sup-notes" rows="2" class="w-full mt-2 p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white transition-all resize-none shadow-sm" placeholder="Additional notes or SLA requirements..."></textarea>
+                        <textarea id="sup-notes" rows="2" class="w-full mt-2 p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all resize-none shadow-sm" placeholder="Additional notes or SLA requirements..."></textarea>
                     </div>
 
                     <!-- Devices Setup -->
                     <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
                         <div class="flex justify-between items-center border-b border-gray-200 dark:border-slate-600 pb-2">
                             <h3 class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">4. Log Devices</h3>
-                            <button onclick="addDeviceField()" class="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded shadow-sm font-bold active:scale-95 transition-transform"><i class="fa-solid fa-plus"></i> Add</button>
+                            <button onclick="addDeviceField()" class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded shadow-sm font-bold active:scale-95 transition-transform"><i class="fa-solid fa-plus"></i> Add</button>
                         </div>
                         <div id="sup-devices-container" class="space-y-3">
                             <p class="text-xs text-gray-400 text-center italic py-2" id="no-devices-msg">No devices added yet. Click Add to include devices.</p>
@@ -325,20 +323,20 @@
                     </div>
 
                     <!-- Digital Signature -->
-                    <div class="bg-emerald-50 dark:bg-emerald-900/10 p-4 rounded-xl border border-emerald-100 dark:border-emerald-900/30 space-y-3 shadow-inner">
+                    <div class="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-xl border border-blue-100 dark:border-blue-900/30 space-y-3 shadow-inner">
                         <div class="flex justify-between items-center">
-                            <h3 class="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">Client Signature</h3>
+                            <h3 class="text-xs font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wider">Client Signature</h3>
                             <button onclick="clearSupportSignature('sup-sig-canvas')" class="text-[10px] text-red-500 font-bold hover:underline bg-white dark:bg-slate-800 px-2 py-1 rounded shadow-sm border border-red-100 dark:border-slate-600">Clear</button>
                         </div>
-                        <div class="grid grid-cols-2 gap-3 pb-2 border-b border-emerald-200/50 dark:border-slate-600">
+                        <div class="grid grid-cols-2 gap-3 pb-2 border-b border-blue-200/50 dark:border-slate-600">
                             <input type="text" id="sup-sig-name" class="w-full p-2 text-xs bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg outline-none dark:text-white" placeholder="Signatory Name *">
                             <input type="text" id="sup-sig-title" class="w-full p-2 text-xs bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg outline-none dark:text-white" placeholder="Designation">
                         </div>
                         <canvas id="sup-sig-canvas" class="sig-pad w-full block shadow-sm"></canvas>
-                        <p class="text-[9px] text-emerald-600 dark:text-emerald-500 leading-tight text-center font-medium mt-2">By signing, the client agrees to RareGrade Tech's SLA terms.</p>
+                        <p class="text-[9px] text-blue-600 dark:text-blue-500 leading-tight text-center font-medium mt-2">By signing, the client agrees to RareGrade Tech's SLA terms.</p>
                     </div>
 
-                    <button onclick="submitSupportClient()" class="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold shadow-lg shadow-emerald-500/30 hover:bg-emerald-700 active:scale-[0.98] transition-all flex justify-center items-center gap-2 text-lg">
+                    <button onclick="submitSupportClient()" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 hover:bg-blue-700 active:scale-[0.98] transition-all flex justify-center items-center gap-2 text-lg">
                         <i class="fa-solid fa-paper-plane"></i> Register Client SLA
                     </button>
                 </div>
@@ -348,7 +346,7 @@
             <div id="sup-view-maintenance" class="hidden space-y-4">
                 <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-bold text-sm text-gray-700 dark:text-gray-200"><i class="fa-solid fa-clipboard-check text-emerald-500 mr-2"></i>Log Visit & Upload</h3>
+                        <h3 class="font-bold text-sm text-gray-700 dark:text-gray-200"><i class="fa-solid fa-clipboard-check text-blue-500 mr-2"></i>Log Visit & Upload</h3>
                     </div>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">Complete an on-site digital job card for an existing client.</p>
                     
@@ -356,13 +354,13 @@
                         
                         <div class="relative">
                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-mono font-bold text-sm">SUP-</span>
-                            <input type="text" id="maint-job-id" placeholder="1234" class="w-full pl-16 pr-4 py-3 bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-xl font-mono font-bold focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white transition-all shadow-sm" inputmode="numeric">
+                            <input type="text" id="maint-job-id" placeholder="1234" class="w-full pl-16 pr-4 py-3 bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-xl font-mono font-bold focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" inputmode="numeric">
                         </div>
 
                         <!-- Essential Data Section -->
                         <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
                             <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">1. Visit Details</span>
-                            <select id="maint-visit-type" class="w-full p-3 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white transition-all shadow-sm">
+                            <select id="maint-visit-type" class="w-full p-3 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm">
                                 <option value="Routine Maintenance">Routine Maintenance</option>
                                 <option value="Emergency Callout">Emergency Callout</option>
                                 <option value="Installation / Setup">Installation / Setup</option>
@@ -378,17 +376,17 @@
                                 <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-600 shadow-sm col-span-2"><input type="checkbox" id="chk-maint-net" class="custom-checkbox shrink-0"> Network Tested</label>
                             </div>
 
-                            <input type="text" id="maint-parts" class="w-full mt-2 p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Parts / Consumables Used (if any)">
-                            <input type="text" id="maint-next-steps" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Recommendations / Next Steps">
+                            <input type="text" id="maint-parts" class="w-full mt-2 p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Parts / Consumables Used (if any)">
+                            <input type="text" id="maint-next-steps" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Recommendations / Next Steps">
                         </div>
 
                         <!-- Notes & Status -->
                         <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
                             <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">3. Detailed Visit Log / Notes</span>
-                            <textarea id="maint-notes" rows="3" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white transition-all resize-none shadow-sm" placeholder="Detail the work performed today..."></textarea>
+                            <textarea id="maint-notes" rows="3" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all resize-none shadow-sm" placeholder="Detail the work performed today..."></textarea>
                             
                             <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mt-2 border-t border-gray-200 dark:border-slate-600 pt-3">4. Update Contract Status</span>
-                            <select id="maint-status" class="w-full p-3 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white transition-all shadow-sm">
+                            <select id="maint-status" class="w-full p-3 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm">
                                 <option value="Active">Active</option>
                                 <option value="On Hold">On Hold</option>
                                 <option value="Terminated">Terminated</option>
@@ -399,22 +397,22 @@
                         <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
                             <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">5. Capture Evidence (Optional)</span>
                             <button onclick="document.getElementById('maint-evidence-upload').click()" class="w-full py-3.5 bg-gray-800 dark:bg-slate-600 text-white rounded-xl font-bold shadow-md active:scale-95 transition-all flex justify-center items-center gap-2 text-sm border border-gray-700 dark:border-slate-500">
-                                <i class="fa-solid fa-camera text-emerald-400"></i> Capture On-Site Image
+                                <i class="fa-solid fa-camera text-blue-400"></i> Capture On-Site Image
                             </button>
                             <input type="file" id="maint-evidence-upload" accept="image/*" capture="environment" class="hidden" onchange="uploadEvidenceToWorkspace(event, 'support')">
                         </div>
 
                         <!-- Sign-off Job Card -->
-                        <div class="bg-emerald-50 dark:bg-emerald-900/10 p-4 rounded-xl border border-emerald-100 dark:border-emerald-900/30 space-y-3 shadow-inner">
+                        <div class="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-xl border border-blue-100 dark:border-blue-900/30 space-y-3 shadow-inner">
                             <div class="flex justify-between items-center">
-                                <h3 class="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">6. Client Sign-off (Job Card)</h3>
+                                <h3 class="text-xs font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wider">6. Client Sign-off (Job Card)</h3>
                                 <button onclick="clearSupportSignature('maint-sig-canvas')" class="text-[10px] text-red-500 font-bold hover:underline bg-white dark:bg-slate-800 px-2 py-1 rounded shadow-sm border border-red-100 dark:border-slate-600">Clear</button>
                             </div>
-                            <input type="text" id="maint-sig-name" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-emerald-200 dark:border-slate-600 rounded-lg outline-none dark:text-white mb-2 shadow-sm" placeholder="Signatory Name *">
+                            <input type="text" id="maint-sig-name" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-blue-200 dark:border-slate-600 rounded-lg outline-none dark:text-white mb-2 shadow-sm" placeholder="Signatory Name *">
                             <canvas id="maint-sig-canvas" class="sig-pad w-full block shadow-sm"></canvas>
                         </div>
 
-                        <button onclick="submitMaintenanceLog()" class="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold shadow-lg shadow-emerald-500/30 hover:bg-emerald-700 active:scale-[0.98] transition-all flex justify-center items-center gap-2 text-base mt-2">
+                        <button onclick="submitMaintenanceLog()" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 hover:bg-blue-700 active:scale-[0.98] transition-all flex justify-center items-center gap-2 text-base mt-2">
                             <i class="fa-solid fa-floppy-disk"></i> Submit Job Card & Notes
                         </button>
                     </div>
@@ -591,7 +589,7 @@
                 <i class="fa-solid fa-house text-lg mb-1"></i>
                 <span class="text-[9px] font-bold uppercase tracking-wide">Home</span>
             </button>
-            <button onclick="switchTab('support')" class="nav-item emerald-theme text-gray-500 dark:text-gray-400 flex flex-col items-center justify-center w-full h-full" id="nav-support">
+            <button onclick="switchTab('support')" class="nav-item text-gray-500 dark:text-gray-400 flex flex-col items-center justify-center w-full h-full" id="nav-support">
                 <i class="fa-solid fa-headset text-lg mb-1"></i>
                 <span class="text-[9px] font-bold uppercase tracking-wide">Support</span>
             </button>
@@ -787,15 +785,10 @@
             }
             
             if (tabId !== 'scanner') {
-                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active', 'text-blue-600', 'dark:text-blue-400', 'emerald-theme'));
+                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active', 'text-blue-600', 'dark:text-blue-400'));
                 const navTarget = document.getElementById(`nav-${tabId}`);
                 if(navTarget) {
-                    navTarget.classList.add('active');
-                    if (tabId === 'support') {
-                        navTarget.classList.add('emerald-theme');
-                    } else {
-                        navTarget.classList.add('text-blue-600', 'dark:text-blue-400');
-                    }
+                    navTarget.classList.add('active', 'text-blue-600', 'dark:text-blue-400');
                 }
             }
             
@@ -938,10 +931,10 @@
             } catch(e) { showToast("Upload Failed. Check connection.", "error"); }
         }
 
-        function generateCalendar() {
+        async function generateCalendar() {
             const container = document.getElementById('calendar-days');
             const title = document.getElementById('cal-month-title');
-            container.innerHTML = '';
+            container.innerHTML = '<div class="col-span-7 text-xs text-center py-2 text-gray-400">Loading...</div>';
             
             const date = new Date();
             const year = date.getFullYear();
@@ -951,15 +944,62 @@
             const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             title.innerHTML = `${monthNames[month]} ${year}`;
 
+            let allAtt = {};
+            if (currentUserData) {
+                try {
+                    const snap = await db.ref('attendance').once('value');
+                    allAtt = snap.val() || {};
+                } catch(e) { console.error(e); }
+            }
+
+            container.innerHTML = '';
+
             const firstDay = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
 
             for(let i = 0; i < firstDay; i++) {
                 container.innerHTML += `<div class="calendar-day day-empty">0</div>`;
             }
+
             for(let i = 1; i <= daysInMonth; i++) {
-                let isToday = (i === today) ? 'day-today' : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300';
-                container.innerHTML += `<div class="calendar-day ${isToday}">${i}</div>`;
+                const dayStr = String(i).padStart(2, '0');
+                const monthStr = String(month + 1).padStart(2, '0');
+                const dateKey = `${year}-${monthStr}-${dayStr}`;
+
+                let dayClass = 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300';
+                let todayRing = (i === today) ? 'ring-2 ring-blue-600 dark:ring-blue-400 ring-offset-2 dark:ring-offset-slate-800' : '';
+
+                const dayOfWeek = new Date(year, month, i).getDay();
+                const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+
+                if (currentUserData && allAtt[dateKey] && allAtt[dateKey][currentUserData.id]) {
+                    const rec = allAtt[dateKey][currentUserData.id];
+                    const tIn = rec.TimeIn;
+                    const tOut = rec.TimeOut;
+
+                    if (tIn) {
+                        const [h, m] = tIn.split(':').map(Number);
+                        const isLate = h > 8 || (h === 8 && m > 30);
+                        const isPastDay = i < today || (i === today && date.getHours() >= 20);
+                        const isHalfDay = i < today && !tOut;
+
+                        if (isLate || isHalfDay) {
+                            dayClass = 'bg-orange-500 text-white font-bold shadow-sm';
+                        } else {
+                            dayClass = 'bg-green-500 text-white font-bold shadow-sm';
+                        }
+                    }
+                } else if (i <= today && !isWeekend && i !== today) {
+                    dayClass = 'bg-red-500 text-white font-bold shadow-sm'; // Past weekday with no record
+                } else if (i === today && !isWeekend) {
+                    const currentHour = date.getHours();
+                    const currentMin = date.getMinutes();
+                    if (currentHour > 8 || (currentHour === 8 && currentMin > 30)) {
+                        dayClass = 'bg-red-500 text-white font-bold shadow-sm'; // Late and hasn't clocked in yet
+                    }
+                }
+
+                container.innerHTML += `<div class="calendar-day ${dayClass} ${todayRing} m-[1px] transition-all">${i}</div>`;
             }
         }
 
@@ -986,7 +1026,7 @@
                     const dateString = new Date(rec.timestamp).toLocaleDateString([], {day:'numeric', month:'short'});
                     
                     let refColor = "text-blue-600 dark:text-blue-400";
-                    if (rec.refId && rec.refId.startsWith("SUP")) refColor = "text-emerald-600 dark:text-emerald-400";
+                    if (rec.refId && rec.refId.startsWith("SUP")) refColor = "text-blue-600 dark:text-blue-400";
                     else if (rec.refId && rec.refId.startsWith("SFT")) refColor = "text-purple-600 dark:text-purple-400";
 
                     list.innerHTML += `
@@ -1685,9 +1725,10 @@ ${sigUrl}
                 return showToast("Biometrics not supported on this device/browser", "error");
             }
 
+            let savedCred = null;
             try {
                 const snap = await db.ref(`employees/${currentUserData.id}/biometricCred`).once('value');
-                const savedCred = snap.val();
+                savedCred = snap.val();
 
                 if (!savedCred) {
                     showToast("Registering biometrics...");
@@ -1700,7 +1741,7 @@ ${sigUrl}
 
                     const createOptions = {
                         challenge: challenge,
-                        rp: { name: "RareGrade Hub" },
+                        rp: { name: "RareGrade Hub", id: window.location.hostname },
                         user: {
                             id: userID,
                             name: currentUserData.email,
@@ -1711,8 +1752,7 @@ ${sigUrl}
                             { alg: -257, type: "public-key" }
                         ],
                         authenticatorSelection: { 
-                            authenticatorAttachment: "platform", 
-                            userVerification: "required" 
+                            userVerification: "preferred" 
                         },
                         timeout: 60000,
                         attestation: "none"
@@ -1736,10 +1776,9 @@ ${sigUrl}
                         challenge: challenge,
                         allowCredentials: [{
                             id: base64urlToBuffer(savedCred),
-                            type: 'public-key',
-                            transports: ['internal']
+                            type: 'public-key'
                         }],
-                        userVerification: "required",
+                        userVerification: "preferred",
                         timeout: 60000
                     };
 
@@ -1751,7 +1790,12 @@ ${sigUrl}
 
             } catch (err) {
                 console.error("Biometric error:", err);
-                showToast("Biometric authentication failed or canceled", "error");
+                if (savedCred && (err.name === 'NotAllowedError' || err.message.toLowerCase().includes('passkey') || err.message.toLowerCase().includes('authenticator'))) {
+                    await db.ref(`employees/${currentUserData.id}/biometricCred`).remove();
+                    showToast("Passkey invalid or missing. Registration reset. Please try scanning again.", "error");
+                } else {
+                    showToast("Biometric authentication failed or canceled", "error");
+                }
             }
         }
 

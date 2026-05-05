@@ -480,6 +480,14 @@
                     <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
                 </div>
                 <div id="calendar-days" class="calendar-grid mt-1"></div>
+                
+                <!-- Calendar Legend -->
+                <div class="flex flex-wrap justify-center gap-3 mt-4 text-[10px] text-gray-500 dark:text-gray-400 font-medium">
+                    <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-green-500"></span> Present</div>
+                    <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-orange-500"></span> Late/Half</div>
+                    <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> Absent</div>
+                    <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span> Holiday</div>
+                </div>
             </div>
             <button onclick="signOutUser()" class="w-full py-3 text-red-600 dark:text-red-400 bg-white dark:bg-slate-800 border border-red-100 dark:border-red-900/30 font-bold text-sm rounded-xl hover:bg-red-50 dark:hover:bg-red-900/10 shadow-sm transition-colors mt-4">
                 Sign Out Account
@@ -527,7 +535,7 @@
                         </div>
                         <div>
                             <p class="text-sm font-semibold">App Version</p>
-                            <p class="text-[10px] text-gray-500 dark:text-gray-400">RareGradeHub v2.7.0</p>
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400">RareGradeHub v2.8.0</p>
                         </div>
                     </div>
                     <span class="text-xs text-gray-400 font-mono">Up to date</span>
@@ -957,6 +965,23 @@
             const firstDay = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
 
+            // South African Public Holidays for 2026
+            const saHolidays = {
+                "01-01": "New Year's Day",
+                "03-21": "Human Rights Day",
+                "04-03": "Good Friday",
+                "04-06": "Family Day",
+                "04-27": "Freedom Day",
+                "05-01": "Workers' Day",
+                "06-16": "Youth Day",
+                "08-09": "National Women's Day",
+                "08-10": "Women's Day Observed",
+                "09-24": "Heritage Day",
+                "12-16": "Day of Reconciliation",
+                "12-25": "Christmas Day",
+                "12-26": "Day of Goodwill"
+            };
+
             for(let i = 0; i < firstDay; i++) {
                 container.innerHTML += `<div class="calendar-day day-empty">0</div>`;
             }
@@ -965,9 +990,12 @@
                 const dayStr = String(i).padStart(2, '0');
                 const monthStr = String(month + 1).padStart(2, '0');
                 const dateKey = `${year}-${monthStr}-${dayStr}`;
+                const shortDateKey = `${monthStr}-${dayStr}`;
+                const isHoliday = saHolidays[shortDateKey];
 
                 let dayClass = 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300';
                 let todayRing = (i === today) ? 'ring-2 ring-blue-600 dark:ring-blue-400 ring-offset-2 dark:ring-offset-slate-800' : '';
+                let titleText = '';
 
                 const dayOfWeek = new Date(year, month, i).getDay();
                 const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
@@ -980,26 +1008,34 @@
                     if (tIn) {
                         const [h, m] = tIn.split(':').map(Number);
                         const isLate = h > 8 || (h === 8 && m > 30);
-                        const isPastDay = i < today || (i === today && date.getHours() >= 20);
                         const isHalfDay = i < today && !tOut;
 
                         if (isLate || isHalfDay) {
                             dayClass = 'bg-orange-500 text-white font-bold shadow-sm';
+                            titleText = isHoliday ? `${isHoliday} (Worked Late/Half)` : 'Late/Half-day';
                         } else {
                             dayClass = 'bg-green-500 text-white font-bold shadow-sm';
+                            titleText = isHoliday ? `${isHoliday} (Worked)` : 'Present';
                         }
                     }
+                } else if (isHoliday) {
+                    dayClass = 'bg-purple-500 text-white font-bold shadow-sm';
+                    titleText = isHoliday;
                 } else if (i <= today && !isWeekend && i !== today) {
-                    dayClass = 'bg-red-500 text-white font-bold shadow-sm'; // Past weekday with no record
+                    dayClass = 'bg-red-500 text-white font-bold shadow-sm'; 
+                    titleText = 'Absent';
                 } else if (i === today && !isWeekend) {
                     const currentHour = date.getHours();
                     const currentMin = date.getMinutes();
                     if (currentHour > 8 || (currentHour === 8 && currentMin > 30)) {
-                        dayClass = 'bg-red-500 text-white font-bold shadow-sm'; // Late and hasn't clocked in yet
+                        dayClass = 'bg-red-500 text-white font-bold shadow-sm'; 
+                        titleText = 'Absent / Late';
                     }
                 }
 
-                container.innerHTML += `<div class="calendar-day ${dayClass} ${todayRing} m-[1px] transition-all">${i}</div>`;
+                const titleAttr = titleText ? `title="${titleText}"` : '';
+
+                container.innerHTML += `<div class="calendar-day ${dayClass} ${todayRing} m-[1px] transition-all cursor-default" ${titleAttr}>${i}</div>`;
             }
         }
 

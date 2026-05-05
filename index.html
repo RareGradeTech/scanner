@@ -128,6 +128,90 @@
         .sup-tab { transition: all 0.3s; border-bottom: 2px solid transparent; }
         .sup-tab.active { border-bottom-color: #2563eb; color: #2563eb; font-weight: bold; }
         .dark .sup-tab.active { border-bottom-color: #60a5fa; color: #60a5fa; }
+
+        /* ============================================================
+           CHAT NOTIFICATION POPUP  — NEW
+           ============================================================ */
+        #chat-notif-popup {
+            position: fixed;
+            top: calc(env(safe-area-inset-top) + 16px);
+            left: 12px;
+            right: 12px;
+            max-width: 420px;
+            margin: 0 auto;
+            z-index: 99998;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(-24px) scale(0.96);
+            transition: opacity 0.28s cubic-bezier(0.22,1,0.36,1),
+                        transform 0.28s cubic-bezier(0.22,1,0.36,1);
+        }
+        #chat-notif-popup.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: all;
+        }
+        #chat-notif-popup .notif-inner {
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08);
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+        .dark #chat-notif-popup .notif-inner {
+            background: rgba(30,41,59,0.94);
+            border-color: rgba(255,255,255,0.08);
+        }
+        .notif-icon {
+            width: 42px; height: 42px;
+            background: linear-gradient(135deg, #075e54 0%, #128c7e 100%);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(7,94,84,0.35);
+        }
+        .notif-icon i { color: #fff; font-size: 18px; }
+        .notif-content { flex: 1; min-width: 0; }
+        .notif-title {
+            font-size: 12px; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 0.06em; color: #075e54;
+            margin-bottom: 2px;
+        }
+        .dark .notif-title { color: #4ade80; }
+        .notif-sender {
+            font-size: 13px; font-weight: 700;
+            color: #0f172a; margin-bottom: 1px;
+        }
+        .dark .notif-sender { color: #f1f5f9; }
+        .notif-text {
+            font-size: 12.5px; color: #64748b;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .dark .notif-text { color: #94a3b8; }
+        .notif-time {
+            font-size: 10px; color: #94a3b8; font-weight: 600;
+            white-space: nowrap; align-self: flex-start; padding-top: 2px;
+        }
+        /* Pulse ring on icon */
+        .notif-icon::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 16px;
+            border: 2px solid rgba(7,94,84,0.4);
+            animation: notif-pulse 1.2s ease-out forwards;
+        }
+        .notif-icon { position: relative; }
+        @keyframes notif-pulse {
+            0%   { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1.5); }
+        }
     </style>
 </head>
 <body class="h-screen flex flex-col relative bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
@@ -136,6 +220,23 @@
     <div id="global-spinner">
         <div class="spinner-ring"></div>
         <p id="spinner-text" class="text-gray-800 dark:text-gray-200 mt-4 font-bold text-sm tracking-wide">Processing...</p>
+    </div>
+
+    <!-- ============================================================
+         CHAT NOTIFICATION POPUP  — NEW
+         Shown as an iOS-style banner when a message arrives while
+         the user is NOT on the Chat tab.
+         ============================================================ -->
+    <div id="chat-notif-popup" role="alertdialog" aria-live="assertive" aria-label="New chat message">
+        <div class="notif-inner" onclick="openChatFromNotif()">
+            <div class="notif-icon"><i class="fa-solid fa-message"></i></div>
+            <div class="notif-content">
+                <div class="notif-title">Rare Grade Team</div>
+                <div class="notif-sender" id="notif-sender-name">Someone</div>
+                <div class="notif-text" id="notif-msg-text">New message</div>
+            </div>
+            <div class="notif-time" id="notif-time-text">now</div>
+        </div>
     </div>
 
     <!-- Top Header -->
@@ -255,7 +356,6 @@
                 </div>
 
                 <div class="space-y-5">
-                    <!-- Business Details -->
                     <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
                         <h3 class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-slate-600 pb-2">1. Business Info</h3>
                         <input type="text" id="sup-biz-name" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Business / Company Name *">
@@ -263,7 +363,6 @@
                         <input type="text" id="sup-address" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Physical Address">
                     </div>
 
-                    <!-- Contact Details -->
                     <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
                         <h3 class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-slate-600 pb-2">2. Primary Contact</h3>
                         <div class="grid grid-cols-2 gap-3">
@@ -276,7 +375,6 @@
                         </div>
                     </div>
 
-                    <!-- Contract & Scope -->
                     <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
                         <h3 class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-slate-600 pb-2">3. Contract Details</h3>
                         <div class="grid grid-cols-2 gap-3">
@@ -311,7 +409,6 @@
                         <textarea id="sup-notes" rows="2" class="w-full mt-2 p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all resize-none shadow-sm" placeholder="Additional notes or SLA requirements..."></textarea>
                     </div>
 
-                    <!-- Devices Setup -->
                     <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
                         <div class="flex justify-between items-center border-b border-gray-200 dark:border-slate-600 pb-2">
                             <h3 class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">4. Log Devices</h3>
@@ -322,7 +419,6 @@
                         </div>
                     </div>
 
-                    <!-- Digital Signature -->
                     <div class="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-xl border border-blue-100 dark:border-blue-900/30 space-y-3 shadow-inner">
                         <div class="flex justify-between items-center">
                             <h3 class="text-xs font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wider">Client Signature</h3>
@@ -351,13 +447,11 @@
                     <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">Complete an on-site digital job card for an existing client.</p>
                     
                     <div class="space-y-5">
-                        
                         <div class="relative">
                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-mono font-bold text-sm">SUP-</span>
                             <input type="text" id="maint-job-id" placeholder="1234" class="w-full pl-16 pr-4 py-3 bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-xl font-mono font-bold focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" inputmode="numeric">
                         </div>
 
-                        <!-- Essential Data Section -->
                         <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
                             <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">1. Visit Details</span>
                             <select id="maint-visit-type" class="w-full p-3 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm">
@@ -380,7 +474,6 @@
                             <input type="text" id="maint-next-steps" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Recommendations / Next Steps">
                         </div>
 
-                        <!-- Notes & Status -->
                         <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
                             <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">3. Detailed Visit Log / Notes</span>
                             <textarea id="maint-notes" rows="3" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all resize-none shadow-sm" placeholder="Detail the work performed today..."></textarea>
@@ -393,7 +486,6 @@
                             </select>
                         </div>
 
-                        <!-- Photo Upload -->
                         <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
                             <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">5. Capture Evidence (Optional)</span>
                             <button onclick="document.getElementById('maint-evidence-upload').click()" class="w-full py-3.5 bg-gray-800 dark:bg-slate-600 text-white rounded-xl font-bold shadow-md active:scale-95 transition-all flex justify-center items-center gap-2 text-sm border border-gray-700 dark:border-slate-500">
@@ -402,7 +494,6 @@
                             <input type="file" id="maint-evidence-upload" accept="image/*" capture="environment" class="hidden" onchange="uploadEvidenceToWorkspace(event, 'support')">
                         </div>
 
-                        <!-- Sign-off Job Card -->
                         <div class="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-xl border border-blue-100 dark:border-blue-900/30 space-y-3 shadow-inner">
                             <div class="flex justify-between items-center">
                                 <h3 class="text-xs font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wider">6. Client Sign-off (Job Card)</h3>
@@ -481,7 +572,6 @@
                 </div>
                 <div id="calendar-days" class="calendar-grid mt-1"></div>
                 
-                <!-- Calendar Legend -->
                 <div class="flex flex-wrap justify-center gap-3 mt-4 text-[10px] text-gray-500 dark:text-gray-400 font-medium">
                     <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-green-500"></span> Present</div>
                     <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-orange-500"></span> Late/Half</div>
@@ -692,6 +782,182 @@
         let isSigningMaint = false;
         let hasMaintSignature = false;
 
+        // ============================================================
+        // NOTIFICATION SYSTEM  — NEW
+        // ============================================================
+
+        /**
+         * notifPopupTimer: holds the auto-dismiss timeout for the in-app popup.
+         */
+        let notifPopupTimer = null;
+
+        /**
+         * requestNotificationPermission()
+         * Called once after login. Asks the browser for push-notification permission
+         * so that OS-level alerts (with the device's default system tone) can be sent.
+         */
+        async function requestNotificationPermission() {
+            if (!('Notification' in window)) return; // Not supported
+            if (Notification.permission === 'granted') return;
+            if (Notification.permission === 'denied') return;
+            // Ask — we defer slightly so it doesn't immediately pop on login
+            setTimeout(async () => {
+                await Notification.requestPermission();
+            }, 2500);
+        }
+
+        /**
+         * playNotificationSound()
+         * Uses the Web Audio API to synthesise a two-tone "ding" that mimics the
+         * platform's default message tone. On most devices this is the closest we
+         * can get without a real audio file — browsers block auto-play of external
+         * audio unless a file is hosted. The synthesized tone plays instantly.
+         */
+        function playNotificationSound() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+
+                // Two-note "ding-dong" sequence
+                const notes = [
+                    { freq: 1046.50, start: 0,    dur: 0.15 },   // C6
+                    { freq: 783.99,  start: 0.15,  dur: 0.25 },   // G5
+                ];
+
+                notes.forEach(({ freq, start, dur }) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
+
+                    // Attack
+                    gain.gain.setValueAtTime(0, ctx.currentTime + start);
+                    gain.gain.linearRampToValueAtTime(0.4, ctx.currentTime + start + 0.03);
+                    // Decay
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
+
+                    osc.start(ctx.currentTime + start);
+                    osc.stop(ctx.currentTime + start + dur + 0.05);
+                });
+
+                // Close the context after all notes finish
+                setTimeout(() => ctx.close(), 600);
+            } catch (e) {
+                console.warn('Audio notification error:', e);
+            }
+        }
+
+        /**
+         * showInAppNotificationPopup(senderName, msgText)
+         * Displays the iOS-style banner that slides down from the top of the screen.
+         * Auto-dismisses after 5 seconds. Tapping opens the chat tab.
+         */
+        function showInAppNotificationPopup(senderName, msgText) {
+            const popup   = document.getElementById('chat-notif-popup');
+            const sender  = document.getElementById('notif-sender-name');
+            const text    = document.getElementById('notif-msg-text');
+            const timeEl  = document.getElementById('notif-time-text');
+
+            sender.textContent = senderName;
+            text.textContent   = msgText;
+            timeEl.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            // Re-trigger pulse animation by cloning the icon node
+            const icon = popup.querySelector('.notif-icon');
+            const cloned = icon.cloneNode(true);
+            icon.parentNode.replaceChild(cloned, icon);
+
+            // Show
+            popup.classList.add('show');
+
+            // Clear any existing timer
+            if (notifPopupTimer) clearTimeout(notifPopupTimer);
+            notifPopupTimer = setTimeout(() => dismissNotifPopup(), 5000);
+        }
+
+        /**
+         * dismissNotifPopup()
+         * Slides the in-app popup back up and hides it.
+         */
+        function dismissNotifPopup() {
+            const popup = document.getElementById('chat-notif-popup');
+            popup.classList.remove('show');
+            if (notifPopupTimer) { clearTimeout(notifPopupTimer); notifPopupTimer = null; }
+        }
+
+        /**
+         * openChatFromNotif()
+         * Called when the user taps the in-app popup banner.
+         */
+        function openChatFromNotif() {
+            dismissNotifPopup();
+            switchTab('chat');
+        }
+
+        /**
+         * sendOsNotification(senderName, msgText)
+         * Fires an OS-level push notification (appears in the device notification
+         * centre, uses the device's default system alert tone automatically).
+         * Only fires when the browser tab is hidden / not in focus.
+         */
+        function sendOsNotification(senderName, msgText) {
+            if (!('Notification' in window)) return;
+            if (Notification.permission !== 'granted') return;
+
+            // Only send OS notification when the page is not visible
+            if (!document.hidden && document.hasFocus()) return;
+
+            const notif = new Notification('Rare Grade Team 💬', {
+                body: `${senderName}: ${msgText}`,
+                icon: './icon-192x192.png',   // uses your existing PWA icon
+                badge: './icon-192x192.png',
+                tag: 'rargrade-chat',          // replaces previous unread notification
+                renotify: true,                // retrigger sound even for same tag
+                vibrate: [200, 100, 200],      // vibration pattern (mobile)
+                silent: false                  // let the OS play its default tone
+            });
+
+            // Clicking the OS notification brings the tab into focus and opens chat
+            notif.onclick = () => {
+                window.focus();
+                switchTab('chat');
+                notif.close();
+            };
+        }
+
+        /**
+         * handleIncomingChatMessage(senderName, msgText, senderId)
+         * Master handler called whenever a new message arrives.
+         * Determines what alerts to fire based on context.
+         */
+        function handleIncomingChatMessage(senderName, msgText, senderId) {
+            // Never notify for own messages
+            if (currentUserData && senderId === currentUserData.id) return;
+
+            const isChatTabOpen = !document.getElementById('view-chat').classList.contains('hidden');
+
+            // 1. Always play the sound (even if chat is open, for ambient awareness)
+            playNotificationSound();
+
+            // 2. Show in-app popup banner only if user is NOT on the Chat tab
+            if (!isChatTabOpen) {
+                showInAppNotificationPopup(senderName, msgText);
+                // Also show the red dot badge on the nav
+                document.getElementById('chat-badge').classList.remove('hidden');
+            }
+
+            // 3. Send an OS notification if the tab/window is not focused
+            sendOsNotification(senderName, msgText);
+        }
+
+        // ============================================================
+        // END NOTIFICATION SYSTEM
+        // ============================================================
+
         // --- THEME INIT ---
         function initTheme() {
             const isDark = localStorage.getItem('theme') === 'dark';
@@ -769,6 +1035,8 @@
                 mainHeader.style.display = 'none'; 
                 fab.style.transform = 'scale(0)';
                 document.getElementById('chat-badge').classList.add('hidden');
+                // Dismiss any popup when opening chat
+                dismissNotifPopup();
                 scrollToBottomChat();
             } else {
                 chatOverlay.classList.add('hidden');
@@ -785,7 +1053,6 @@
                 }
                 
                 if (tabId === 'support') {
-                    // Check which sub-tab is active and init the correct canvas
                     const isRegisterActive = document.getElementById('tab-sup-register').classList.contains('active');
                     if (isRegisterActive) initSupportSignaturePad('sup-sig-canvas', 'register');
                     else initSupportSignaturePad('maint-sig-canvas', 'maintenance');
@@ -847,6 +1114,10 @@
                     listenToWorkHistory();
                     initChat();
                     closePortal();
+
+                    // ── NEW: Request OS notification permission after login ──
+                    requestNotificationPermission();
+
                 } else {
                     showToast("Not registered - Alert sent to admin", "error");
                     await auth.signOut();
@@ -949,7 +1220,7 @@
             const month = date.getMonth();
             const today = date.getDate();
             
-            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
             title.innerHTML = `${monthNames[month]} ${year}`;
 
             let allAtt = {};
@@ -965,20 +1236,13 @@
             const firstDay = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-            // South African Public Holidays for 2026
             const saHolidays = {
-                "01-01": "New Year's Day",
-                "03-21": "Human Rights Day",
-                "04-03": "Good Friday",
-                "04-06": "Family Day",
-                "04-27": "Freedom Day",
-                "05-01": "Workers' Day",
-                "06-16": "Youth Day",
-                "08-09": "National Women's Day",
-                "08-10": "Women's Day Observed",
-                "09-24": "Heritage Day",
-                "12-16": "Day of Reconciliation",
-                "12-25": "Christmas Day",
+                "01-01": "New Year's Day", "03-21": "Human Rights Day",
+                "04-03": "Good Friday", "04-06": "Family Day",
+                "04-27": "Freedom Day", "05-01": "Workers' Day",
+                "06-16": "Youth Day", "08-09": "National Women's Day",
+                "08-10": "Women's Day Observed", "09-24": "Heritage Day",
+                "12-16": "Day of Reconciliation", "12-25": "Christmas Day",
                 "12-26": "Day of Goodwill"
             };
 
@@ -1034,7 +1298,6 @@
                 }
 
                 const titleAttr = titleText ? `title="${titleText}"` : '';
-
                 container.innerHTML += `<div class="calendar-day ${dayClass} ${todayRing} m-[1px] transition-all cursor-default" ${titleAttr}>${i}</div>`;
             }
         }
@@ -1097,11 +1360,10 @@
             }
         }
 
-        // --- SUPPORT & MAINTENANCE SIGNATURE PAD LOGIC ---
+        // --- SIGNATURE PAD LOGIC ---
         function initSupportSignaturePad(canvasId, mode) {
             const canvas = document.getElementById(canvasId);
             
-            // Prevent double init
             if (mode === 'register' && supCtx) return;
             if (mode === 'maintenance' && maintCtx) return;
             
@@ -1125,13 +1387,10 @@
 
             const startDraw = (e) => {
                 if(e.type !== 'mousedown') e.preventDefault();
-                
                 const ctx = mode === 'register' ? supCtx : maintCtx;
                 if (!ctx) return;
-                
                 if (mode === 'register') { isSigningSupport = true; hasSupportSignature = true; }
                 else { isSigningMaint = true; hasMaintSignature = true; }
-                
                 ctx.beginPath();
                 const pos = getPos(e);
                 ctx.moveTo(pos.x, pos.y);
@@ -1140,10 +1399,8 @@
             const draw = (e) => {
                 const isSigning = mode === 'register' ? isSigningSupport : isSigningMaint;
                 const ctx = mode === 'register' ? supCtx : maintCtx;
-                
                 if (!isSigning || !ctx) return;
                 if(e.type !== 'mousemove') e.preventDefault();
-                
                 const pos = getPos(e);
                 ctx.lineWidth = 2.5;
                 ctx.lineCap = 'round';
@@ -1156,7 +1413,6 @@
             const stopDraw = () => {
                 const isSigning = mode === 'register' ? isSigningSupport : isSigningMaint;
                 const ctx = mode === 'register' ? supCtx : maintCtx;
-                
                 if (isSigning && ctx) {
                     if (mode === 'register') isSigningSupport = false;
                     else isSigningMaint = false;
@@ -1168,7 +1424,6 @@
             canvas.addEventListener('mousemove', draw);
             canvas.addEventListener('mouseup', stopDraw);
             canvas.addEventListener('mouseout', stopDraw);
-
             canvas.addEventListener('touchstart', startDraw, { passive: false });
             canvas.addEventListener('touchmove', draw, { passive: false });
             canvas.addEventListener('touchend', stopDraw, { passive: false });
@@ -1177,7 +1432,6 @@
         function clearSupportSignature(canvasId) {
             const canvas = document.getElementById(canvasId);
             if (!canvas) return;
-            
             if (canvasId === 'sup-sig-canvas' && supCtx) {
                 supCtx.clearRect(0, 0, canvas.width, canvas.height);
                 hasSupportSignature = false;
@@ -1271,23 +1525,13 @@
                 const canvas = document.getElementById('sup-sig-canvas');
                 
                 await db.ref('support_businesses').push({
-                    refId: refId,
-                    bizName: bizName,
-                    sector: sector,
-                    address: address,
-                    contractType: contractType,
-                    startDate: startDate,
-                    contactName: contactName,
-                    contactTitle: contactTitle,
-                    contactPhone: contactPhone,
-                    contactEmail: contactEmail,
-                    scope: scope,
-                    sigName: sigName,
-                    sigTitle: sigTitle, 
+                    refId, bizName, sector, address, contractType, startDate,
+                    contactName, contactTitle, contactPhone, contactEmail,
+                    scope, sigName, sigTitle,
                     signatureBase64: canvas.toDataURL('image/png'),
                     status: 'Active',
                     maintenanceNotes: notes,
-                    devices: devices,
+                    devices,
                     timestamp: firebase.database.ServerValue.TIMESTAMP
                 });
 
@@ -1300,13 +1544,11 @@
                 document.getElementById('global-spinner').classList.remove('active');
                 showToast(`Client Registered! Ref: SUP-${refId}`);
                 
-                // Clear Form
                 document.querySelectorAll('#sup-view-register input[type="text"], #sup-view-register input[type="tel"], #sup-view-register input[type="email"], #sup-view-register input[type="date"], #sup-view-register textarea').forEach(i => i.value = '');
                 document.querySelectorAll('#sup-view-register input[type="checkbox"]').forEach(i => i.checked = false);
                 document.getElementById('sup-devices-container').innerHTML = '<p class="text-xs text-gray-400 text-center italic py-2" id="no-devices-msg">No devices added yet. Click Add to include devices.</p>';
                 supportDeviceCount = 0;
                 clearSupportSignature('sup-sig-canvas');
-
                 switchTab('home');
             } catch (err) {
                 document.getElementById('global-spinner').classList.remove('active');
@@ -1315,23 +1557,19 @@
             }
         }
 
-        // --- SUPPORT MAINTENANCE LOG LOGIC ---
+        // --- SUPPORT MAINTENANCE LOG ---
         async function uploadCanvasToCloudinary(canvas) {
-            // Upload signature canvas image to Cloudinary for reliable URL storage
             return new Promise((resolve, reject) => {
                 canvas.toBlob(async (blob) => {
                     const formData = new FormData();
                     formData.append('file', blob);
                     formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-                    
                     try {
                         const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
                         if(!res.ok) throw new Error("Upload failed");
                         const data = await res.json();
                         resolve(data.secure_url);
-                    } catch(e) {
-                        resolve(null); // Fallback if upload fails
-                    }
+                    } catch(e) { resolve(null); }
                 }, 'image/png');
             });
         }
@@ -1350,8 +1588,6 @@
             if (!sigName || !hasMaintSignature) return showToast("Client Sign-off required", "error");
 
             const cleanRef = rawRef.replace('SUP-', '');
-
-            // Build Checklist array
             const checklist = [];
             if(document.getElementById('chk-maint-os').checked) checklist.push("OS & Software Updated");
             if(document.getElementById('chk-maint-av').checked) checklist.push("Antivirus Checked");
@@ -1364,7 +1600,6 @@
             document.getElementById('spinner-text').innerText = "Generating Digital Job Card...";
 
             try {
-                // Find existing support business
                 const snap = await db.ref('support_businesses').orderByChild('refId').equalTo(cleanRef).once('value');
                 if (!snap.exists()) {
                     document.getElementById('global-spinner').classList.remove('active');
@@ -1374,13 +1609,11 @@
                 const key = Object.keys(snap.val())[0];
                 const record = snap.val()[key];
 
-                // Attempt to upload signature for Job Card linking
                 document.getElementById('spinner-text').innerText = "Uploading Signature securely...";
                 const sigCanvas = document.getElementById('maint-sig-canvas');
                 let sigUrl = await uploadCanvasToCloudinary(sigCanvas);
                 if (!sigUrl) sigUrl = "[Image Upload Failed - Verify locally]";
 
-                // Format the string log to append to existing notes
                 const dateStr = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
                 const newLogEntry = `
 ====================================
@@ -1401,18 +1634,11 @@ CLIENT SIG (${sigName}):
 ${sigUrl}
 ====================================
 `;
-                // Prepend the new log to any existing notes so it appears at the top
                 const existingNotes = record.maintenanceNotes ? record.maintenanceNotes + "\n" : "";
                 const updatedNotes = newLogEntry + existingNotes;
 
                 document.getElementById('spinner-text').innerText = "Saving to Database...";
-
-                await db.ref(`support_businesses/${key}`).update({
-                    status: status,
-                    maintenanceNotes: updatedNotes,
-                    lastUpdated: Date.now()
-                });
-
+                await db.ref(`support_businesses/${key}`).update({ status, maintenanceNotes: updatedNotes, lastUpdated: Date.now() });
                 await db.ref(`employees/${currentUserData.id}/work_history`).push({
                     refId: `SUP-${cleanRef}`,
                     title: `Job Card: ${record.bizName || 'Client'}`,
@@ -1422,7 +1648,6 @@ ${sigUrl}
                 document.getElementById('global-spinner').classList.remove('active');
                 showToast("Job Card Saved & Synced!");
                 
-                // Clear Form
                 document.getElementById('maint-job-id').value = '';
                 document.getElementById('maint-parts').value = '';
                 document.getElementById('maint-next-steps').value = '';
@@ -1430,9 +1655,7 @@ ${sigUrl}
                 document.getElementById('maint-sig-name').value = '';
                 document.querySelectorAll('#sup-view-maintenance input[type="checkbox"]').forEach(c => c.checked = false);
                 clearSupportSignature('maint-sig-canvas');
-
                 switchTab('home');
-
             } catch(e) {
                 document.getElementById('global-spinner').classList.remove('active');
                 showToast("Failed to submit Job Card", "error");
@@ -1440,11 +1663,11 @@ ${sigUrl}
             }
         }
 
-        // --- REMOTE EVIDENCE UPLOAD (Unified for Hardware/Software & Support) ---
+        // --- REMOTE EVIDENCE UPLOAD ---
         async function uploadEvidenceToWorkspace(event, sourceContext) {
             const file = event.target.files[0];
             let rawRef = '';
-            let targetArrayName = 'photos'; // Default for support
+            let targetArrayName = 'photos';
 
             if (sourceContext === 'hardware_software') {
                 rawRef = document.getElementById('upload-job-id').value.trim().toUpperCase();
@@ -1479,22 +1702,19 @@ ${sigUrl}
                 let targetDb = '';
                 let snap = null;
 
-                // Try to find the record based on context
                 if (sourceContext === 'support') {
                     snap = await db.ref('support_businesses').orderByChild('refId').equalTo(cleanRef).once('value');
                     targetDb = 'support_businesses';
                 } else {
                     snap = await db.ref('reports').orderByChild('refId').equalTo(cleanRef).once('value');
                     targetDb = 'reports';
-                    if (!snap.exists()) {
+                    if (!snap || !snap.exists()) {
                         snap = await db.ref('software_projects').orderByChild('refId').equalTo(cleanRef).once('value');
                         targetDb = 'software_projects';
                     }
                 }
 
-                if (!snap || !snap.exists()) {
-                    throw new Error("Job ID not found in system.");
-                }
+                if (!snap || !snap.exists()) throw new Error("Job ID not found in system.");
 
                 const key = Object.keys(snap.val())[0];
                 const record = snap.val()[key];
@@ -1502,10 +1722,8 @@ ${sigUrl}
                 currentPhotos.push(secureUrl);
 
                 await db.ref(`${targetDb}/${key}`).update({ [targetArrayName]: currentPhotos });
-
                 if (spinner) spinner.classList.remove('active');
                 showToast("Image synced securely!");
-
             } catch(e) {
                 if (spinner) spinner.classList.remove('active');
                 showToast(e.message || "Failed to link image", "error");
@@ -1515,18 +1733,27 @@ ${sigUrl}
         }
 
         // --- TEAM CHAT LOGIC ---
+        /**
+         * initChat()
+         * Sets up the Firebase real-time listener for team_chat.
+         * On each new child_added event, the notification system is invoked.
+         */
         function initChat() {
             if(chatInitialized) return;
             chatInitialized = true;
             
             const chatRef = db.ref('team_chat').limitToLast(50);
             const container = document.getElementById('chat-messages');
+
+            // Track whether we're still loading the initial batch
+            let initialLoadDone = false;
+            chatRef.once('value', () => { initialLoadDone = true; });
             
             chatRef.on('child_added', (snap) => {
                 if(container.querySelector('.text-center')) container.innerHTML = ''; 
                 
                 const msg = snap.val();
-                const isMine = msg.senderId === currentUserData.id;
+                const isMine = currentUserData && msg.senderId === currentUserData.id;
                 const timeString = new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 
                 const bubbleColor = isMine ? 'bg-[#d9fdd3] dark:bg-[#005c4b] chat-mine' : 'bg-[#ffffff] dark:bg-[#202c33] chat-theirs';
@@ -1545,9 +1772,13 @@ ${sigUrl}
                 container.insertAdjacentHTML('beforeend', msgHTML);
                 scrollToBottomChat();
 
-                const currentTab = document.querySelector('.nav-item.active').id;
-                if(currentTab !== 'nav-chat' && !isMine && document.getElementById('view-chat').classList.contains('hidden')) {
-                    document.getElementById('chat-badge').classList.remove('hidden');
+                // ── NEW: Fire notifications only for NEW messages (not history load) ──
+                if (initialLoadDone && !isMine) {
+                    handleIncomingChatMessage(
+                        msg.senderName || 'Team Member',
+                        msg.text || '',
+                        msg.senderId
+                    );
                 }
             });
         }
@@ -1573,7 +1804,7 @@ ${sigUrl}
             input.style.height = ''; 
             
             await db.ref('team_chat').push({
-                text: text,
+                text,
                 senderId: currentUserData.id,
                 senderName: currentUserData.name || "Employee",
                 timestamp: firebase.database.ServerValue.TIMESTAMP
@@ -1598,14 +1829,10 @@ ${sigUrl}
             const today = new Date().toISOString().split('T')[0];
             db.ref(`attendance/${today}/${currentUserData.id}`).on('value', (snap) => {
                 const data = snap.val() || {};
-                const tIn = data.TimeIn || '--:--';
-                const tOut = data.TimeOut || '--:--';
-                
-                document.getElementById('log-in').innerText = tIn;
+                document.getElementById('log-in').innerText = data.TimeIn || '--:--';
                 document.getElementById('log-lout').innerText = data.LunchOut || '--:--';
                 document.getElementById('log-lback').innerText = data.LunchBack || '--:--';
-                document.getElementById('log-out').innerText = tOut;
-
+                document.getElementById('log-out').innerText = data.TimeOut || '--:--';
                 calculateHours(data.TimeIn, data.TimeOut);
             });
         }
@@ -1613,24 +1840,13 @@ ${sigUrl}
         function calculateHours(timeIn, timeOut) {
             const display = document.getElementById('hours-worked');
             if (!timeIn) { display.innerText = "0h 0m"; return; }
-
             const [inH, inM] = timeIn.split(':').map(Number);
             let outH, outM;
-
-            if (timeOut) {
-                [outH, outM] = timeOut.split(':').map(Number);
-            } else {
-                const now = new Date();
-                outH = now.getHours();
-                outM = now.getMinutes();
-            }
-
+            if (timeOut) { [outH, outM] = timeOut.split(':').map(Number); }
+            else { const now = new Date(); outH = now.getHours(); outM = now.getMinutes(); }
             let diffMins = (outH * 60 + outM) - (inH * 60 + inM);
             if (diffMins < 0) diffMins = 0; 
-
-            const h = Math.floor(diffMins / 60);
-            const m = diffMins % 60;
-            display.innerText = `${h}h ${m}m`;
+            display.innerText = `${Math.floor(diffMins / 60)}h ${diffMins % 60}m`;
         }
 
         function checkCooldown() {
@@ -1638,10 +1854,8 @@ ${sigUrl}
             const lastScanKey = 'lastScanTime_' + currentUserData.id;
             const lastScan = localStorage.getItem(lastScanKey);
             const cooldownMs = 5 * 60 * 1000; 
-
             if (lastScan && (Date.now() - parseInt(lastScan)) < cooldownMs) {
-                const remainingMs = cooldownMs - (Date.now() - parseInt(lastScan));
-                showCooldownModal(remainingMs);
+                showCooldownModal(cooldownMs - (Date.now() - parseInt(lastScan)));
                 return true; 
             }
             return false;
@@ -1652,19 +1866,13 @@ ${sigUrl}
             const text = document.getElementById('cooldown-text');
             modal.classList.remove('hidden');
             setTimeout(() => modal.classList.remove('opacity-0'), 10);
-            
             clearInterval(cooldownTimerInterval);
-            
             let timeLeft = Math.ceil(remainingMs / 1000);
             updateCooldownText(timeLeft, text);
-
             cooldownTimerInterval = setInterval(() => {
                 timeLeft--;
-                if (timeLeft <= 0) {
-                    closeCooldownModal();
-                } else {
-                    updateCooldownText(timeLeft, text);
-                }
+                if (timeLeft <= 0) closeCooldownModal();
+                else updateCooldownText(timeLeft, text);
             }, 1000);
         }
 
@@ -1686,14 +1894,11 @@ ${sigUrl}
             showToast("Verifying location...");
             if (!navigator.geolocation) return showToast("GPS Not Supported", "error");
             navigator.geolocation.getCurrentPosition(async (pos) => {
-                const userLat = pos.coords.latitude;
-                const userLon = pos.coords.longitude;
+                const { latitude: userLat, longitude: userLon } = pos.coords;
                 const snap = await db.ref('settings/officeLocation').once('value');
                 if (!snap.exists()) return showToast("Admin hasn't set office location", "error");
-                
                 const adminConfig = snap.val();
                 const distance = calculateDistance(userLat, userLon, adminConfig.lat, adminConfig.lng);
-                
                 if (distance <= (adminConfig.radius || 150)) {
                     locationVerified = true;
                     document.getElementById('location-overlay').classList.add('hidden');
@@ -1707,7 +1912,7 @@ ${sigUrl}
             const R = 6371e3;
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         }
 
@@ -1715,10 +1920,8 @@ ${sigUrl}
             if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
             if (!html5QrCode.isScanning) {
                 try { 
-                    const qrConfig = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
-                    await html5QrCode.start({ facingMode: "environment" }, qrConfig, onScanSuccess); 
-                } 
-                catch (e) { console.error("Scanner startup error:", e); }
+                    await html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 }, onScanSuccess); 
+                } catch (e) { console.error("Scanner startup error:", e); }
             }
         }
 
@@ -1727,9 +1930,7 @@ ${sigUrl}
             if (scannedId === lastScannedId) return;
             const storedId = currentUserData.id.toString().trim();
             if (scannedId !== storedId) { showToast(`ID Mismatch`, "error"); return; }
-            
             if (checkCooldown()) return; 
-            
             lastScannedId = scannedId;
             clearTimeout(scanTimeout);
             scanTimeout = setTimeout(() => { lastScannedId = null; }, 5000);
@@ -1740,7 +1941,7 @@ ${sigUrl}
         function bufferToBase64url(buffer) {
             const bytes = new Uint8Array(buffer);
             let str = '';
-            for (const char of bytes) { str += String.fromCharCode(char); }
+            for (const char of bytes) str += String.fromCharCode(char);
             return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
         }
         
@@ -1750,16 +1951,13 @@ ${sigUrl}
             const str = atob(base64);
             const buffer = new ArrayBuffer(str.length);
             const bytes = new Uint8Array(buffer);
-            for (let i = 0; i < str.length; i++) { bytes[i] = str.charCodeAt(i); }
+            for (let i = 0; i < str.length; i++) bytes[i] = str.charCodeAt(i);
             return buffer;
         }
 
         async function logWithBiometrics() {
             if (checkCooldown()) return; 
-            
-            if (!window.PublicKeyCredential) {
-                return showToast("Biometrics not supported on this device/browser", "error");
-            }
+            if (!window.PublicKeyCredential) return showToast("Biometrics not supported on this device/browser", "error");
 
             let savedCred = null;
             try {
@@ -1768,62 +1966,37 @@ ${sigUrl}
 
                 if (!savedCred) {
                     showToast("Registering biometrics...");
-                    
                     const challenge = new Uint8Array(32);
                     window.crypto.getRandomValues(challenge);
-                    
                     const userID = new Uint8Array(16);
                     window.crypto.getRandomValues(userID);
 
-                    const createOptions = {
-                        challenge: challenge,
-                        rp: { name: "RareGrade Hub", id: window.location.hostname },
-                        user: {
-                            id: userID,
-                            name: currentUserData.email,
-                            displayName: currentUserData.name || "Employee"
-                        },
-                        pubKeyCredParams: [
-                            { alg: -7, type: "public-key" },
-                            { alg: -257, type: "public-key" }
-                        ],
-                        authenticatorSelection: { 
-                            userVerification: "preferred" 
-                        },
-                        timeout: 60000,
-                        attestation: "none"
-                    };
-
-                    const credential = await navigator.credentials.create({ publicKey: createOptions });
+                    const credential = await navigator.credentials.create({
+                        publicKey: {
+                            challenge, rp: { name: "RareGrade Hub", id: window.location.hostname },
+                            user: { id: userID, name: currentUserData.email, displayName: currentUserData.name || "Employee" },
+                            pubKeyCredParams: [{ alg: -7, type: "public-key" }, { alg: -257, type: "public-key" }],
+                            authenticatorSelection: { userVerification: "preferred" },
+                            timeout: 60000, attestation: "none"
+                        }
+                    });
                     
-                    const credIdBase64 = bufferToBase64url(credential.rawId);
-                    await db.ref(`employees/${currentUserData.id}/biometricCred`).set(credIdBase64);
-                    
+                    await db.ref(`employees/${currentUserData.id}/biometricCred`).set(bufferToBase64url(credential.rawId));
                     showToast("Biometrics Registered! Logging in...");
                     processAttendanceUpdate(currentUserData.id);
-
                 } else {
                     showToast("Verify identity...");
-                    
                     const challenge = new Uint8Array(32);
                     window.crypto.getRandomValues(challenge);
-
-                    const getOptions = {
-                        challenge: challenge,
-                        allowCredentials: [{
-                            id: base64urlToBuffer(savedCred),
-                            type: 'public-key'
-                        }],
-                        userVerification: "preferred",
-                        timeout: 60000
-                    };
-
-                    await navigator.credentials.get({ publicKey: getOptions });
-                    
+                    await navigator.credentials.get({
+                        publicKey: {
+                            challenge, allowCredentials: [{ id: base64urlToBuffer(savedCred), type: 'public-key' }],
+                            userVerification: "preferred", timeout: 60000
+                        }
+                    });
                     showToast("Identity Verified!");
                     processAttendanceUpdate(currentUserData.id);
                 }
-
             } catch (err) {
                 console.error("Biometric error:", err);
                 if (savedCred && (err.name === 'NotAllowedError' || err.message.toLowerCase().includes('passkey') || err.message.toLowerCase().includes('authenticator'))) {
@@ -1865,13 +2038,11 @@ ${sigUrl}
         function showToast(msg, type="success") {
             const t = document.getElementById('toast');
             document.getElementById('toastMsg').innerHTML = msg;
-            
             if(type==="error") {
                 t.classList.add('bg-red-500'); t.classList.remove('bg-gray-900', 'dark:bg-white');
             } else {
                 t.classList.remove('bg-red-500'); t.classList.add('bg-gray-900', 'dark:bg-white');
             }
-
             t.classList.remove('opacity-0', 'translate-y-10', 'pointer-events-none');
             setTimeout(() => t.classList.add('opacity-0', 'translate-y-10', 'pointer-events-none'), 3000);
         }
@@ -1880,16 +2051,12 @@ ${sigUrl}
             document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
         }, 1000);
 
-        // --- PWA SERVICE WORKER REGISTRATION ---
+        // --- PWA SERVICE WORKER ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then((registration) => {
-                        console.log('ServiceWorker registration successful');
-                    })
-                    .catch((err) => {
-                        console.log('ServiceWorker registration failed: ', err);
-                    });
+                    .then(() => console.log('ServiceWorker registered'))
+                    .catch(err => console.log('ServiceWorker failed:', err));
             });
         }
     </script>

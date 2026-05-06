@@ -9,6 +9,7 @@
     <meta name="apple-mobile-web-app-title" content="RareGrade">
     <title>Employee Attendance Portal</title>
     
+    <!-- PWA Setup -->
     <link rel="manifest" href="./manifest.json">
     <link rel="apple-touch-icon" href="./icon-192x192.png">
 
@@ -39,7 +40,7 @@
         }
         .app-card {
             border-radius: 1.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
             transition: background-color 0.3s, border-color 0.3s;
         }
         #login-view {
@@ -102,18 +103,19 @@
         .toggle-checkbox:checked + .toggle-label { background-color: #2563eb; }
 
         #global-spinner {
-            position: fixed; inset: 0; background: rgba(255,255,255,0.8); backdrop-filter: blur(4px);
+            position: fixed; inset: 0; background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(4px);
             z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center;
             opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
         }
-        .dark #global-spinner { background: rgba(15,23,42,0.8); }
+        .dark #global-spinner { background: rgba(15, 23, 42, 0.8); }
         #global-spinner.active { opacity: 1; pointer-events: all; }
         .spinner-ring {
-            width: 50px; height: 50px; border: 4px solid rgba(37,99,235,0.2); border-top-color: #3b82f6;
+            width: 50px; height: 50px; border: 4px solid rgba(37, 99, 235, 0.2); border-top-color: #3b82f6;
             border-radius: 50%; animation: spin 1s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        /* Signature Canvas Support */
         .sig-pad {
             border: 2px dashed #cbd5e1; background: #f8fafc; border-radius: 0.75rem;
             width: 100%; height: 140px; touch-action: none; cursor: crosshair;
@@ -122,35 +124,46 @@
 
         .custom-checkbox { width: 18px; height: 18px; border-radius: 4px; border: 2px solid #cbd5e1; cursor: pointer; accent-color: #2563eb; }
         
+        /* Support Sub-tabs */
         .sup-tab { transition: all 0.3s; border-bottom: 2px solid transparent; }
         .sup-tab.active { border-bottom-color: #2563eb; color: #2563eb; font-weight: bold; }
         .dark .sup-tab.active { border-bottom-color: #60a5fa; color: #60a5fa; }
 
-        /* ── LEAVE STATUS BADGES ── */
-        .leave-badge-pending  { background: #fef3c7; color: #92400e; }
-        .leave-badge-approved { background: #dcfce7; color: #166534; }
-        .leave-badge-rejected { background: #fee2e2; color: #991b1b; }
-        .dark .leave-badge-pending  { background: #78350f33; color: #fcd34d; }
-        .dark .leave-badge-approved { background: #14532d33; color: #86efac; }
-        .dark .leave-badge-rejected { background: #7f1d1d33; color: #fca5a5; }
+        /* Leave Sub-tabs */
+        .leave-tab { transition: all 0.3s; border-bottom: 2px solid transparent; }
+        .leave-tab.active { border-bottom-color: #2563eb; color: #2563eb; font-weight: bold; }
+        .dark .leave-tab.active { border-bottom-color: #60a5fa; color: #60a5fa; }
 
-        /* ── LEAVE CARD HOVER ── */
-        .leave-card { transition: box-shadow 0.2s, transform 0.15s; }
-        .leave-card:hover { box-shadow: 0 4px 20px rgba(37,99,235,0.1); transform: translateY(-1px); }
+        /* Leave Status Badges */
+        .badge-pending { background: #fef3c7; color: #92400e; }
+        .dark .badge-pending { background: #451a03; color: #fcd34d; }
+        .badge-approved { background: #d1fae5; color: #065f46; }
+        .dark .badge-approved { background: #022c22; color: #34d399; }
+        .badge-rejected { background: #fee2e2; color: #991b1b; }
+        .dark .badge-rejected { background: #450a0a; color: #f87171; }
 
-        /* ── CHAT NOTIFICATION POPUP ── */
+        /* ============================================================
+           CHAT NOTIFICATION POPUP  — NEW
+           ============================================================ */
         #chat-notif-popup {
             position: fixed;
             top: calc(env(safe-area-inset-top) + 16px);
-            left: 12px; right: 12px;
-            max-width: 420px; margin: 0 auto;
+            left: 12px;
+            right: 12px;
+            max-width: 420px;
+            margin: 0 auto;
             z-index: 99998;
             pointer-events: none;
             opacity: 0;
             transform: translateY(-24px) scale(0.96);
-            transition: opacity 0.28s cubic-bezier(0.22,1,0.36,1), transform 0.28s cubic-bezier(0.22,1,0.36,1);
+            transition: opacity 0.28s cubic-bezier(0.22,1,0.36,1),
+                        transform 0.28s cubic-bezier(0.22,1,0.36,1);
         }
-        #chat-notif-popup.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
+        #chat-notif-popup.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: all;
+        }
         #chat-notif-popup .notif-inner {
             background: rgba(255,255,255,0.92);
             backdrop-filter: blur(20px) saturate(180%);
@@ -159,30 +172,59 @@
             border-radius: 18px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08);
             padding: 14px 16px;
-            display: flex; align-items: center; gap: 12px; cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
         }
-        .dark #chat-notif-popup .notif-inner { background: rgba(30,41,59,0.94); border-color: rgba(255,255,255,0.08); }
+        .dark #chat-notif-popup .notif-inner {
+            background: rgba(30,41,59,0.94);
+            border-color: rgba(255,255,255,0.08);
+        }
         .notif-icon {
             width: 42px; height: 42px;
             background: linear-gradient(135deg, #075e54 0%, #128c7e 100%);
             border-radius: 12px;
-            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-            box-shadow: 0 2px 8px rgba(7,94,84,0.35); position: relative;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(7,94,84,0.35);
         }
         .notif-icon i { color: #fff; font-size: 18px; }
         .notif-content { flex: 1; min-width: 0; }
-        .notif-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: #075e54; margin-bottom: 2px; }
-        .dark .notif-title { color: #4ade80; }
-        .notif-sender { font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 1px; }
-        .dark .notif-sender { color: #f1f5f9; }
-        .notif-text { font-size: 12.5px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .dark .notif-text { color: #94a3b8; }
-        .notif-time { font-size: 10px; color: #94a3b8; font-weight: 600; white-space: nowrap; align-self: flex-start; padding-top: 2px; }
-        .notif-icon::after {
-            content: ''; position: absolute; inset: -4px; border-radius: 16px;
-            border: 2px solid rgba(7,94,84,0.4); animation: notif-pulse 1.2s ease-out forwards;
+        .notif-title {
+            font-size: 12px; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 0.06em; color: #075e54;
+            margin-bottom: 2px;
         }
-        @keyframes notif-pulse { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.5); } }
+        .dark .notif-title { color: #4ade80; }
+        .notif-sender {
+            font-size: 13px; font-weight: 700;
+            color: #0f172a; margin-bottom: 1px;
+        }
+        .dark .notif-sender { color: #f1f5f9; }
+        .notif-text {
+            font-size: 12.5px; color: #64748b;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .dark .notif-text { color: #94a3b8; }
+        .notif-time {
+            font-size: 10px; color: #94a3b8; font-weight: 600;
+            white-space: nowrap; align-self: flex-start; padding-top: 2px;
+        }
+        /* Pulse ring on icon */
+        .notif-icon::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 16px;
+            border: 2px solid rgba(7,94,84,0.4);
+            animation: notif-pulse 1.2s ease-out forwards;
+        }
+        .notif-icon { position: relative; }
+        @keyframes notif-pulse {
+            0%   { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1.5); }
+        }
     </style>
 </head>
 <body class="h-screen flex flex-col relative bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
@@ -193,7 +235,7 @@
         <p id="spinner-text" class="text-gray-800 dark:text-gray-200 mt-4 font-bold text-sm tracking-wide">Processing...</p>
     </div>
 
-    <!-- Chat Notification Popup -->
+    <!-- CHAT NOTIFICATION POPUP -->
     <div id="chat-notif-popup" role="alertdialog" aria-live="assertive" aria-label="New chat message">
         <div class="notif-inner" onclick="openChatFromNotif()">
             <div class="notif-icon"><i class="fa-solid fa-message"></i></div>
@@ -217,11 +259,12 @@
         <div class="text-xs font-semibold text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-slate-700 px-3 py-1.5 rounded-full transition-colors" id="clock">00:00:00</div>
     </header>
 
-    <!-- Main Content -->
+    <!-- Main Content Area -->
     <main id="app-content" class="flex-1 overflow-y-auto pb-28 px-4 pt-4 w-full max-w-lg mx-auto transition-all relative">
         
         <!-- HOME VIEW -->
         <section id="view-home" class="space-y-4">
+            <!-- Employee Profile & PIN -->
             <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5 flex items-center justify-between">
                 <div class="flex items-center gap-4">
                     <img id="home-avatar" src="" onerror="handleImgError(this)" class="w-14 h-14 rounded-full object-cover border-2 border-gray-100 dark:border-slate-600 shimmer" alt="Profile">
@@ -236,6 +279,7 @@
                 </div>
             </div>
 
+            <!-- Attendance Card -->
             <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-bold text-sm"><i class="fa-regular fa-clock mr-2 text-blue-500 dark:text-blue-400"></i>Today's Shift</h3>
@@ -261,6 +305,7 @@
                 </div>
             </div>
 
+            <!-- Remote Image Upload -->
             <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5 mt-4" id="home-upload-widget">
                 <div class="flex justify-between items-center mb-3">
                     <h3 class="font-bold text-sm text-gray-700 dark:text-gray-200">Workspace Upload</h3>
@@ -283,6 +328,7 @@
                 </div>
             </div>
 
+            <!-- Recent Work Feed -->
             <div class="mt-6 px-1">
                 <div class="flex justify-between items-center mb-3">
                     <h3 class="font-bold text-sm text-gray-700 dark:text-gray-200">Recent Tasks Signed</h3>
@@ -294,8 +340,9 @@
             </div>
         </section>
 
-        <!-- SUPPORT VIEW -->
+        <!-- SUPPORT CLIENT REGISTRATION VIEW -->
         <section id="view-support" class="hidden space-y-4">
+            
             <div class="flex bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden text-sm font-bold shadow-sm">
                 <button onclick="switchSupTab('register')" id="tab-sup-register" class="flex-1 py-3 text-center sup-tab active text-gray-500 dark:text-gray-400">
                     <i class="fa-solid fa-user-plus mr-1"></i> Register Client
@@ -305,14 +352,18 @@
                 </button>
             </div>
 
+            <!-- SUB-VIEW: REGISTER CLIENT -->
             <div id="sup-view-register" class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5">
                 <div class="flex items-center gap-3 mb-5">
-                    <div class="bg-blue-100 dark:bg-blue-900/50 p-2 rounded-lg text-blue-600 dark:text-blue-400"><i class="fa-solid fa-handshake"></i></div>
+                    <div class="bg-blue-100 dark:bg-blue-900/50 p-2 rounded-lg text-blue-600 dark:text-blue-400">
+                        <i class="fa-solid fa-handshake"></i>
+                    </div>
                     <div>
                         <h2 class="font-bold text-gray-800 dark:text-gray-200 leading-tight">Add Support Client</h2>
                         <p class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">Register a new maintenance SLA</p>
                     </div>
                 </div>
+
                 <div class="space-y-5">
                     <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
                         <h3 class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-slate-600 pb-2">1. Business Info</h3>
@@ -320,6 +371,7 @@
                         <input type="text" id="sup-sector" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Industry / Sector (e.g. Retail)">
                         <input type="text" id="sup-address" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Physical Address">
                     </div>
+
                     <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
                         <h3 class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-slate-600 pb-2">2. Primary Contact</h3>
                         <div class="grid grid-cols-2 gap-3">
@@ -331,6 +383,7 @@
                             <input type="email" id="sup-contact-email" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Email Address">
                         </div>
                     </div>
+
                     <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
                         <h3 class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-slate-600 pb-2">3. Contract Details</h3>
                         <div class="grid grid-cols-2 gap-3">
@@ -349,6 +402,7 @@
                                 <input type="date" id="sup-start-date" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm">
                             </div>
                         </div>
+
                         <div class="pt-2">
                             <span class="text-[9px] font-bold text-gray-500 uppercase block mb-2">Scope of Services</span>
                             <div class="grid grid-cols-2 gap-2 text-xs text-gray-700 dark:text-gray-300">
@@ -360,8 +414,10 @@
                                 <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 shadow-sm"><input type="checkbox" id="sup-scope-remote" class="custom-checkbox shrink-0"> Remote</label>
                             </div>
                         </div>
+
                         <textarea id="sup-notes" rows="2" class="w-full mt-2 p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all resize-none shadow-sm" placeholder="Additional notes or SLA requirements..."></textarea>
                     </div>
+
                     <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
                         <div class="flex justify-between items-center border-b border-gray-200 dark:border-slate-600 pb-2">
                             <h3 class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">4. Log Devices</h3>
@@ -371,6 +427,7 @@
                             <p class="text-xs text-gray-400 text-center italic py-2" id="no-devices-msg">No devices added yet. Click Add to include devices.</p>
                         </div>
                     </div>
+
                     <div class="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-xl border border-blue-100 dark:border-blue-900/30 space-y-3 shadow-inner">
                         <div class="flex justify-between items-center">
                             <h3 class="text-xs font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wider">Client Signature</h3>
@@ -383,22 +440,27 @@
                         <canvas id="sup-sig-canvas" class="sig-pad w-full block shadow-sm"></canvas>
                         <p class="text-[9px] text-blue-600 dark:text-blue-500 leading-tight text-center font-medium mt-2">By signing, the client agrees to RareGrade Tech's SLA terms.</p>
                     </div>
+
                     <button onclick="submitSupportClient()" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 hover:bg-blue-700 active:scale-[0.98] transition-all flex justify-center items-center gap-2 text-lg">
                         <i class="fa-solid fa-paper-plane"></i> Register Client SLA
                     </button>
                 </div>
             </div>
 
+            <!-- SUB-VIEW: LOG MAINTENANCE -->
             <div id="sup-view-maintenance" class="hidden space-y-4">
                 <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="font-bold text-sm text-gray-700 dark:text-gray-200"><i class="fa-solid fa-clipboard-check text-blue-500 mr-2"></i>Log Visit & Upload</h3>
                     </div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">Complete an on-site digital job card for an existing client.</p>
+                    
                     <div class="space-y-5">
                         <div class="relative">
                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-mono font-bold text-sm">SUP-</span>
                             <input type="text" id="maint-job-id" placeholder="1234" class="w-full pl-16 pr-4 py-3 bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-xl font-mono font-bold focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" inputmode="numeric">
                         </div>
+
                         <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
                             <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">1. Visit Details</span>
                             <select id="maint-visit-type" class="w-full p-3 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm">
@@ -407,6 +469,7 @@
                                 <option value="Installation / Setup">Installation / Setup</option>
                                 <option value="Assessment / Audit">Assessment / Audit</option>
                             </select>
+                            
                             <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mt-4 border-t border-gray-200 dark:border-slate-600 pt-3">2. Checklist / Tasks Performed</span>
                             <div class="grid grid-cols-2 gap-3 text-xs text-gray-700 dark:text-gray-300">
                                 <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-600 shadow-sm"><input type="checkbox" id="chk-maint-os" class="custom-checkbox shrink-0"> OS Updates</label>
@@ -415,12 +478,15 @@
                                 <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-600 shadow-sm"><input type="checkbox" id="chk-maint-clean" class="custom-checkbox shrink-0"> Hardware Cleaned</label>
                                 <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-600 shadow-sm col-span-2"><input type="checkbox" id="chk-maint-net" class="custom-checkbox shrink-0"> Network Tested</label>
                             </div>
+
                             <input type="text" id="maint-parts" class="w-full mt-2 p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Parts / Consumables Used (if any)">
                             <input type="text" id="maint-next-steps" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Recommendations / Next Steps">
                         </div>
+
                         <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
                             <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">3. Detailed Visit Log / Notes</span>
                             <textarea id="maint-notes" rows="3" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all resize-none shadow-sm" placeholder="Detail the work performed today..."></textarea>
+                            
                             <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mt-2 border-t border-gray-200 dark:border-slate-600 pt-3">4. Update Contract Status</span>
                             <select id="maint-status" class="w-full p-3 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm">
                                 <option value="Active">Active</option>
@@ -428,6 +494,7 @@
                                 <option value="Terminated">Terminated</option>
                             </select>
                         </div>
+
                         <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
                             <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">5. Capture Evidence (Optional)</span>
                             <button onclick="document.getElementById('maint-evidence-upload').click()" class="w-full py-3.5 bg-gray-800 dark:bg-slate-600 text-white rounded-xl font-bold shadow-md active:scale-95 transition-all flex justify-center items-center gap-2 text-sm border border-gray-700 dark:border-slate-500">
@@ -435,6 +502,7 @@
                             </button>
                             <input type="file" id="maint-evidence-upload" accept="image/*" capture="environment" class="hidden" onchange="uploadEvidenceToWorkspace(event, 'support')">
                         </div>
+
                         <div class="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-xl border border-blue-100 dark:border-blue-900/30 space-y-3 shadow-inner">
                             <div class="flex justify-between items-center">
                                 <h3 class="text-xs font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wider">6. Client Sign-off (Job Card)</h3>
@@ -443,6 +511,7 @@
                             <input type="text" id="maint-sig-name" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-blue-200 dark:border-slate-600 rounded-lg outline-none dark:text-white mb-2 shadow-sm" placeholder="Signatory Name *">
                             <canvas id="maint-sig-canvas" class="sig-pad w-full block shadow-sm"></canvas>
                         </div>
+
                         <button onclick="submitMaintenanceLog()" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 hover:bg-blue-700 active:scale-[0.98] transition-all flex justify-center items-center gap-2 text-base mt-2">
                             <i class="fa-solid fa-floppy-disk"></i> Submit Job Card & Notes
                         </button>
@@ -450,120 +519,6 @@
                 </div>
             </div>
         </section>
-
-        <!-- ══════════════════════════════════════════════
-             LEAVE MANAGEMENT VIEW  — NEW
-             ══════════════════════════════════════════════ -->
-        <section id="view-leave" class="hidden space-y-4">
-
-            <!-- Summary strip -->
-            <div id="leave-summary-strip" class="grid grid-cols-3 gap-2">
-                <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-3 text-center">
-                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Annual</p>
-                    <p id="leave-bal-annual" class="text-xl font-black text-blue-600 dark:text-blue-400 shimmer rounded">--</p>
-                    <p class="text-[9px] text-gray-400 mt-0.5">days left</p>
-                </div>
-                <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-3 text-center">
-                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Sick</p>
-                    <p id="leave-bal-sick" class="text-xl font-black text-orange-500 shimmer rounded">--</p>
-                    <p class="text-[9px] text-gray-400 mt-0.5">days left</p>
-                </div>
-                <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-3 text-center">
-                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Family</p>
-                    <p id="leave-bal-family" class="text-xl font-black text-purple-500 shimmer rounded">--</p>
-                    <p class="text-[9px] text-gray-400 mt-0.5">days left</p>
-                </div>
-            </div>
-
-            <!-- Request form -->
-            <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5">
-                <div class="flex items-center gap-3 mb-5">
-                    <div class="bg-blue-100 dark:bg-blue-900/50 p-2 rounded-lg text-blue-600 dark:text-blue-400">
-                        <i class="fa-solid fa-calendar-plus"></i>
-                    </div>
-                    <div>
-                        <h2 class="font-bold text-gray-800 dark:text-gray-200 leading-tight">Apply for Leave</h2>
-                        <p class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">Submit a new leave request</p>
-                    </div>
-                </div>
-
-                <div class="space-y-4">
-                    <!-- Leave Type -->
-                    <div>
-                        <label class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide block mb-1">Leave Type *</label>
-                        <div class="grid grid-cols-3 gap-2" id="leave-type-selector">
-                            <button onclick="selectLeaveType('Annual')" id="lt-annual" class="leave-type-btn py-3 px-2 rounded-xl border-2 border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-bold text-xs flex flex-col items-center gap-1 transition-all active:scale-95">
-                                <i class="fa-solid fa-umbrella-beach text-base"></i> Annual
-                            </button>
-                            <button onclick="selectLeaveType('Sick')" id="lt-sick" class="leave-type-btn py-3 px-2 rounded-xl border-2 border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700/50 text-gray-600 dark:text-gray-300 font-bold text-xs flex flex-col items-center gap-1 transition-all active:scale-95">
-                                <i class="fa-solid fa-kit-medical text-base"></i> Sick
-                            </button>
-                            <button onclick="selectLeaveType('Family')" id="lt-family" class="leave-type-btn py-3 px-2 rounded-xl border-2 border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700/50 text-gray-600 dark:text-gray-300 font-bold text-xs flex flex-col items-center gap-1 transition-all active:scale-95">
-                                <i class="fa-solid fa-people-roof text-base"></i> Family
-                            </button>
-                        </div>
-                        <input type="hidden" id="leave-type-value" value="Annual">
-                    </div>
-
-                    <!-- Dates -->
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide block mb-1">Start Date *</label>
-                            <input type="date" id="leave-start-date" onchange="calcLeaveDays()" class="w-full p-3 text-sm bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all">
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide block mb-1">End Date *</label>
-                            <input type="date" id="leave-end-date" onchange="calcLeaveDays()" class="w-full p-3 text-sm bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all">
-                        </div>
-                    </div>
-
-                    <!-- Days count pill -->
-                    <div id="leave-days-pill" class="hidden text-center">
-                        <span class="inline-block bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-4 py-1.5 rounded-full text-xs font-bold">
-                            <i class="fa-regular fa-calendar-days mr-1"></i>
-                            <span id="leave-days-count">0</span> working day(s) requested
-                        </span>
-                    </div>
-
-                    <!-- Reason -->
-                    <div>
-                        <label class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide block mb-1">Reason / Notes</label>
-                        <textarea id="leave-reason" rows="3" class="w-full p-3 text-sm bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all resize-none" placeholder="Briefly describe your reason for leave..."></textarea>
-                    </div>
-
-                    <!-- Supporting doc upload (optional) -->
-                    <div class="bg-gray-50 dark:bg-slate-700/30 p-3 rounded-xl border border-dashed border-gray-300 dark:border-slate-600">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-xs font-bold text-gray-600 dark:text-gray-300">Supporting Document</p>
-                                <p class="text-[10px] text-gray-400">Medical cert, etc. (optional)</p>
-                            </div>
-                            <button onclick="document.getElementById('leave-doc-upload').click()" class="text-xs bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-gray-200 px-3 py-2 rounded-lg font-bold active:scale-95 transition-transform flex items-center gap-1.5">
-                                <i class="fa-solid fa-paperclip"></i> Attach
-                            </button>
-                            <input type="file" id="leave-doc-upload" accept="image/*,application/pdf" class="hidden" onchange="handleLeaveDocUpload(event)">
-                        </div>
-                        <p id="leave-doc-name" class="text-[10px] text-green-600 dark:text-green-400 font-semibold mt-2 hidden"></p>
-                    </div>
-
-                    <button onclick="submitLeaveRequest()" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 hover:bg-blue-700 active:scale-[0.98] transition-all flex justify-center items-center gap-2 text-base">
-                        <i class="fa-solid fa-paper-plane"></i> Submit Leave Request
-                    </button>
-                </div>
-            </div>
-
-            <!-- My leave history -->
-            <div class="px-1">
-                <div class="flex justify-between items-center mb-3">
-                    <h3 class="font-bold text-sm text-gray-700 dark:text-gray-200">My Leave History</h3>
-                    <i class="fa-solid fa-clock-rotate-left text-gray-400 text-sm"></i>
-                </div>
-                <div id="leave-history-list" class="space-y-3">
-                    <div class="text-center text-xs text-gray-400 py-4 italic">No leave requests yet.</div>
-                </div>
-            </div>
-        </section>
-        <!-- ══ END LEAVE VIEW ══ -->
 
         <!-- SCANNER VIEW -->
         <section id="view-scanner" class="hidden space-y-4 h-full flex flex-col pb-6">
@@ -573,7 +528,9 @@
                 </div>
                 <h3 class="text-lg font-bold">Verify Location</h3>
                 <p class="text-xs text-gray-500 dark:text-gray-400 px-4">You must be at the office coordinates to log attendance.</p>
-                <button onclick="detectAndVerifyLocation()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-colors mt-2 text-sm shadow-md">Check GPS Lock</button>
+                <button onclick="detectAndVerifyLocation()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-colors mt-2 text-sm shadow-md">
+                    Check GPS Lock
+                </button>
             </div>
             <div id="scanner-interface" class="hidden flex-1 flex flex-col space-y-4 overflow-y-auto">
                 <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 shrink-0">
@@ -589,6 +546,158 @@
                 </div>
             </div>
         </section>
+
+        <!-- ============================================================
+             LEAVE MANAGEMENT VIEW
+             ============================================================ -->
+        <section id="view-leave" class="hidden space-y-4">
+
+            <!-- Sub-tabs -->
+            <div class="flex bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden text-sm font-bold shadow-sm">
+                <button onclick="switchLeaveTab('apply')" id="tab-leave-apply" class="flex-1 py-3 text-center leave-tab active text-gray-500 dark:text-gray-400">
+                    <i class="fa-solid fa-paper-plane mr-1"></i> Apply
+                </button>
+                <button onclick="switchLeaveTab('history')" id="tab-leave-history" class="flex-1 py-3 text-center leave-tab text-gray-500 dark:text-gray-400">
+                    <i class="fa-solid fa-clock-rotate-left mr-1"></i> My Requests
+                </button>
+                <button onclick="switchLeaveTab('balances')" id="tab-leave-balances" class="flex-1 py-3 text-center leave-tab text-gray-500 dark:text-gray-400">
+                    <i class="fa-solid fa-chart-pie mr-1"></i> Balances
+                </button>
+            </div>
+
+            <!-- SUB-VIEW: APPLY FOR LEAVE -->
+            <div id="leave-view-apply" class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5">
+                <div class="flex items-center gap-3 mb-5">
+                    <div class="bg-blue-100 dark:bg-blue-900/50 p-2 rounded-lg text-blue-600 dark:text-blue-400">
+                        <i class="fa-solid fa-umbrella-beach"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-gray-800 dark:text-gray-200 leading-tight">Request Leave</h2>
+                        <p class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">Submit a leave application</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Leave Type -->
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide block mb-1">Leave Type *</label>
+                        <select id="leave-type" class="w-full p-3 bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all">
+                            <option value="Annual Leave">Annual Leave</option>
+                            <option value="Sick Leave">Sick Leave</option>
+                            <option value="Family Responsibility">Family Responsibility Leave</option>
+                            <option value="Unpaid Leave">Unpaid Leave</option>
+                            <option value="Study Leave">Study Leave</option>
+                            <option value="Maternity Leave">Maternity Leave</option>
+                            <option value="Paternity Leave">Paternity Leave</option>
+                        </select>
+                    </div>
+
+                    <!-- Date Range -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide block mb-1">Start Date *</label>
+                            <input type="date" id="leave-start" class="w-full p-3 bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide block mb-1">End Date *</label>
+                            <input type="date" id="leave-end" class="w-full p-3 bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all">
+                        </div>
+                    </div>
+
+                    <!-- Days Counter -->
+                    <div id="leave-days-display" class="hidden bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/30 rounded-xl p-3 text-center">
+                        <span class="text-xs text-blue-600 dark:text-blue-400 font-bold">
+                            <i class="fa-solid fa-calendar-days mr-1"></i>
+                            <span id="leave-days-count">0</span> working day(s) requested
+                        </span>
+                    </div>
+
+                    <!-- Reason -->
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide block mb-1">Reason / Notes</label>
+                        <textarea id="leave-reason" rows="3" class="w-full p-3 text-sm bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all resize-none" placeholder="Briefly describe the reason for your leave request..."></textarea>
+                    </div>
+
+                    <!-- Supporting Doc Upload (optional) -->
+                    <div class="bg-gray-50 dark:bg-slate-700/30 p-3 rounded-xl border border-gray-100 dark:border-slate-700">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Supporting Document (Optional)</span>
+                            <span class="text-[9px] text-gray-400 italic">e.g. doctor's note</span>
+                        </div>
+                        <button onclick="document.getElementById('leave-doc-upload').click()" class="w-full py-2.5 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-lg font-semibold text-xs shadow-sm active:scale-95 transition-all flex justify-center items-center gap-2">
+                            <i class="fa-solid fa-paperclip text-blue-500"></i> Attach Document / Image
+                        </button>
+                        <input type="file" id="leave-doc-upload" accept="image/*,application/pdf" class="hidden" onchange="handleLeaveDocUpload(event)">
+                        <p id="leave-doc-name" class="text-[10px] text-green-600 dark:text-green-400 mt-2 text-center font-semibold hidden"></p>
+                    </div>
+
+                    <button onclick="submitLeaveRequest()" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 hover:bg-blue-700 active:scale-[0.98] transition-all flex justify-center items-center gap-2 text-base">
+                        <i class="fa-solid fa-paper-plane"></i> Submit Leave Request
+                    </button>
+                </div>
+            </div>
+
+            <!-- SUB-VIEW: MY REQUESTS HISTORY -->
+            <div id="leave-view-history" class="hidden space-y-3">
+                <div class="flex justify-between items-center px-1">
+                    <h3 class="font-bold text-sm text-gray-700 dark:text-gray-200">My Leave Requests</h3>
+                    <i class="fa-solid fa-clock-rotate-left text-gray-400"></i>
+                </div>
+                <div id="leave-history-list" class="space-y-3">
+                    <div class="text-center text-xs text-gray-400 py-6 italic">No leave requests submitted yet.</div>
+                </div>
+            </div>
+
+            <!-- SUB-VIEW: LEAVE BALANCES -->
+            <div id="leave-view-balances" class="hidden space-y-4">
+                <div class="flex justify-between items-center px-1">
+                    <h3 class="font-bold text-sm text-gray-700 dark:text-gray-200">Leave Balances</h3>
+                    <button onclick="loadLeaveBalances()" class="text-xs text-blue-600 dark:text-blue-400 font-bold"><i class="fa-solid fa-rotate-right mr-1"></i>Refresh</button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <!-- Annual Leave -->
+                    <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 text-center">
+                        <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
+                            <i class="fa-solid fa-sun text-green-600 dark:text-green-400 text-sm"></i>
+                        </div>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Annual</p>
+                        <p id="bal-annual" class="text-2xl font-black text-green-600 dark:text-green-400">--</p>
+                        <p class="text-[9px] text-gray-400">days remaining</p>
+                    </div>
+                    <!-- Sick Leave -->
+                    <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 text-center">
+                        <div class="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
+                            <i class="fa-solid fa-heart-pulse text-red-600 dark:text-red-400 text-sm"></i>
+                        </div>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Sick</p>
+                        <p id="bal-sick" class="text-2xl font-black text-red-600 dark:text-red-400">--</p>
+                        <p class="text-[9px] text-gray-400">days remaining</p>
+                    </div>
+                    <!-- Family Responsibility -->
+                    <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 text-center">
+                        <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
+                            <i class="fa-solid fa-people-roof text-purple-600 dark:text-purple-400 text-sm"></i>
+                        </div>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Family</p>
+                        <p id="bal-family" class="text-2xl font-black text-purple-600 dark:text-purple-400">--</p>
+                        <p class="text-[9px] text-gray-400">days remaining</p>
+                    </div>
+                    <!-- Study Leave -->
+                    <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 text-center">
+                        <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
+                            <i class="fa-solid fa-book text-blue-600 dark:text-blue-400 text-sm"></i>
+                        </div>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Study</p>
+                        <p id="bal-study" class="text-2xl font-black text-blue-600 dark:text-blue-400">--</p>
+                        <p class="text-[9px] text-gray-400">days remaining</p>
+                    </div>
+                </div>
+
+                <p class="text-[10px] text-center text-gray-400 italic px-2">Balances are updated by admin upon leave approval. Contact HR if balances appear incorrect.</p>
+            </div>
+        </section>
+        <!-- END LEAVE MANAGEMENT VIEW -->
 
         <!-- PROFILE VIEW -->
         <section id="view-profile" class="hidden space-y-4">
@@ -609,32 +718,29 @@
                         <label class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Email Address</label>
                         <input type="email" id="edit-email" readonly class="w-full mt-1 p-2.5 text-sm bg-gray-100 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg text-gray-500 outline-none cursor-not-allowed shimmer">
                     </div>
-                    <button onclick="saveProfile()" class="w-full py-2.5 bg-gray-900 dark:bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-gray-800 dark:hover:bg-blue-700 transition-colors shadow-sm">Save Changes</button>
+                    <button onclick="saveProfile()" class="w-full py-2.5 bg-gray-900 dark:bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-gray-800 dark:hover:bg-blue-700 transition-colors shadow-sm">
+                        Save Changes
+                    </button>
                 </div>
             </div>
-
-            <!-- CALENDAR -->
             <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-bold text-sm" id="cal-month-title">Calendar</h3>
-                    <div class="flex items-center gap-2">
-                        <button onclick="changeCalMonth(-1)" class="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors p-1 active:scale-90"><i class="fa-solid fa-chevron-left text-xs"></i></button>
-                        <button onclick="changeCalMonth(1)" class="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors p-1 active:scale-90"><i class="fa-solid fa-chevron-right text-xs"></i></button>
-                    </div>
+                    <i class="fa-regular fa-calendar text-blue-500 dark:text-blue-400"></i>
                 </div>
                 <div class="calendar-grid calendar-header text-gray-500">
                     <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
                 </div>
                 <div id="calendar-days" class="calendar-grid mt-1"></div>
+                
                 <div class="flex flex-wrap justify-center gap-3 mt-4 text-[10px] text-gray-500 dark:text-gray-400 font-medium">
                     <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-green-500"></span> Present</div>
-                    <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-orange-500"></span> Late</div>
+                    <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-orange-500"></span> Late/Half</div>
                     <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> Absent</div>
-                    <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> On Leave</div>
                     <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span> Holiday</div>
+                    <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> On Leave</div>
                 </div>
             </div>
-
             <button onclick="signOutUser()" class="w-full py-3 text-red-600 dark:text-red-400 bg-white dark:bg-slate-800 border border-red-100 dark:border-red-900/30 font-bold text-sm rounded-xl hover:bg-red-50 dark:hover:bg-red-900/10 shadow-sm transition-colors mt-4">
                 Sign Out Account
             </button>
@@ -646,7 +752,9 @@
             <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-2 shadow-sm divide-y divide-gray-100 dark:divide-slate-700">
                 <div class="flex items-center justify-between p-3">
                     <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300"><i class="fa-solid fa-moon text-sm"></i></div>
+                        <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300">
+                            <i class="fa-solid fa-moon text-sm"></i>
+                        </div>
                         <div>
                             <p class="text-sm font-semibold">Dark Theme</p>
                             <p class="text-[10px] text-gray-500 dark:text-gray-400">Reduce glare and save battery</p>
@@ -659,7 +767,9 @@
                 </div>
                 <div class="flex items-center justify-between p-3">
                     <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400"><i class="fa-solid fa-bell text-sm"></i></div>
+                        <div class="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                            <i class="fa-solid fa-bell text-sm"></i>
+                        </div>
                         <div>
                             <p class="text-sm font-semibold">Push Notifications</p>
                             <p class="text-[10px] text-gray-500 dark:text-gray-400">Shift reminders & chat alerts</p>
@@ -672,10 +782,12 @@
                 </div>
                 <div class="flex items-center justify-between p-3">
                     <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-green-50 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400"><i class="fa-solid fa-code-branch text-sm"></i></div>
+                        <div class="w-8 h-8 rounded-full bg-green-50 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
+                            <i class="fa-solid fa-code-branch text-sm"></i>
+                        </div>
                         <div>
                             <p class="text-sm font-semibold">App Version</p>
-                            <p class="text-[10px] text-gray-500 dark:text-gray-400">RareGradeHub v3.0.0</p>
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400">RareGradeHub v2.9.0</p>
                         </div>
                     </div>
                     <span class="text-xs text-gray-400 font-mono">Up to date</span>
@@ -693,14 +805,21 @@
         </section>
     </main>
 
-    <!-- CHAT VIEW -->
+    <!-- CHAT VIEW (Full Screen Overlay) -->
     <section id="view-chat" class="hidden fixed inset-0 z-40 bg-[#e5ddd5] dark:bg-[#0b141a] flex-col">
         <div class="bg-[#075e54] dark:bg-slate-800 shadow-sm p-3 pt-[calc(0.75rem+env(safe-area-inset-top))] flex items-center gap-3 shrink-0 text-white transition-colors z-10">
-            <button onclick="switchTab('home')" class="text-white p-2 -ml-2 active:scale-95 transition-transform"><i class="fa-solid fa-arrow-left text-lg"></i></button>
-            <div class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center"><i class="fa-solid fa-users text-sm"></i></div>
+            <button onclick="switchTab('home')" class="text-white p-2 -ml-2 active:scale-95 transition-transform">
+                <i class="fa-solid fa-arrow-left text-lg"></i>
+            </button>
+            <div class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
+                <i class="fa-solid fa-users text-sm"></i>
+            </div>
             <div>
                 <h3 class="font-bold text-sm">Rare Grade Team</h3>
-                <p class="text-[10px] font-semibold flex items-center gap-1 opacity-90"><span class="w-1.5 h-1.5 rounded-full bg-green-400 block animate-pulse shadow-[0_0_5px_#4ade80]"></span>Active Online</p>
+                <p class="text-[10px] font-semibold flex items-center gap-1 opacity-90">
+                    <span class="w-1.5 h-1.5 rounded-full bg-green-400 block animate-pulse shadow-[0_0_5px_#4ade80]"></span>
+                    Active Online
+                </p>
             </div>
         </div>
         <div id="chat-messages" class="flex-1 overflow-y-auto p-4 flex flex-col gap-2 pb-20 relative z-0">
@@ -718,12 +837,12 @@
         </div>
     </section>
 
-    <!-- FAB -->
+    <!-- Floating Action Button -->
     <button onclick="switchTab('scanner')" id="fab-scanner" class="fixed bottom-20 right-4 bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/40 z-30 transform transition-transform duration-300 active:scale-95">
         <i class="fa-solid fa-qrcode text-2xl"></i>
     </button>
 
-    <!-- Bottom Navigation (6 tabs) -->
+    <!-- Bottom Navigation Bar -->
     <nav id="bottom-nav" class="bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 fixed bottom-0 w-full z-20 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.02)] transition-transform duration-300">
         <div class="flex justify-around items-center h-16 px-1">
             <button onclick="switchTab('home')" class="nav-item active text-gray-500 dark:text-gray-400 flex flex-col items-center justify-center w-full h-full" id="nav-home">
@@ -734,16 +853,15 @@
                 <i class="fa-solid fa-headset text-lg mb-1"></i>
                 <span class="text-[9px] font-bold uppercase tracking-wide">Support</span>
             </button>
-            <!-- LEAVE NAV ITEM — NEW -->
             <button onclick="switchTab('leave')" class="nav-item text-gray-500 dark:text-gray-400 flex flex-col items-center justify-center w-full h-full relative" id="nav-leave">
-                <i class="fa-solid fa-calendar-check text-lg mb-1"></i>
+                <i class="fa-solid fa-umbrella-beach text-lg mb-1"></i>
                 <span class="text-[9px] font-bold uppercase tracking-wide">Leave</span>
-                <span id="leave-badge" class="absolute top-2 right-3 w-2 h-2 bg-orange-500 rounded-full hidden"></span>
+                <span id="leave-badge" class="absolute top-2 right-4 w-2 h-2 bg-orange-500 rounded-full hidden"></span>
             </button>
             <button onclick="switchTab('chat')" class="nav-item text-gray-500 dark:text-gray-400 flex flex-col items-center justify-center w-full h-full relative" id="nav-chat">
                 <i class="fa-regular fa-comments text-lg mb-1"></i>
                 <span class="text-[9px] font-bold uppercase tracking-wide">Chat</span>
-                <span id="chat-badge" class="absolute top-2 right-3 w-2 h-2 bg-red-500 rounded-full hidden"></span>
+                <span id="chat-badge" class="absolute top-2 right-6 w-2 h-2 bg-red-500 rounded-full hidden"></span>
             </button>
             <button onclick="switchTab('profile')" class="nav-item text-gray-500 dark:text-gray-400 flex flex-col items-center justify-center w-full h-full" id="nav-profile">
                 <i class="fa-regular fa-user text-lg mb-1"></i>
@@ -766,16 +884,17 @@
                 <h1 class="text-3xl font-extrabold tracking-tight">Portal Access</h1>
                 <p class="text-gray-500 dark:text-gray-400 mt-2 text-sm leading-relaxed px-4">Sign in using the email address registered for you on the system by the admin.</p>
             </div>
-            <button onclick="signInWithGoogle()" class="w-full py-4 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-sm hover:bg-gray-50 dark:hover:bg-slate-700 active:scale-95 transition-all text-lg">
+            <button onclick="signInWithGoogle()"
+                    class="w-full py-4 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-sm hover:bg-gray-50 dark:hover:bg-slate-700 active:scale-95 transition-all text-lg">
                 <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-6 h-6" alt="Google">
                 Verify Email Address
             </button>
         </div>
     </div>
 
-    <!-- Cooldown Modal -->
+    <!-- Custom Cooldown Modal -->
     <div id="cooldown-modal" class="fixed inset-0 bg-black/50 z-[999] hidden flex items-center justify-center backdrop-blur-sm p-4 transition-opacity opacity-0 duration-300">
-        <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 w-full max-w-[320px] text-center shadow-2xl">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 w-full max-w-[320px] text-center shadow-2xl transform transition-transform duration-300 scale-100">
             <div class="w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-orange-500">
                 <i class="fa-solid fa-clock-rotate-left text-3xl"></i>
             </div>
@@ -785,7 +904,7 @@
         </div>
     </div>
 
-    <!-- Toast -->
+    <!-- Toast Notification -->
     <div id="toast" class="fixed left-4 right-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-4 py-3 rounded-xl shadow-2xl transition-all duration-300 opacity-0 translate-y-10 pointer-events-none font-semibold text-sm text-center flex justify-center items-center max-w-sm mx-auto z-[9999]">
         <span id="toastMsg">Notification</span>
     </div>
@@ -794,7 +913,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script>
-        // ─── CONFIGURATION ───────────────────────────────────────────────────
+        // --- CONFIGURATION ---
         const firebaseConfig = {
             apiKey: "AIzaSyCh7Ute6LeSAxcNDEQwZg5m0cA4ujnLCfg",
             authDomain: "test-17881.firebaseapp.com",
@@ -803,50 +922,49 @@
             messagingSenderId: "1057428047643",
             appId: "1:1057428047643:web:f3801c0d933225a5cd35be"
         };
+        
         const CLOUDINARY_UPLOAD_PRESET = "banter_box";
-        const CLOUDINARY_CLOUD_NAME    = "dqkujefxj";
-
-        // ─── ATTENDANCE TIME RULES ───────────────────────────────────────────
-        // Clock-in window:  on-time = 00:00 – 09:15 → GREEN (present)
-        //                   late     = 09:16 +       → ORANGE (late)
-        // Absent rule:      past 16:00 with no clock-in → RED
-        const ATTEND_START_H  = 9;   // 09:00
-        const ATTEND_START_M  = 0;
-        const LATE_CUTOFF_H   = 9;   // 09:15 — clock-in AT or BEFORE this = present
-        const LATE_CUTOFF_M   = 15;
-        const ABSENT_AFTER_H  = 16;  // 16:00 — if no clock-in by this hour → absent
-        const ABSENT_AFTER_M  = 0;
-
-        // ─── LEAVE ENTITLEMENTS (days per year — SA BCEA defaults) ──────────
-        const LEAVE_ENTITLEMENT = { Annual: 15, Sick: 30, Family: 3 };
+        const CLOUDINARY_CLOUD_NAME = "dqkujefxj";
 
         firebase.initializeApp(firebaseConfig);
-        const db   = firebase.database();
+        const db = firebase.database();
         const auth = firebase.auth();
         auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-
-        let currentUserData      = null;
-        let html5QrCode          = null;
-        let lastScannedId        = null;
-        let scanTimeout          = null;
-        let locationVerified     = false;
-        let chatInitialized      = false;
+        
+        let currentUserData = null;
+        let html5QrCode = null;
+        let lastScannedId = null;
+        let scanTimeout = null;
+        let locationVerified = false;
+        let chatInitialized = false;
         let cooldownTimerInterval = null;
-        let calViewYear          = null;
-        let calViewMonth         = null;
-        let leaveDocUrl          = null;  // stores uploaded doc URL
 
-        // Signature state
-        let supCtx = null, isSigningSupport = false, hasSupportSignature = false;
-        let maintCtx = null, isSigningMaint = false, hasMaintSignature = false;
+        // Signature Variables
+        let supCtx = null;
+        let isSigningSupport = false;
+        let hasSupportSignature = false;
         let supportDeviceCount = 0;
 
-        // ─── NOTIFICATION SYSTEM ─────────────────────────────────────────────
+        let maintCtx = null;
+        let isSigningMaint = false;
+        let hasMaintSignature = false;
+
+        // Leave doc upload URL
+        let leaveDocUrl = null;
+
+        // ============================================================
+        // NOTIFICATION SYSTEM
+        // ============================================================
+
         let notifPopupTimer = null;
 
         async function requestNotificationPermission() {
-            if (!('Notification' in window) || Notification.permission !== 'default') return;
-            setTimeout(async () => { await Notification.requestPermission(); }, 2500);
+            if (!('Notification' in window)) return;
+            if (Notification.permission === 'granted') return;
+            if (Notification.permission === 'denied') return;
+            setTimeout(async () => {
+                await Notification.requestPermission();
+            }, 2500);
         }
 
         function playNotificationSound() {
@@ -854,9 +972,15 @@
                 const AudioCtx = window.AudioContext || window.webkitAudioContext;
                 if (!AudioCtx) return;
                 const ctx = new AudioCtx();
-                [{ freq: 1046.50, start: 0, dur: 0.15 }, { freq: 783.99, start: 0.15, dur: 0.25 }].forEach(({ freq, start, dur }) => {
-                    const osc = ctx.createOscillator(), gain = ctx.createGain();
-                    osc.connect(gain); gain.connect(ctx.destination);
+                const notes = [
+                    { freq: 1046.50, start: 0,    dur: 0.15 },
+                    { freq: 783.99,  start: 0.15,  dur: 0.25 },
+                ];
+                notes.forEach(({ freq, start, dur }) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
                     gain.gain.setValueAtTime(0, ctx.currentTime + start);
@@ -866,53 +990,77 @@
                     osc.stop(ctx.currentTime + start + dur + 0.05);
                 });
                 setTimeout(() => ctx.close(), 600);
-            } catch(e) {}
+            } catch (e) {
+                console.warn('Audio notification error:', e);
+            }
         }
 
         function showInAppNotificationPopup(senderName, msgText) {
-            const popup = document.getElementById('chat-notif-popup');
-            document.getElementById('notif-sender-name').textContent = senderName;
-            document.getElementById('notif-msg-text').textContent    = msgText;
-            document.getElementById('notif-time-text').textContent   = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const popup   = document.getElementById('chat-notif-popup');
+            const sender  = document.getElementById('notif-sender-name');
+            const text    = document.getElementById('notif-msg-text');
+            const timeEl  = document.getElementById('notif-time-text');
+            sender.textContent = senderName;
+            text.textContent   = msgText;
+            timeEl.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const icon = popup.querySelector('.notif-icon');
-            icon.parentNode.replaceChild(icon.cloneNode(true), icon);
+            const cloned = icon.cloneNode(true);
+            icon.parentNode.replaceChild(cloned, icon);
             popup.classList.add('show');
             if (notifPopupTimer) clearTimeout(notifPopupTimer);
-            notifPopupTimer = setTimeout(dismissNotifPopup, 5000);
+            notifPopupTimer = setTimeout(() => dismissNotifPopup(), 5000);
         }
 
         function dismissNotifPopup() {
-            document.getElementById('chat-notif-popup').classList.remove('show');
+            const popup = document.getElementById('chat-notif-popup');
+            popup.classList.remove('show');
             if (notifPopupTimer) { clearTimeout(notifPopupTimer); notifPopupTimer = null; }
         }
 
-        function openChatFromNotif() { dismissNotifPopup(); switchTab('chat'); }
+        function openChatFromNotif() {
+            dismissNotifPopup();
+            switchTab('chat');
+        }
 
         function sendOsNotification(senderName, msgText) {
-            if (!('Notification' in window) || Notification.permission !== 'granted') return;
+            if (!('Notification' in window)) return;
+            if (Notification.permission !== 'granted') return;
             if (!document.hidden && document.hasFocus()) return;
             const notif = new Notification('Rare Grade Team 💬', {
                 body: `${senderName}: ${msgText}`,
-                icon: './icon-192x192.png', badge: './icon-192x192.png',
-                tag: 'rargrade-chat', renotify: true, vibrate: [200,100,200], silent: false
+                icon: './icon-192x192.png',
+                badge: './icon-192x192.png',
+                tag: 'rargrade-chat',
+                renotify: true,
+                vibrate: [200, 100, 200],
+                silent: false
             });
-            notif.onclick = () => { window.focus(); switchTab('chat'); notif.close(); };
+            notif.onclick = () => {
+                window.focus();
+                switchTab('chat');
+                notif.close();
+            };
         }
 
         function handleIncomingChatMessage(senderName, msgText, senderId) {
             if (currentUserData && senderId === currentUserData.id) return;
-            const isChatOpen = !document.getElementById('view-chat').classList.contains('hidden');
+            const isChatTabOpen = !document.getElementById('view-chat').classList.contains('hidden');
             playNotificationSound();
-            if (!isChatOpen) {
+            if (!isChatTabOpen) {
                 showInAppNotificationPopup(senderName, msgText);
                 document.getElementById('chat-badge').classList.remove('hidden');
             }
             sendOsNotification(senderName, msgText);
         }
 
-        // ─── THEME ────────────────────────────────────────────────────────────
+        // ============================================================
+        // END NOTIFICATION SYSTEM
+        // ============================================================
+
+        // --- THEME INIT ---
         function initTheme() {
-            if (localStorage.getItem('theme') === 'dark') {
+            const isDark = localStorage.getItem('theme') === 'dark';
+            if (isDark) {
                 document.documentElement.classList.add('dark');
                 document.getElementById('theme-toggle').checked = true;
             }
@@ -921,68 +1069,125 @@
 
         function toggleTheme() {
             const html = document.documentElement;
-            if (html.classList.contains('dark')) { html.classList.remove('dark'); localStorage.setItem('theme', 'light'); }
-            else { html.classList.add('dark'); localStorage.setItem('theme', 'dark'); }
-            if (supCtx)  supCtx.strokeStyle  = html.classList.contains('dark') ? '#ffffff' : '#0f172a';
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+            if (supCtx) supCtx.strokeStyle = html.classList.contains('dark') ? '#ffffff' : '#0f172a';
             if (maintCtx) maintCtx.strokeStyle = html.classList.contains('dark') ? '#ffffff' : '#0f172a';
         }
 
-        // ─── SWIPE NAVIGATION ─────────────────────────────────────────────────
-        let touchStartX = 0, touchEndX = 0;
-        const swipeThreshold = 50;
+        // --- SWIPE GESTURE NAVIGATION LOGIC ---
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const swipeThreshold = 50; 
         const navTabs = ['home', 'support', 'leave', 'chat', 'profile', 'settings'];
 
-        document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
-        document.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; handleSwipeGesture(); }, { passive: true });
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipeGesture();
+        }, { passive: true });
 
         function handleSwipeGesture() {
             const loginView = document.getElementById('login-view');
+            const scannerView = document.getElementById('view-scanner');
             if (!loginView.classList.contains('hidden') && loginView.classList.contains('active')) return;
-            if (!document.getElementById('view-scanner').classList.contains('hidden')) return;
+            if (!scannerView.classList.contains('hidden')) return;
+
             let currentTabId = 'home';
-            if (!document.getElementById('view-chat').classList.contains('hidden')) currentTabId = 'chat';
-            else { const an = document.querySelector('.nav-item.active'); if (an) currentTabId = an.id.replace('nav-', ''); }
-            const ci = navTabs.indexOf(currentTabId);
-            if (ci === -1) return;
-            if (touchEndX < touchStartX - swipeThreshold && ci < navTabs.length - 1) switchTab(navTabs[ci + 1]);
-            if (touchEndX > touchStartX + swipeThreshold && ci > 0) switchTab(navTabs[ci - 1]);
-        }
-
-        // ─── UI ROUTING ───────────────────────────────────────────────────────
-        function switchTab(tabId) {
-            document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
-            const chatOverlay = document.getElementById('view-chat');
-            const mainHeader  = document.getElementById('main-header');
-            const fab         = document.getElementById('fab-scanner');
-
-            if (tabId === 'chat') {
-                chatOverlay.classList.remove('hidden'); chatOverlay.classList.add('flex');
-                mainHeader.style.display = 'none'; fab.style.transform = 'scale(0)';
-                document.getElementById('chat-badge').classList.add('hidden');
-                dismissNotifPopup(); scrollToBottomChat();
+            if (!document.getElementById('view-chat').classList.contains('hidden')) {
+                currentTabId = 'chat';
             } else {
-                chatOverlay.classList.add('hidden'); chatOverlay.classList.remove('flex');
-                mainHeader.style.display = 'flex';
-                const targetView = document.getElementById(`view-${tabId}`);
-                if (targetView) targetView.classList.remove('hidden');
-                fab.style.transform = (tabId === 'scanner') ? 'scale(0)' : 'scale(1)';
-                if (tabId === 'support') {
-                    const isRegActive = document.getElementById('tab-sup-register').classList.contains('active');
-                    if (isRegActive) initSupportSignaturePad('sup-sig-canvas', 'register');
-                    else initSupportSignaturePad('maint-sig-canvas', 'maintenance');
-                }
-                if (tabId === 'profile') generateCalendar();
-                if (tabId === 'leave') loadLeaveHistory();
+                const activeNav = document.querySelector('.nav-item.active');
+                if (activeNav) currentTabId = activeNav.id.replace('nav-', '');
             }
 
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active', 'text-blue-600', 'dark:text-blue-400'));
-            const navTarget = document.getElementById(`nav-${tabId}`);
-            if (navTarget) navTarget.classList.add('active', 'text-blue-600', 'dark:text-blue-400');
+            const currentIndex = navTabs.indexOf(currentTabId);
+            if (currentIndex === -1) return;
 
-            window.scrollTo(0, 0);
+            if (touchEndX < touchStartX - swipeThreshold) {
+                if (currentIndex < navTabs.length - 1) switchTab(navTabs[currentIndex + 1]);
+            }
+            if (touchEndX > touchStartX + swipeThreshold) {
+                if (currentIndex > 0) switchTab(navTabs[currentIndex - 1]);
+            }
+        }
 
-            if (tabId === 'scanner' && locationVerified) startScanner();
-            else if (html5QrCode && html5QrCode.isScanning) html5QrCode.stop().catch(() => {});
+        // --- UI ROUTING ---
+        function switchTab(tabId) {
+            document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
+            
+            const chatOverlay = document.getElementById('view-chat');
+            const mainHeader = document.getElementById('main-header');
+            const fab = document.getElementById('fab-scanner');
+
+            if (tabId === 'chat') {
+                chatOverlay.classList.remove('hidden');
+                chatOverlay.classList.add('flex');
+                mainHeader.style.display = 'none'; 
+                fab.style.transform = 'scale(0)';
+                document.getElementById('chat-badge').classList.add('hidden');
+                dismissNotifPopup();
+                scrollToBottomChat();
+            } else {
+                chatOverlay.classList.add('hidden');
+                chatOverlay.classList.remove('flex');
+                mainHeader.style.display = 'flex'; 
+                
+                const targetView = document.getElementById(`view-${tabId}`);
+                if(targetView) targetView.classList.remove('hidden');
+
+                if (tabId === 'scanner') {
+                    fab.style.transform = 'scale(0)';
+                } else {
+                    fab.style.transform = 'scale(1)';
+                }
+                
+                if (tabId === 'support') {
+                    const isRegisterActive = document.getElementById('tab-sup-register').classList.contains('active');
+                    if (isRegisterActive) initSupportSignaturePad('sup-sig-canvas', 'register');
+                    else initSupportSignaturePad('maint-sig-canvas', 'maintenance');
+                }
+
+                if (tabId === 'leave') {
+                    loadLeaveHistory();
+                    loadLeaveBalances();
+                    // Set today as default start date
+                    if (!document.getElementById('leave-start').value) {
+                        const today = new Date().toISOString().split('T')[0];
+                        document.getElementById('leave-start').value = today;
+                        document.getElementById('leave-end').value = today;
+                        calculateLeaveDays();
+                    }
+                }
+
+                if (tabId === 'profile') {
+                    generateCalendar();
+                }
+            }
+            
+            if (tabId !== 'scanner') {
+                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active', 'text-blue-600', 'dark:text-blue-400'));
+                const navTarget = document.getElementById(`nav-${tabId}`);
+                if(navTarget) {
+                    navTarget.classList.add('active', 'text-blue-600', 'dark:text-blue-400');
+                }
+            }
+            
+            window.scrollTo(0,0);
+
+            if (tabId === 'scanner' && locationVerified) {
+                startScanner();
+            } else if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().catch(() => {});
+            }
         }
 
         function showPortal() {
@@ -992,7 +1197,7 @@
             document.getElementById('fab-scanner').style.display = 'none';
             document.querySelector('nav').classList.add('hidden');
         }
-
+        
         function closePortal() {
             document.getElementById('login-view').classList.remove('active');
             document.getElementById('app-content').classList.remove('hidden');
@@ -1003,500 +1208,313 @@
             generateCalendar();
         }
 
-        // ─── AUTH ─────────────────────────────────────────────────────────────
+        // --- AUTHENTICATION ---
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 const snap = await db.ref('employees').orderByChild('email').equalTo(user.email.toLowerCase()).once('value');
                 if (snap.exists()) {
-                    const data = snap.val(), key = Object.keys(data)[0];
+                    const data = snap.val();
+                    const key = Object.keys(data)[0];
                     currentUserData = { ...data[key], id: key };
+                    
                     if (!currentUserData.employeeNumber) {
                         const pin = Math.floor(10000 + Math.random() * 90000).toString();
                         await db.ref(`employees/${key}`).update({ employeeNumber: pin });
                         currentUserData.employeeNumber = pin;
                     }
+
+                    // Initialise default leave balances if not set
+                    if (!currentUserData.leaveBalances) {
+                        const defaultBalances = {
+                            annual: 15,
+                            sick: 30,
+                            family: 3,
+                            study: 5
+                        };
+                        await db.ref(`employees/${key}/leaveBalances`).set(defaultBalances);
+                        currentUserData.leaveBalances = defaultBalances;
+                    }
+                    
                     updateUIWithUserData();
                     listenToAttendance();
                     listenToWorkHistory();
                     initChat();
                     closePortal();
                     requestNotificationPermission();
-                    loadLeaveBalances();
-                    listenForLeaveStatusChanges();
+                    listenToLeaveStatusChanges();
+
                 } else {
-                    showToast("Not registered – Alert sent to admin", "error");
-                    await auth.signOut(); showPortal();
+                    showToast("Not registered - Alert sent to admin", "error");
+                    await auth.signOut();
+                    showPortal();
                 }
             } else { showPortal(); }
         });
 
         async function signInWithGoogle() {
             const provider = new firebase.auth.GoogleAuthProvider();
-            try { await auth.signInWithPopup(provider); }
-            catch (e) { showToast(e.message ? e.message.split('.')[0] : "Login failed", "error"); }
+            try { await auth.signInWithPopup(provider); } 
+            catch (error) { showToast(error.message ? error.message.split('.')[0] : "Login failed", "error"); }
         }
 
         async function signOutUser() {
             if (html5QrCode && html5QrCode.isScanning) await html5QrCode.stop().catch(() => {});
             await auth.signOut();
-            currentUserData = null; locationVerified = false;
+            currentUserData = null;
+            locationVerified = false;
             document.getElementById('location-overlay').classList.remove('hidden');
             document.getElementById('scanner-interface').classList.add('hidden');
+            
+            document.querySelectorAll('.shimmer').forEach(el => {
+                if(el.tagName === 'INPUT') el.value = '';
+                else if(el.tagName !== 'IMG') el.innerText = 'Loading...';
+                el.classList.add('shimmer');
+            });
             showPortal();
         }
 
-        // ─── PROFILE & AVATAR ─────────────────────────────────────────────────
+        // --- PROFILE, AVATAR & CALENDAR ---
         function generateFallbackAvatarUrl(name) {
             return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=eff6ff&color=2563eb&bold=true`;
         }
 
         function handleImgError(imgNode) {
-            imgNode.src = generateFallbackAvatarUrl(currentUserData?.name || 'User');
+            if(currentUserData && currentUserData.name) {
+                imgNode.src = generateFallbackAvatarUrl(currentUserData.name);
+            } else {
+                imgNode.src = generateFallbackAvatarUrl('User');
+            }
         }
 
         function updateUIWithUserData() {
             const name = currentUserData.name || "Employee";
-            const dp   = currentUserData.profilePic || generateFallbackAvatarUrl(name);
+            const dp = currentUserData.profilePic || generateFallbackAvatarUrl(name);
+            
             document.querySelectorAll('.shimmer').forEach(el => el.classList.remove('shimmer'));
-            document.getElementById('home-name').innerText    = name;
-            document.getElementById('home-avatar').src        = dp;
-            document.getElementById('profile-img').src        = dp;
-            document.getElementById('edit-name').value        = name;
-            document.getElementById('edit-email').value       = currentUserData.email;
+
+            document.getElementById('home-name').innerText = name;
+            document.getElementById('home-avatar').src = dp;
+            document.getElementById('profile-img').src = dp;
+            document.getElementById('edit-name').value = name;
+            document.getElementById('edit-email').value = currentUserData.email;
             document.getElementById('emp-pin-display').innerText = currentUserData.employeeNumber || 'ERROR';
         }
 
         async function saveProfile() {
             const newName = document.getElementById('edit-name').value.trim();
-            if (!newName) return showToast("Name cannot be empty", "error");
-            await db.ref(`employees/${currentUserData.id}`).update({ name: newName });
-            currentUserData.name = newName;
-            updateUIWithUserData();
-            showToast("Profile Updated");
+            if(!newName) return showToast("Name cannot be empty", "error");
+            try {
+                await db.ref(`employees/${currentUserData.id}`).update({ name: newName });
+                currentUserData.name = newName;
+                updateUIWithUserData();
+                showToast("Profile Updated");
+            } catch(e) { showToast("Failed to update profile", "error"); }
         }
 
         async function handleImageUpload(event) {
             const file = event.target.files[0];
-            if (!file) return;
+            if(!file) return;
+
             const formData = new FormData();
             formData.append('file', file);
             formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            
             showToast("Uploading picture...");
             try {
-                const res  = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
+                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+                    method: 'POST', body: formData
+                });
                 const data = await res.json();
-                if (data.secure_url) {
+                
+                if(data.secure_url) {
                     await db.ref(`employees/${currentUserData.id}`).update({ profilePic: data.secure_url });
                     currentUserData.profilePic = data.secure_url;
-                    updateUIWithUserData(); showToast("Picture Updated");
-                } else throw new Error(data.error.message);
+                    updateUIWithUserData();
+                    showToast("Picture Updated");
+                } else { throw new Error(data.error.message); }
             } catch(e) { showToast("Upload Failed. Check connection.", "error"); }
-        }
-
-        // ─── CALENDAR (FIXED LOGIC + LEAVE SUPPORT) ──────────────────────────
-        function changeCalMonth(delta) {
-            calViewMonth += delta;
-            if (calViewMonth > 11) { calViewMonth = 0; calViewYear++; }
-            if (calViewMonth < 0)  { calViewMonth = 11; calViewYear--; }
-            generateCalendar();
         }
 
         async function generateCalendar() {
             const container = document.getElementById('calendar-days');
-            const title     = document.getElementById('cal-month-title');
+            const title = document.getElementById('cal-month-title');
             container.innerHTML = '<div class="col-span-7 text-xs text-center py-2 text-gray-400">Loading...</div>';
-
-            const now = new Date();
-            if (calViewYear === null)  calViewYear  = now.getFullYear();
-            if (calViewMonth === null) calViewMonth = now.getMonth();
-
-            const year  = calViewYear;
-            const month = calViewMonth;
-            const today = now.getDate();
-            const isCurrentMonth = (year === now.getFullYear() && month === now.getMonth());
-
+            
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const today = date.getDate();
+            
             const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
             title.innerHTML = `${monthNames[month]} ${year}`;
 
-            // ── Fetch attendance ──────────────────────────────────────────────
             let allAtt = {};
-            if (currentUserData) {
-                try { const s = await db.ref('attendance').once('value'); allAtt = s.val() || {}; } catch(e) {}
-            }
-
-            // ── Fetch approved leave for this employee ────────────────────────
             let approvedLeaveDates = new Set();
+
             if (currentUserData) {
                 try {
-                    const snap = await db.ref('leave_requests')
-                        .orderByChild('employeeId').equalTo(currentUserData.id).once('value');
-                    if (snap.exists()) {
-                        snap.forEach(child => {
+                    const snap = await db.ref('attendance').once('value');
+                    allAtt = snap.val() || {};
+                } catch(e) { console.error(e); }
+
+                // Fetch approved leave requests to overlay on calendar
+                try {
+                    const leaveSnap = await db.ref('leave_requests')
+                        .orderByChild('employeeId')
+                        .equalTo(currentUserData.id)
+                        .once('value');
+                    
+                    if (leaveSnap.exists()) {
+                        leaveSnap.forEach(child => {
                             const req = child.val();
-                            if (req.status === 'approved') {
-                                // Expand date range into individual dates
-                                const start = new Date(req.startDate + 'T00:00:00');
-                                const end   = new Date(req.endDate   + 'T00:00:00');
-                                for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-                                    approvedLeaveDates.add(d.toISOString().split('T')[0]);
+                            if (req.status === 'Approved') {
+                                // Generate all dates in the leave range
+                                const start = new Date(req.startDate);
+                                const end = new Date(req.endDate);
+                                let cur = new Date(start);
+                                while (cur <= end) {
+                                    const dayOfWeek = cur.getDay();
+                                    if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+                                        approvedLeaveDates.add(cur.toISOString().split('T')[0]);
+                                    }
+                                    cur.setDate(cur.getDate() + 1);
                                 }
                             }
                         });
                     }
-                } catch(e) {}
+                } catch(e) { console.error(e); }
             }
 
-            // ── SA Public Holidays 2025 ───────────────────────────────────────
+            container.innerHTML = '';
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
             const saHolidays = {
-                "01-01":"New Year's Day","03-21":"Human Rights Day","04-03":"Good Friday",
-                "04-06":"Family Day","04-27":"Freedom Day","05-01":"Workers' Day",
-                "06-16":"Youth Day","08-09":"National Women's Day","08-10":"Women's Day Observed",
-                "09-24":"Heritage Day","12-16":"Day of Reconciliation",
-                "12-25":"Christmas Day","12-26":"Day of Goodwill"
+                "01-01": "New Year's Day", "03-21": "Human Rights Day",
+                "04-03": "Good Friday", "04-06": "Family Day",
+                "04-27": "Freedom Day", "05-01": "Workers' Day",
+                "06-16": "Youth Day", "08-09": "National Women's Day",
+                "08-10": "Women's Day Observed", "09-24": "Heritage Day",
+                "12-16": "Day of Reconciliation", "12-25": "Christmas Day",
+                "12-26": "Day of Goodwill"
             };
 
-            container.innerHTML = '';
-            const firstDay     = new Date(year, month, 1).getDay();
-            const daysInMonth  = new Date(year, month + 1, 0).getDate();
-            const currentHour  = now.getHours();
-            const currentMin   = now.getMinutes();
-
-            for (let i = 0; i < firstDay; i++) {
+            for(let i = 0; i < firstDay; i++) {
                 container.innerHTML += `<div class="calendar-day day-empty">0</div>`;
             }
 
-            for (let i = 1; i <= daysInMonth; i++) {
-                const dayStr   = String(i).padStart(2, '0');
+            for(let i = 1; i <= daysInMonth; i++) {
+                const dayStr = String(i).padStart(2, '0');
                 const monthStr = String(month + 1).padStart(2, '0');
-                const dateKey  = `${year}-${monthStr}-${dayStr}`;
-                const shortKey = `${monthStr}-${dayStr}`;
-                const isHoliday = saHolidays[shortKey];
-                const dayOfWeek = new Date(year, month, i).getDay();
-                const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
-                const isPast    = isCurrentMonth ? (i < today) : (year < now.getFullYear() || (year === now.getFullYear() && month < now.getMonth()));
-                const isToday   = isCurrentMonth && (i === today);
-                const isFuture  = isCurrentMonth ? (i > today) : (year > now.getFullYear() || (year === now.getFullYear() && month > now.getMonth()));
-                const todayRing = isToday ? 'ring-2 ring-blue-600 dark:ring-blue-400 ring-offset-1 dark:ring-offset-slate-800' : '';
+                const dateKey = `${year}-${monthStr}-${dayStr}`;
+                const shortDateKey = `${monthStr}-${dayStr}`;
+                const isHoliday = saHolidays[shortDateKey];
+                const isOnApprovedLeave = approvedLeaveDates.has(dateKey);
 
-                let dayClass  = 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300';
+                let dayClass = 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300';
+                let todayRing = (i === today) ? 'ring-2 ring-blue-600 dark:ring-blue-400 ring-offset-2 dark:ring-offset-slate-800' : '';
                 let titleText = '';
 
-                // ── Priority: Approved leave (BLUE) ──────────────────────────
-                if (approvedLeaveDates.has(dateKey)) {
-                    dayClass  = 'bg-blue-500 text-white font-bold shadow-sm';
+                const dayOfWeek = new Date(year, month, i).getDay();
+                const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+
+                // On Approved Leave — show blue first, overrides absent
+                if (isOnApprovedLeave) {
+                    dayClass = 'bg-blue-500 text-white font-bold shadow-sm';
                     titleText = 'Approved Leave';
-                }
-                // ── Public holiday (PURPLE) ───────────────────────────────────
-                else if (isHoliday) {
-                    dayClass  = 'bg-purple-500 text-white font-bold shadow-sm';
-                    titleText = isHoliday;
-                }
-                // ── Weekend — no status ───────────────────────────────────────
-                else if (isWeekend) {
-                    dayClass = 'text-gray-400 dark:text-gray-500';
-                }
-                // ── Has attendance record ─────────────────────────────────────
-                else if (currentUserData && allAtt[dateKey] && allAtt[dateKey][currentUserData.id]) {
+                } else if (currentUserData && allAtt[dateKey] && allAtt[dateKey][currentUserData.id]) {
                     const rec = allAtt[dateKey][currentUserData.id];
                     const tIn = rec.TimeIn;
+                    const tOut = rec.TimeOut;
+
                     if (tIn) {
+                        // NEW LOGIC: Parse clock-in time
                         const [h, m] = tIn.split(':').map(Number);
-                        const totalMinsIn      = h * 60 + m;
-                        const lateCutoffMins   = LATE_CUTOFF_H * 60 + LATE_CUTOFF_M;
-                        if (totalMinsIn <= lateCutoffMins) {
-                            // On time (before or at 09:15) → GREEN
-                            dayClass  = 'bg-green-500 text-white font-bold shadow-sm';
-                            titleText = 'Present';
+                        const totalMinutes = h * 60 + m;
+                        // Present: 00:00 – 09:15 (i.e., up to and including 09:15)
+                        const presentCutoff = 9 * 60 + 15;   // 555 minutes
+                        // Late: after 09:15
+                        const isLate = totalMinutes > presentCutoff;
+                        const isHalfDay = i < today && !tOut;
+
+                        if (isLate || isHalfDay) {
+                            dayClass = 'bg-orange-500 text-white font-bold shadow-sm';
+                            titleText = isHoliday ? `${isHoliday} (Worked Late/Half)` : 'Late/Half-day';
                         } else {
-                            // After 09:15 → ORANGE (late)
-                            dayClass  = 'bg-orange-500 text-white font-bold shadow-sm';
-                            titleText = `Late (${tIn})`;
+                            dayClass = 'bg-green-500 text-white font-bold shadow-sm';
+                            titleText = isHoliday ? `${isHoliday} (Worked)` : 'Present';
                         }
                     }
-                }
-                // ── Past workday with NO attendance record → ABSENT (RED) ─────
-                else if (isPast && !isWeekend) {
-                    dayClass  = 'bg-red-500 text-white font-bold shadow-sm';
+                } else if (isHoliday) {
+                    dayClass = 'bg-purple-500 text-white font-bold shadow-sm';
+                    titleText = isHoliday;
+                } else if (i < today && !isWeekend) {
+                    // Past weekday with no clock-in and not on leave and after 16:00 rule
+                    dayClass = 'bg-red-500 text-white font-bold shadow-sm'; 
                     titleText = 'Absent';
-                }
-                // ── Today: check if it's past 16:00 with no record → ABSENT ──
-                else if (isToday && !isWeekend) {
-                    const pastAbsentThreshold = (currentHour > ABSENT_AFTER_H) ||
-                        (currentHour === ABSENT_AFTER_H && currentMin >= ABSENT_AFTER_M);
-                    if (pastAbsentThreshold) {
-                        dayClass  = 'bg-red-500 text-white font-bold shadow-sm';
+                } else if (i === today && !isWeekend) {
+                    // Today: mark absent only if past 16:00 and no clock-in
+                    const currentHour = date.getHours();
+                    if (currentHour >= 16) {
+                        dayClass = 'bg-red-500 text-white font-bold shadow-sm'; 
                         titleText = 'Absent';
                     }
-                    // If before 16:00 today with no record — leave as neutral (day not done yet)
                 }
-                // ── Future days — leave neutral ───────────────────────────────
 
                 const titleAttr = titleText ? `title="${titleText}"` : '';
                 container.innerHTML += `<div class="calendar-day ${dayClass} ${todayRing} m-[1px] transition-all cursor-default" ${titleAttr}>${i}</div>`;
             }
         }
 
-        // ─── WORK HISTORY ─────────────────────────────────────────────────────
+        // --- WORK HISTORY LOGIC ---
         function listenToWorkHistory() {
             if (!currentUserData) return;
-            const ref = db.ref(`employees/${currentUserData.id}/work_history`).orderByChild('timestamp').limitToLast(10);
-            ref.on('value', (snap) => {
+            const historyRef = db.ref(`employees/${currentUserData.id}/work_history`).orderByChild('timestamp').limitToLast(10);
+            
+            historyRef.on('value', (snap) => {
                 const list = document.getElementById('work-history-list');
                 list.innerHTML = '';
-                if (!snap.exists()) { list.innerHTML = `<div class="text-center text-xs text-gray-400 py-4 italic">No tasks signed yet.</div>`; return; }
-                let records = [];
-                snap.forEach(c => records.push(c.val()));
-                records.reverse();
-                records.forEach(rec => {
-                    const timeStr = new Date(rec.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-                    const dateStr = new Date(rec.timestamp).toLocaleDateString([], {day:'numeric',month:'short'});
-                    let refColor = rec.refId?.startsWith('LVE') ? 'text-blue-500 dark:text-blue-400' :
-                                   rec.refId?.startsWith('SUP') ? 'text-blue-600 dark:text-blue-400' : 'text-purple-600 dark:text-purple-400';
-                    list.innerHTML += `<div class="bg-gray-50 dark:bg-slate-700/50 border border-gray-100 dark:border-slate-700 rounded-xl p-3 flex justify-between items-center">
-                        <div><h4 class="font-bold text-sm text-gray-800 dark:text-gray-200 truncate w-40">${rec.title}</h4><span class="font-mono text-[10px] ${refColor}">${rec.refId}</span></div>
-                        <div class="text-right"><p class="text-xs text-gray-500 font-medium">${timeStr}</p><p class="text-[9px] text-gray-400 uppercase tracking-widest">${dateStr}</p></div>
-                    </div>`;
-                });
-            });
-        }
-
-        // ═══════════════════════════════════════════════════════════════════
-        //  LEAVE MANAGEMENT — NEW
-        // ═══════════════════════════════════════════════════════════════════
-
-        /** Load leave balances from DB (or default from entitlement) */
-        async function loadLeaveBalances() {
-            if (!currentUserData) return;
-            try {
-                const snap = await db.ref(`employees/${currentUserData.id}/leaveBalance`).once('value');
-                const bal = snap.val() || {};
-                const annual = bal.Annual ?? LEAVE_ENTITLEMENT.Annual;
-                const sick   = bal.Sick   ?? LEAVE_ENTITLEMENT.Sick;
-                const family = bal.Family ?? LEAVE_ENTITLEMENT.Family;
-                document.getElementById('leave-bal-annual').innerText = annual;
-                document.getElementById('leave-bal-sick').innerText   = sick;
-                document.getElementById('leave-bal-family').innerText = family;
-                document.querySelectorAll('#leave-summary-strip .shimmer').forEach(el => el.classList.remove('shimmer'));
-            } catch(e) {}
-        }
-
-        /** Toggle leave type button styling */
-        function selectLeaveType(type) {
-            document.querySelectorAll('.leave-type-btn').forEach(btn => {
-                btn.className = 'leave-type-btn py-3 px-2 rounded-xl border-2 border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700/50 text-gray-600 dark:text-gray-300 font-bold text-xs flex flex-col items-center gap-1 transition-all active:scale-95';
-            });
-            const activeColors = {
-                Annual: 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
-                Sick:   'border-orange-500 bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300',
-                Family: 'border-purple-500 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300',
-            };
-            const btn = document.getElementById(`lt-${type.toLowerCase()}`);
-            if (btn) btn.className = `leave-type-btn py-3 px-2 rounded-xl border-2 ${activeColors[type]} font-bold text-xs flex flex-col items-center gap-1 transition-all active:scale-95`;
-            document.getElementById('leave-type-value').value = type;
-        }
-
-        /** Count working days (Mon–Fri) between two date strings */
-        function countWorkingDays(startStr, endStr) {
-            const start = new Date(startStr + 'T00:00:00');
-            const end   = new Date(endStr   + 'T00:00:00');
-            if (isNaN(start) || isNaN(end) || end < start) return 0;
-            let count = 0;
-            for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-                const dow = d.getDay();
-                if (dow !== 0 && dow !== 6) count++;
-            }
-            return count;
-        }
-
-        function calcLeaveDays() {
-            const start = document.getElementById('leave-start-date').value;
-            const end   = document.getElementById('leave-end-date').value;
-            if (start && end) {
-                const days = countWorkingDays(start, end);
-                document.getElementById('leave-days-count').innerText = days;
-                document.getElementById('leave-days-pill').classList.remove('hidden');
-            } else {
-                document.getElementById('leave-days-pill').classList.add('hidden');
-            }
-        }
-
-        /** Handle optional supporting document upload */
-        async function handleLeaveDocUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const nameEl = document.getElementById('leave-doc-name');
-            nameEl.textContent = `Uploading ${file.name}...`;
-            nameEl.classList.remove('hidden');
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-            try {
-                const res  = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
-                const data = await res.json();
-                if (data.secure_url) {
-                    leaveDocUrl = data.secure_url;
-                    nameEl.textContent = `✓ ${file.name} attached`;
-                } else throw new Error();
-            } catch { nameEl.textContent = 'Upload failed. Try again.'; }
-        }
-
-        /** Submit a leave request to Firebase */
-        async function submitLeaveRequest() {
-            if (!currentUserData) return;
-            const leaveType = document.getElementById('leave-type-value').value;
-            const startDate = document.getElementById('leave-start-date').value;
-            const endDate   = document.getElementById('leave-end-date').value;
-            const reason    = document.getElementById('leave-reason').value.trim();
-
-            if (!startDate || !endDate) return showToast("Please select start and end dates", "error");
-            if (new Date(endDate) < new Date(startDate)) return showToast("End date cannot be before start date", "error");
-
-            const days = countWorkingDays(startDate, endDate);
-            if (days === 0) return showToast("No working days selected", "error");
-
-            // Check balance
-            const balEl = document.getElementById(`leave-bal-${leaveType.toLowerCase()}`);
-            const currentBalance = parseInt(balEl?.innerText || '0');
-            if (days > currentBalance) return showToast(`Insufficient ${leaveType} leave balance (${currentBalance} days remaining)`, "error");
-
-            document.getElementById('global-spinner').classList.add('active');
-            document.getElementById('spinner-text').innerText = "Submitting leave request...";
-
-            try {
-                const reqId = `LVE-${Math.floor(1000 + Math.random() * 9000)}`;
-                await db.ref('leave_requests').push({
-                    reqId,
-                    employeeId:   currentUserData.id,
-                    employeeName: currentUserData.name || 'Employee',
-                    leaveType,
-                    startDate,
-                    endDate,
-                    days,
-                    reason,
-                    docUrl: leaveDocUrl || null,
-                    status: 'pending',
-                    submittedAt: firebase.database.ServerValue.TIMESTAMP
-                });
-
-                // Log to work history
-                await db.ref(`employees/${currentUserData.id}/work_history`).push({
-                    refId: reqId,
-                    title: `${leaveType} Leave Request (${days}d)`,
-                    timestamp: firebase.database.ServerValue.TIMESTAMP
-                });
-
-                document.getElementById('global-spinner').classList.remove('active');
-                showToast(`Leave request submitted! Ref: ${reqId}`);
-
-                // Reset form
-                document.getElementById('leave-start-date').value = '';
-                document.getElementById('leave-end-date').value   = '';
-                document.getElementById('leave-reason').value     = '';
-                document.getElementById('leave-days-pill').classList.add('hidden');
-                leaveDocUrl = null;
-                document.getElementById('leave-doc-name').classList.add('hidden');
-                selectLeaveType('Annual');
-                loadLeaveHistory();
-            } catch(e) {
-                document.getElementById('global-spinner').classList.remove('active');
-                showToast("Failed to submit leave request", "error");
-                console.error(e);
-            }
-        }
-
-        /** Load this employee's leave request history */
-        async function loadLeaveHistory() {
-            if (!currentUserData) return;
-            const list = document.getElementById('leave-history-list');
-            list.innerHTML = '<div class="text-center text-xs text-gray-400 py-4 italic">Loading...</div>';
-            try {
-                const snap = await db.ref('leave_requests')
-                    .orderByChild('employeeId').equalTo(currentUserData.id).once('value');
+                
                 if (!snap.exists()) {
-                    list.innerHTML = '<div class="text-center text-xs text-gray-400 py-4 italic">No leave requests yet.</div>';
+                    list.innerHTML = `<div class="text-center text-xs text-gray-400 py-4 italic">No tasks signed yet.</div>`;
                     return;
                 }
+                
                 let records = [];
-                snap.forEach(c => records.push({ ...c.val(), _key: c.key }));
-                records.sort((a, b) => (b.submittedAt || 0) - (a.submittedAt || 0));
+                snap.forEach(child => { records.push(child.val()); });
+                records.reverse(); 
 
-                const typeIcons = { Annual: 'fa-umbrella-beach', Sick: 'fa-kit-medical', Family: 'fa-people-roof' };
-                const typeColors = {
-                    Annual: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20',
-                    Sick:   'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20',
-                    Family: 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20',
-                };
-                const statusLabels = { pending: 'Pending', approved: 'Approved', rejected: 'Rejected' };
+                records.forEach(rec => {
+                    const timeString = new Date(rec.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    const dateString = new Date(rec.timestamp).toLocaleDateString([], {day:'numeric', month:'short'});
+                    
+                    let refColor = "text-blue-600 dark:text-blue-400";
+                    if (rec.refId && rec.refId.startsWith("SUP")) refColor = "text-blue-600 dark:text-blue-400";
+                    else if (rec.refId && rec.refId.startsWith("SFT")) refColor = "text-purple-600 dark:text-purple-400";
+                    else if (rec.refId && rec.refId.startsWith("LVE")) refColor = "text-teal-600 dark:text-teal-400";
 
-                list.innerHTML = '';
-                records.forEach(req => {
-                    const statusClass = `leave-badge-${req.status}`;
-                    const tc = typeColors[req.leaveType] || 'text-gray-500 bg-gray-50';
-                    const icon = typeIcons[req.leaveType] || 'fa-calendar';
-                    const submittedStr = req.submittedAt
-                        ? new Date(req.submittedAt).toLocaleDateString([], {day:'numeric',month:'short',year:'numeric'})
-                        : 'Unknown';
                     list.innerHTML += `
-                        <div class="leave-card app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4">
-                            <div class="flex items-start justify-between mb-2">
-                                <div class="flex items-center gap-2">
-                                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg ${tc} shrink-0">
-                                        <i class="fa-solid ${icon} text-sm"></i>
-                                    </span>
-                                    <div>
-                                        <p class="font-bold text-sm text-gray-800 dark:text-gray-200">${req.leaveType} Leave</p>
-                                        <p class="text-[10px] font-mono text-gray-400">${req.reqId || ''}</p>
-                                    </div>
-                                </div>
-                                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full ${statusClass}">${statusLabels[req.status] || req.status}</span>
+                        <div class="bg-gray-50 dark:bg-slate-700/50 border border-gray-100 dark:border-slate-700 rounded-xl p-3 flex justify-between items-center">
+                            <div>
+                                <h4 class="font-bold text-sm text-gray-800 dark:text-gray-200 truncate w-40">${rec.title}</h4>
+                                <span class="font-mono text-[10px] ${refColor}">${rec.refId}</span>
                             </div>
-                            <div class="grid grid-cols-2 gap-2 text-xs text-gray-600 dark:text-gray-400 mt-2 border-t border-gray-100 dark:border-slate-700 pt-2">
-                                <div><span class="font-bold block text-[9px] text-gray-400 uppercase tracking-widest mb-0.5">Dates</span>${req.startDate} → ${req.endDate}</div>
-                                <div><span class="font-bold block text-[9px] text-gray-400 uppercase tracking-widest mb-0.5">Duration</span>${req.days} working day(s)</div>
-                                <div class="col-span-2"><span class="font-bold block text-[9px] text-gray-400 uppercase tracking-widest mb-0.5">Submitted</span>${submittedStr}</div>
-                                ${req.reason ? `<div class="col-span-2"><span class="font-bold block text-[9px] text-gray-400 uppercase tracking-widest mb-0.5">Reason</span>${req.reason}</div>` : ''}
-                                ${req.status === 'rejected' && req.rejectReason ? `<div class="col-span-2 bg-red-50 dark:bg-red-900/20 p-2 rounded-lg text-red-600 dark:text-red-400 text-[10px] font-semibold"><i class="fa-solid fa-circle-exclamation mr-1"></i>${req.rejectReason}</div>` : ''}
+                            <div class="text-right">
+                                <p class="text-xs text-gray-500 font-medium">${timeString}</p>
+                                <p class="text-[9px] text-gray-400 uppercase tracking-widest">${dateString}</p>
                             </div>
-                            ${req.docUrl ? `<a href="${req.docUrl}" target="_blank" class="mt-2 inline-flex items-center gap-1 text-[10px] text-blue-600 dark:text-blue-400 font-semibold hover:underline"><i class="fa-solid fa-paperclip"></i> View Document</a>` : ''}
-                        </div>`;
+                        </div>
+                    `;
                 });
-            } catch(e) {
-                list.innerHTML = '<div class="text-center text-xs text-gray-400 py-4 italic">Error loading leave history.</div>';
-            }
-        }
-
-        /**
-         * listenForLeaveStatusChanges()
-         * Watches leave_requests and fires a notification + badge when any of
-         * this employee's requests change from 'pending' to 'approved'/'rejected'.
-         */
-        function listenForLeaveStatusChanges() {
-            if (!currentUserData) return;
-            const ref = db.ref('leave_requests').orderByChild('employeeId').equalTo(currentUserData.id);
-            let initialLoadDone = false;
-            ref.once('value', () => { initialLoadDone = true; });
-
-            ref.on('child_changed', (snap) => {
-                if (!initialLoadDone) return;
-                const req = snap.val();
-                if (req.status === 'approved' || req.status === 'rejected') {
-                    const emoji  = req.status === 'approved' ? '✅' : '❌';
-                    const label  = req.status === 'approved' ? 'Approved' : 'Rejected';
-                    const msg    = `${emoji} ${req.leaveType} leave ${label} (${req.reqId})`;
-                    showToast(msg, req.status === 'approved' ? 'success' : 'error');
-                    document.getElementById('leave-badge').classList.remove('hidden');
-                    playNotificationSound();
-                    loadLeaveBalances(); // refresh balance display
-                }
             });
         }
 
-        // ═══════════════════════════════════════════════════════════════════
-
-        // ─── SUPPORT TAB ──────────────────────────────────────────────────────
+        // --- SUPPORT TAB ROUTING ---
         function switchSupTab(tab) {
             document.querySelectorAll('.sup-tab').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-sup-' + tab).classList.add('active');
+
             if (tab === 'register') {
                 document.getElementById('sup-view-register').classList.remove('hidden');
                 document.getElementById('sup-view-maintenance').classList.add('hidden');
@@ -1508,45 +1526,70 @@
             }
         }
 
-        // ─── SIGNATURE PAD ────────────────────────────────────────────────────
+        // --- SIGNATURE PAD LOGIC ---
         function initSupportSignaturePad(canvasId, mode) {
             const canvas = document.getElementById(canvasId);
-            if ((mode === 'register' && supCtx) || (mode === 'maintenance' && maintCtx)) return;
+            
+            if (mode === 'register' && supCtx) return;
+            if (mode === 'maintenance' && maintCtx) return;
+            
             if (!canvas) return;
+
             setTimeout(() => {
                 const rect = canvas.parentElement.getBoundingClientRect();
-                canvas.width = rect.width - 32; canvas.height = 140;
+                canvas.width = rect.width - 32; 
+                canvas.height = 140;
+                
                 if (mode === 'register') supCtx = canvas.getContext('2d');
                 else maintCtx = canvas.getContext('2d');
             }, 50);
+
             const getPos = (e) => {
                 const rect = canvas.getBoundingClientRect();
-                return { x: (e.touches ? e.touches[0].clientX : e.clientX) - rect.left,
-                          y: (e.touches ? e.touches[0].clientY : e.clientY) - rect.top };
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return { x: clientX - rect.left, y: clientY - rect.top };
             };
+
             const startDraw = (e) => {
-                if (e.type !== 'mousedown') e.preventDefault();
-                const ctx = mode === 'register' ? supCtx : maintCtx; if (!ctx) return;
+                if(e.type !== 'mousedown') e.preventDefault();
+                const ctx = mode === 'register' ? supCtx : maintCtx;
+                if (!ctx) return;
                 if (mode === 'register') { isSigningSupport = true; hasSupportSignature = true; }
                 else { isSigningMaint = true; hasMaintSignature = true; }
-                ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y);
+                ctx.beginPath();
+                const pos = getPos(e);
+                ctx.moveTo(pos.x, pos.y);
             };
+
             const draw = (e) => {
                 const isSigning = mode === 'register' ? isSigningSupport : isSigningMaint;
                 const ctx = mode === 'register' ? supCtx : maintCtx;
                 if (!isSigning || !ctx) return;
-                if (e.type !== 'mousemove') e.preventDefault();
-                const p = getPos(e);
-                ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+                if(e.type !== 'mousemove') e.preventDefault();
+                const pos = getPos(e);
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
                 ctx.strokeStyle = document.documentElement.classList.contains('dark') ? '#ffffff' : '#0f172a';
-                ctx.lineTo(p.x, p.y); ctx.stroke();
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
             };
+
             const stopDraw = () => {
+                const isSigning = mode === 'register' ? isSigningSupport : isSigningMaint;
                 const ctx = mode === 'register' ? supCtx : maintCtx;
-                if (ctx) { if (mode === 'register') isSigningSupport = false; else isSigningMaint = false; ctx.closePath(); }
+                if (isSigning && ctx) {
+                    if (mode === 'register') isSigningSupport = false;
+                    else isSigningMaint = false;
+                    ctx.closePath();
+                }
             };
-            canvas.addEventListener('mousedown', startDraw); canvas.addEventListener('mousemove', draw);
-            canvas.addEventListener('mouseup', stopDraw); canvas.addEventListener('mouseout', stopDraw);
+
+            canvas.addEventListener('mousedown', startDraw);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDraw);
+            canvas.addEventListener('mouseout', stopDraw);
             canvas.addEventListener('touchstart', startDraw, { passive: false });
             canvas.addEventListener('touchmove', draw, { passive: false });
             canvas.addEventListener('touchend', stopDraw, { passive: false });
@@ -1555,18 +1598,25 @@
         function clearSupportSignature(canvasId) {
             const canvas = document.getElementById(canvasId);
             if (!canvas) return;
-            if (canvasId === 'sup-sig-canvas' && supCtx)   { supCtx.clearRect(0,0,canvas.width,canvas.height); hasSupportSignature = false; }
-            else if (canvasId === 'maint-sig-canvas' && maintCtx) { maintCtx.clearRect(0,0,canvas.width,canvas.height); hasMaintSignature = false; }
+            if (canvasId === 'sup-sig-canvas' && supCtx) {
+                supCtx.clearRect(0, 0, canvas.width, canvas.height);
+                hasSupportSignature = false;
+            } else if (canvasId === 'maint-sig-canvas' && maintCtx) {
+                maintCtx.clearRect(0, 0, canvas.width, canvas.height);
+                hasMaintSignature = false;
+            }
         }
 
-        // ─── DEVICE FIELDS ────────────────────────────────────────────────────
+        // --- DEVICE SETUP ---
         function addDeviceField() {
             supportDeviceCount++;
             const container = document.getElementById('sup-devices-container');
             document.getElementById('no-devices-msg').style.display = 'none';
+
             const div = document.createElement('div');
             div.className = "bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg p-3 relative device-entry shadow-sm";
-            div.innerHTML = `<button onclick="this.parentElement.remove(); checkDeviceEmpty()" class="absolute top-2 right-2 text-red-400 hover:text-red-600"><i class="fa-solid fa-xmark"></i></button>
+            div.innerHTML = `
+                <button onclick="this.parentElement.remove(); checkDeviceEmpty()" class="absolute top-2 right-2 text-red-400 hover:text-red-600"><i class="fa-solid fa-xmark"></i></button>
                 <div class="grid grid-cols-2 gap-2 mb-2">
                     <div><span class="text-[9px] text-gray-400 font-bold block mb-1">Type</span><input type="text" class="w-full text-xs p-1.5 border border-gray-200 dark:border-slate-600 rounded bg-gray-50 dark:bg-slate-700 dark:text-white" placeholder="PC / Printer" data-field="type"></div>
                     <div><span class="text-[9px] text-gray-400 font-bold block mb-1">Make/Model</span><input type="text" class="w-full text-xs p-1.5 border border-gray-200 dark:border-slate-600 rounded bg-gray-50 dark:bg-slate-700 dark:text-white" placeholder="Dell 7090" data-field="makeModel"></div>
@@ -1574,211 +1624,648 @@
                 <div class="grid grid-cols-2 gap-2">
                     <div><span class="text-[9px] text-gray-400 font-bold block mb-1">Serial/Tag</span><input type="text" class="w-full text-xs p-1.5 border border-gray-200 dark:border-slate-600 rounded bg-gray-50 dark:bg-slate-700 dark:text-white" placeholder="S/N" data-field="serial"></div>
                     <div><span class="text-[9px] text-gray-400 font-bold block mb-1">OS/Location</span><input type="text" class="w-full text-xs p-1.5 border border-gray-200 dark:border-slate-600 rounded bg-gray-50 dark:bg-slate-700 dark:text-white" placeholder="Win11 / Reception" data-field="location"></div>
-                </div>`;
+                </div>
+            `;
             container.appendChild(div);
         }
 
         function checkDeviceEmpty() {
-            if (document.querySelectorAll('.device-entry').length === 0)
+            const container = document.getElementById('sup-devices-container');
+            if (container.querySelectorAll('.device-entry').length === 0) {
                 document.getElementById('no-devices-msg').style.display = 'block';
+            }
         }
 
         function collectSupportDevices() {
-            return [...document.querySelectorAll('.device-entry')].map(e => ({
-                type: e.querySelector('[data-field="type"]').value,
-                make: e.querySelector('[data-field="makeModel"]').value,
-                serial: e.querySelector('[data-field="serial"]').value,
-                location: e.querySelector('[data-field="location"]').value,
-                os: '', condition: ''
-            }));
+            const devices = [];
+            document.querySelectorAll('.device-entry').forEach(entry => {
+                devices.push({
+                    type: entry.querySelector('[data-field="type"]').value,
+                    make: entry.querySelector('[data-field="makeModel"]').value,
+                    serial: entry.querySelector('[data-field="serial"]').value,
+                    location: entry.querySelector('[data-field="location"]').value,
+                    os: '', condition: ''
+                });
+            });
+            return devices;
         }
 
-        // ─── SUBMIT SUPPORT CLIENT ────────────────────────────────────────────
+        // --- SUBMIT REGISTRATION ---
         async function submitSupportClient() {
-            const bizName     = document.getElementById('sup-biz-name').value.trim();
+            const bizName = document.getElementById('sup-biz-name').value.trim();
+            const sector = document.getElementById('sup-sector').value.trim();
+            const address = document.getElementById('sup-address').value.trim();
             const contactName = document.getElementById('sup-contact-name').value.trim();
+            const contactTitle = document.getElementById('sup-contact-title').value.trim();
             const contactPhone = document.getElementById('sup-contact-phone').value.trim();
-            const sigName     = document.getElementById('sup-sig-name').value.trim();
-            if (!bizName || !contactName || !contactPhone || !sigName) return showToast("Please fill all required (*) fields.", "error");
-            if (!hasSupportSignature) return showToast("Client signature is required", "error");
+            const contactEmail = document.getElementById('sup-contact-email').value.trim();
+            const contractType = document.getElementById('sup-contract-type').value;
+            const startDate = document.getElementById('sup-start-date').value;
+            const notes = document.getElementById('sup-notes').value.trim();
+            const sigName = document.getElementById('sup-sig-name').value.trim();
+            const sigTitle = document.getElementById('sup-sig-title').value.trim();
+            
+            if (!bizName || !contactName || !contactPhone || !sigName) {
+                return showToast("Please fill all required fields (*) and Signatory Name.", "error");
+            }
+            if (!hasSupportSignature) {
+                return showToast("Client signature is required", "error");
+            }
 
-            const scope = ['hardware','software','network','backup','security','remote'].reduce((o,k) => {
-                o[k] = document.getElementById(`sup-scope-${k}`).checked; return o;
-            }, {});
+            const scope = {
+                hardware: document.getElementById('sup-scope-hardware').checked,
+                software: document.getElementById('sup-scope-software').checked,
+                network: document.getElementById('sup-scope-network').checked,
+                backup: document.getElementById('sup-scope-backup').checked,
+                security: document.getElementById('sup-scope-security').checked,
+                remote: document.getElementById('sup-scope-remote').checked,
+            };
+
+            const devices = collectSupportDevices();
 
             document.getElementById('global-spinner').classList.add('active');
             document.getElementById('spinner-text').innerText = "Registering Support Client...";
+
             try {
                 const refId = Math.floor(1000 + Math.random() * 9000).toString();
                 const canvas = document.getElementById('sup-sig-canvas');
+                
                 await db.ref('support_businesses').push({
-                    refId, bizName, sector: document.getElementById('sup-sector').value.trim(),
-                    address: document.getElementById('sup-address').value.trim(),
-                    contractType: document.getElementById('sup-contract-type').value,
-                    startDate: document.getElementById('sup-start-date').value,
-                    contactName, contactTitle: document.getElementById('sup-contact-title').value.trim(),
-                    contactPhone, contactEmail: document.getElementById('sup-contact-email').value.trim(),
-                    scope, sigName, sigTitle: document.getElementById('sup-sig-title').value.trim(),
-                    signatureBase64: canvas.toDataURL('image/png'), status: 'Active',
-                    maintenanceNotes: document.getElementById('sup-notes').value.trim(),
-                    devices: collectSupportDevices(), timestamp: firebase.database.ServerValue.TIMESTAMP
+                    refId, bizName, sector, address, contractType, startDate,
+                    contactName, contactTitle, contactPhone, contactEmail,
+                    scope, sigName, sigTitle,
+                    signatureBase64: canvas.toDataURL('image/png'),
+                    status: 'Active',
+                    maintenanceNotes: notes,
+                    devices,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
                 });
+
                 await db.ref(`employees/${currentUserData.id}/work_history`).push({
-                    refId: `SUP-${refId}`, title: `SLA Signed: ${bizName}`, timestamp: firebase.database.ServerValue.TIMESTAMP
+                    refId: `SUP-${refId}`,
+                    title: `SLA Signed: ${bizName}`,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
                 });
+
                 document.getElementById('global-spinner').classList.remove('active');
                 showToast(`Client Registered! Ref: SUP-${refId}`);
+                
                 document.querySelectorAll('#sup-view-register input[type="text"], #sup-view-register input[type="tel"], #sup-view-register input[type="email"], #sup-view-register input[type="date"], #sup-view-register textarea').forEach(i => i.value = '');
                 document.querySelectorAll('#sup-view-register input[type="checkbox"]').forEach(i => i.checked = false);
-                document.getElementById('sup-devices-container').innerHTML = '<p class="text-xs text-gray-400 text-center italic py-2" id="no-devices-msg">No devices added yet.</p>';
-                supportDeviceCount = 0; clearSupportSignature('sup-sig-canvas'); switchTab('home');
-            } catch(e) { document.getElementById('global-spinner').classList.remove('active'); showToast("Failed to register client", "error"); }
+                document.getElementById('sup-devices-container').innerHTML = '<p class="text-xs text-gray-400 text-center italic py-2" id="no-devices-msg">No devices added yet. Click Add to include devices.</p>';
+                supportDeviceCount = 0;
+                clearSupportSignature('sup-sig-canvas');
+                switchTab('home');
+            } catch (err) {
+                document.getElementById('global-spinner').classList.remove('active');
+                showToast("Failed to register client", "error");
+                console.error(err);
+            }
         }
 
-        // ─── CLOUDINARY CANVAS UPLOAD ─────────────────────────────────────────
+        // --- SUPPORT MAINTENANCE LOG ---
         async function uploadCanvasToCloudinary(canvas) {
-            return new Promise((resolve) => {
+            return new Promise((resolve, reject) => {
                 canvas.toBlob(async (blob) => {
-                    const fd = new FormData();
-                    fd.append('file', blob); fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+                    const formData = new FormData();
+                    formData.append('file', blob);
+                    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
                     try {
-                        const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: 'POST', body: fd });
-                        if (!res.ok) throw new Error();
-                        resolve((await res.json()).secure_url);
-                    } catch { resolve(null); }
+                        const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
+                        if(!res.ok) throw new Error("Upload failed");
+                        const data = await res.json();
+                        resolve(data.secure_url);
+                    } catch(e) { resolve(null); }
                 }, 'image/png');
             });
         }
 
-        // ─── MAINTENANCE LOG ──────────────────────────────────────────────────
         async function submitMaintenanceLog() {
-            const rawRef  = document.getElementById('maint-job-id').value.trim().toUpperCase();
-            const notes   = document.getElementById('maint-notes').value.trim();
+            const rawRef = document.getElementById('maint-job-id').value.trim().toUpperCase();
+            const status = document.getElementById('maint-status').value;
+            const visitType = document.getElementById('maint-visit-type').value;
+            const partsUsed = document.getElementById('maint-parts').value.trim() || 'None';
+            const nextSteps = document.getElementById('maint-next-steps').value.trim() || 'None';
+            const notes = document.getElementById('maint-notes').value.trim();
             const sigName = document.getElementById('maint-sig-name').value.trim();
+
             if (!rawRef) return showToast("Please enter a SUP ID", "error");
-            if (!notes)  return showToast("Please enter Visit Log / Notes", "error");
+            if (!notes) return showToast("Please enter Visit Log / Notes", "error");
             if (!sigName || !hasMaintSignature) return showToast("Client Sign-off required", "error");
 
-            const cleanRef  = rawRef.replace('SUP-','');
+            const cleanRef = rawRef.replace('SUP-', '');
             const checklist = [];
-            if (document.getElementById('chk-maint-os').checked)     checklist.push("OS & Software Updated");
-            if (document.getElementById('chk-maint-av').checked)     checklist.push("Antivirus Checked");
-            if (document.getElementById('chk-maint-backup').checked) checklist.push("Backups Verified");
-            if (document.getElementById('chk-maint-clean').checked)  checklist.push("Hardware Cleaned");
-            if (document.getElementById('chk-maint-net').checked)    checklist.push("Network Tested");
+            if(document.getElementById('chk-maint-os').checked) checklist.push("OS & Software Updated");
+            if(document.getElementById('chk-maint-av').checked) checklist.push("Antivirus Checked");
+            if(document.getElementById('chk-maint-backup').checked) checklist.push("Backups Verified");
+            if(document.getElementById('chk-maint-clean').checked) checklist.push("Hardware Cleaned/Inspected");
+            if(document.getElementById('chk-maint-net').checked) checklist.push("Network/Connectivity Tested");
+            const checklistStr = checklist.length > 0 ? checklist.map(t => `  - ${t}`).join('\n') : "  - No standard checklist items selected.";
 
             document.getElementById('global-spinner').classList.add('active');
             document.getElementById('spinner-text').innerText = "Generating Digital Job Card...";
+
             try {
                 const snap = await db.ref('support_businesses').orderByChild('refId').equalTo(cleanRef).once('value');
-                if (!snap.exists()) { document.getElementById('global-spinner').classList.remove('active'); return showToast("Support Contract not found.", "error"); }
-                const key = Object.keys(snap.val())[0], record = snap.val()[key];
+                if (!snap.exists()) {
+                    document.getElementById('global-spinner').classList.remove('active');
+                    return showToast("Support Contract not found.", "error");
+                }
 
-                document.getElementById('spinner-text').innerText = "Uploading Signature...";
-                let sigUrl = await uploadCanvasToCloudinary(document.getElementById('maint-sig-canvas'));
-                if (!sigUrl) sigUrl = "[Upload Failed]";
+                const key = Object.keys(snap.val())[0];
+                const record = snap.val()[key];
+
+                document.getElementById('spinner-text').innerText = "Uploading Signature securely...";
+                const sigCanvas = document.getElementById('maint-sig-canvas');
+                let sigUrl = await uploadCanvasToCloudinary(sigCanvas);
+                if (!sigUrl) sigUrl = "[Image Upload Failed - Verify locally]";
 
                 const dateStr = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
-                const newLog = `\n====================================\nVISIT LOG: ${dateStr}\nTECH: ${currentUserData.name || 'Employee'}\nTASKS:\n${checklist.map(t=>'  - '+t).join('\n') || '  - None'}\nPARTS: ${document.getElementById('maint-parts').value.trim()||'None'}\nNEXT: ${document.getElementById('maint-next-steps').value.trim()||'None'}\nNOTES:\n${notes}\nSIG (${sigName}): ${sigUrl}\n====================================`;
+                const newLogEntry = `
+====================================
+VISIT LOG: ${dateStr}
+TYPE: ${visitType}
+TECHNICIAN: ${currentUserData.name || 'Employee'}
+------------------------------------
+TASKS COMPLETED:
+${checklistStr}
 
-                await db.ref(`support_businesses/${key}`).update({
-                    status: document.getElementById('maint-status').value,
-                    maintenanceNotes: newLog + (record.maintenanceNotes ? '\n' + record.maintenanceNotes : ''),
-                    lastUpdated: Date.now()
-                });
+PARTS USED: ${partsUsed}
+NEXT STEPS: ${nextSteps}
+
+NOTES: 
+${notes}
+
+CLIENT SIG (${sigName}): 
+${sigUrl}
+====================================
+`;
+                const existingNotes = record.maintenanceNotes ? record.maintenanceNotes + "\n" : "";
+                const updatedNotes = newLogEntry + existingNotes;
+
+                document.getElementById('spinner-text').innerText = "Saving to Database...";
+                await db.ref(`support_businesses/${key}`).update({ status, maintenanceNotes: updatedNotes, lastUpdated: Date.now() });
                 await db.ref(`employees/${currentUserData.id}/work_history`).push({
-                    refId: `SUP-${cleanRef}`, title: `Job Card: ${record.bizName || 'Client'}`, timestamp: firebase.database.ServerValue.TIMESTAMP
+                    refId: `SUP-${cleanRef}`,
+                    title: `Job Card: ${record.bizName || 'Client'}`,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
                 });
+
                 document.getElementById('global-spinner').classList.remove('active');
                 showToast("Job Card Saved & Synced!");
-                ['maint-job-id','maint-parts','maint-next-steps','maint-notes','maint-sig-name'].forEach(id => { document.getElementById(id).value = ''; });
+                
+                document.getElementById('maint-job-id').value = '';
+                document.getElementById('maint-parts').value = '';
+                document.getElementById('maint-next-steps').value = '';
+                document.getElementById('maint-notes').value = '';
+                document.getElementById('maint-sig-name').value = '';
                 document.querySelectorAll('#sup-view-maintenance input[type="checkbox"]').forEach(c => c.checked = false);
-                clearSupportSignature('maint-sig-canvas'); switchTab('home');
-            } catch(e) { document.getElementById('global-spinner').classList.remove('active'); showToast("Failed to submit Job Card", "error"); }
+                clearSupportSignature('maint-sig-canvas');
+                switchTab('home');
+            } catch(e) {
+                document.getElementById('global-spinner').classList.remove('active');
+                showToast("Failed to submit Job Card", "error");
+                console.error(e);
+            }
         }
 
-        // ─── EVIDENCE UPLOAD ──────────────────────────────────────────────────
+        // --- REMOTE EVIDENCE UPLOAD ---
         async function uploadEvidenceToWorkspace(event, sourceContext) {
             const file = event.target.files[0];
-            let rawRef = '', targetArrayName = 'photos';
+            let rawRef = '';
+            let targetArrayName = 'photos';
+
             if (sourceContext === 'hardware_software') {
                 rawRef = document.getElementById('upload-job-id').value.trim().toUpperCase();
                 targetArrayName = document.getElementById('upload-phase').value;
             } else if (sourceContext === 'support') {
                 rawRef = document.getElementById('maint-job-id').value.trim().toUpperCase();
             }
-            if (!file || !rawRef) { showToast("ID and Image required", "error"); event.target.value = ''; return; }
-            const cleanRef = rawRef.replace('RGT-','').replace('SFT-','').replace('SUP-','');
+            
+            if (!file || !rawRef) {
+                showToast("ID and Image required", "error");
+                event.target.value = '';
+                return;
+            }
+
+            const cleanRef = rawRef.replace('RGT-', '').replace('SFT-', '').replace('SUP-', '');
             const spinner = document.getElementById('global-spinner');
-            spinner.classList.add('active');
-            document.getElementById('spinner-text').innerText = "Routing Image to Workspace...";
+            const spinnerText = document.getElementById('spinner-text');
+            
+            if (spinner) spinner.classList.add('active');
+            if (spinnerText) spinnerText.innerText = "Routing Image to Workspace...";
+
             try {
-                const fd = new FormData(); fd.append('file', file); fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: 'POST', body: fd });
-                if (!res.ok) throw new Error("Cloudinary upload failed");
-                const secureUrl = (await res.json()).secure_url;
-                let targetDb = '', snap = null;
-                if (sourceContext === 'support') { snap = await db.ref('support_businesses').orderByChild('refId').equalTo(cleanRef).once('value'); targetDb = 'support_businesses'; }
-                else {
-                    snap = await db.ref('reports').orderByChild('refId').equalTo(cleanRef).once('value'); targetDb = 'reports';
-                    if (!snap?.exists()) { snap = await db.ref('software_projects').orderByChild('refId').equalTo(cleanRef).once('value'); targetDb = 'software_projects'; }
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
+                if(!res.ok) throw new Error("Cloudinary upload failed");
+                const cloudData = await res.json();
+                const secureUrl = cloudData.secure_url;
+
+                let targetDb = '';
+                let snap = null;
+
+                if (sourceContext === 'support') {
+                    snap = await db.ref('support_businesses').orderByChild('refId').equalTo(cleanRef).once('value');
+                    targetDb = 'support_businesses';
+                } else {
+                    snap = await db.ref('reports').orderByChild('refId').equalTo(cleanRef).once('value');
+                    targetDb = 'reports';
+                    if (!snap || !snap.exists()) {
+                        snap = await db.ref('software_projects').orderByChild('refId').equalTo(cleanRef).once('value');
+                        targetDb = 'software_projects';
+                    }
                 }
-                if (!snap?.exists()) throw new Error("Job ID not found.");
-                const key = Object.keys(snap.val())[0], record = snap.val()[key];
-                let photos = record[targetArrayName] || [];
-                photos.push(secureUrl);
-                await db.ref(`${targetDb}/${key}`).update({ [targetArrayName]: photos });
-                spinner.classList.remove('active'); showToast("Image synced!");
-            } catch(e) { spinner.classList.remove('active'); showToast(e.message || "Failed to link image", "error"); }
-            event.target.value = '';
+
+                if (!snap || !snap.exists()) throw new Error("Job ID not found in system.");
+
+                const key = Object.keys(snap.val())[0];
+                const record = snap.val()[key];
+                let currentPhotos = record[targetArrayName] || [];
+                currentPhotos.push(secureUrl);
+
+                await db.ref(`${targetDb}/${key}`).update({ [targetArrayName]: currentPhotos });
+                if (spinner) spinner.classList.remove('active');
+                showToast("Image synced securely!");
+            } catch(e) {
+                if (spinner) spinner.classList.remove('active');
+                showToast(e.message || "Failed to link image", "error");
+            }
+            
+            event.target.value = ''; 
         }
 
-        // ─── CHAT ─────────────────────────────────────────────────────────────
+        // ============================================================
+        // LEAVE MANAGEMENT LOGIC
+        // ============================================================
+
+        function switchLeaveTab(tab) {
+            document.querySelectorAll('.leave-tab').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-leave-' + tab).classList.add('active');
+            document.getElementById('leave-view-apply').classList.add('hidden');
+            document.getElementById('leave-view-history').classList.add('hidden');
+            document.getElementById('leave-view-balances').classList.add('hidden');
+            document.getElementById('leave-view-' + tab).classList.remove('hidden');
+
+            if (tab === 'history') loadLeaveHistory();
+            if (tab === 'balances') loadLeaveBalances();
+        }
+
+        /**
+         * Calculate the number of working days (Mon–Fri) between two dates.
+         */
+        function countWorkingDays(startDateStr, endDateStr) {
+            if (!startDateStr || !endDateStr) return 0;
+            const start = new Date(startDateStr);
+            const end = new Date(endDateStr);
+            if (end < start) return 0;
+            let count = 0;
+            let cur = new Date(start);
+            while (cur <= end) {
+                const day = cur.getDay();
+                if (day !== 0 && day !== 6) count++;
+                cur.setDate(cur.getDate() + 1);
+            }
+            return count;
+        }
+
+        function calculateLeaveDays() {
+            const start = document.getElementById('leave-start').value;
+            const end = document.getElementById('leave-end').value;
+            const display = document.getElementById('leave-days-display');
+            const countEl = document.getElementById('leave-days-count');
+            if (start && end) {
+                const days = countWorkingDays(start, end);
+                countEl.textContent = days;
+                display.classList.remove('hidden');
+            } else {
+                display.classList.add('hidden');
+            }
+        }
+
+        // Bind change events for leave date pickers
+        document.getElementById('leave-start').addEventListener('change', calculateLeaveDays);
+        document.getElementById('leave-end').addEventListener('change', calculateLeaveDays);
+
+        /**
+         * Handle optional document upload for leave request
+         */
+        async function handleLeaveDocUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            showToast("Uploading document...");
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+            try {
+                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`, { method: 'POST', body: formData });
+                const data = await res.json();
+                if (data.secure_url) {
+                    leaveDocUrl = data.secure_url;
+                    const nameEl = document.getElementById('leave-doc-name');
+                    nameEl.textContent = `✓ Attached: ${file.name}`;
+                    nameEl.classList.remove('hidden');
+                    showToast("Document attached!");
+                } else {
+                    throw new Error("Upload failed");
+                }
+            } catch(e) {
+                showToast("Document upload failed", "error");
+                leaveDocUrl = null;
+            }
+        }
+
+        /**
+         * Submit a new leave request to Firebase
+         */
+        async function submitLeaveRequest() {
+            if (!currentUserData) return;
+
+            const leaveType = document.getElementById('leave-type').value;
+            const startDate = document.getElementById('leave-start').value;
+            const endDate = document.getElementById('leave-end').value;
+            const reason = document.getElementById('leave-reason').value.trim();
+
+            if (!startDate || !endDate) return showToast("Please select start and end dates", "error");
+            if (new Date(endDate) < new Date(startDate)) return showToast("End date cannot be before start date", "error");
+
+            const days = countWorkingDays(startDate, endDate);
+            if (days === 0) return showToast("No working days in selected range", "error");
+
+            document.getElementById('global-spinner').classList.add('active');
+            document.getElementById('spinner-text').innerText = "Submitting leave request...";
+
+            try {
+                const refId = 'LVE-' + Math.floor(1000 + Math.random() * 9000).toString();
+
+                await db.ref('leave_requests').push({
+                    refId,
+                    employeeId: currentUserData.id,
+                    employeeName: currentUserData.name || 'Employee',
+                    employeeEmail: currentUserData.email || '',
+                    leaveType,
+                    startDate,
+                    endDate,
+                    days,
+                    reason,
+                    supportingDocUrl: leaveDocUrl || null,
+                    status: 'Pending',
+                    submittedAt: firebase.database.ServerValue.TIMESTAMP,
+                    reviewedBy: null,
+                    reviewNote: null,
+                    reviewedAt: null
+                });
+
+                await db.ref(`employees/${currentUserData.id}/work_history`).push({
+                    refId,
+                    title: `Leave Request: ${leaveType}`,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+
+                document.getElementById('global-spinner').classList.remove('active');
+                showToast(`Leave request submitted! Ref: ${refId}`);
+
+                // Reset form
+                document.getElementById('leave-type').value = 'Annual Leave';
+                document.getElementById('leave-start').value = '';
+                document.getElementById('leave-end').value = '';
+                document.getElementById('leave-reason').value = '';
+                document.getElementById('leave-days-display').classList.add('hidden');
+                document.getElementById('leave-doc-name').classList.add('hidden');
+                leaveDocUrl = null;
+
+                switchLeaveTab('history');
+            } catch(e) {
+                document.getElementById('global-spinner').classList.remove('active');
+                showToast("Failed to submit leave request", "error");
+                console.error(e);
+            }
+        }
+
+        /**
+         * Load and render the employee's leave request history
+         */
+        async function loadLeaveHistory() {
+            if (!currentUserData) return;
+            const list = document.getElementById('leave-history-list');
+            list.innerHTML = '<div class="text-center text-xs text-gray-400 py-6">Loading...</div>';
+
+            try {
+                const snap = await db.ref('leave_requests')
+                    .orderByChild('employeeId')
+                    .equalTo(currentUserData.id)
+                    .once('value');
+
+                if (!snap.exists()) {
+                    list.innerHTML = '<div class="text-center text-xs text-gray-400 py-6 italic">No leave requests submitted yet.</div>';
+                    return;
+                }
+
+                let requests = [];
+                snap.forEach(child => {
+                    requests.push({ key: child.key, ...child.val() });
+                });
+                requests.sort((a, b) => (b.submittedAt || 0) - (a.submittedAt || 0));
+
+                list.innerHTML = '';
+
+                requests.forEach(req => {
+                    let statusClass = 'badge-pending';
+                    let statusIcon = 'fa-clock';
+                    let statusLabel = 'Pending';
+
+                    if (req.status === 'Approved') {
+                        statusClass = 'badge-approved';
+                        statusIcon = 'fa-circle-check';
+                        statusLabel = 'Approved';
+                    } else if (req.status === 'Rejected') {
+                        statusClass = 'badge-rejected';
+                        statusIcon = 'fa-circle-xmark';
+                        statusLabel = 'Rejected';
+                    }
+
+                    const submittedDate = req.submittedAt
+                        ? new Date(req.submittedAt).toLocaleDateString([], { day: 'numeric', month: 'short', year: 'numeric' })
+                        : '—';
+
+                    const reviewNoteHtml = req.reviewNote
+                        ? `<p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1 italic">"${req.reviewNote}"</p>`
+                        : '';
+
+                    const docLinkHtml = req.supportingDocUrl
+                        ? `<a href="${req.supportingDocUrl}" target="_blank" class="text-[10px] text-blue-500 underline mt-1 block"><i class="fa-solid fa-paperclip mr-1"></i>View Document</a>`
+                        : '';
+
+                    list.innerHTML += `
+                        <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4">
+                            <div class="flex items-start justify-between mb-2">
+                                <div>
+                                    <h4 class="font-bold text-sm text-gray-800 dark:text-gray-200">${req.leaveType}</h4>
+                                    <p class="text-[10px] font-mono text-gray-400 mt-0.5">${req.refId}</p>
+                                </div>
+                                <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full ${statusClass}">
+                                    <i class="fa-solid ${statusIcon} text-[9px]"></i>${statusLabel}
+                                </span>
+                            </div>
+                            <div class="flex gap-4 text-xs text-gray-600 dark:text-gray-400 mb-1">
+                                <span><i class="fa-regular fa-calendar text-blue-400 mr-1"></i>${req.startDate} → ${req.endDate}</span>
+                                <span class="font-bold text-blue-600 dark:text-blue-400">${req.days} day(s)</span>
+                            </div>
+                            ${req.reason ? `<p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">${req.reason}</p>` : ''}
+                            ${reviewNoteHtml}
+                            ${docLinkHtml}
+                            <p class="text-[9px] text-gray-400 mt-2 text-right">Submitted: ${submittedDate}</p>
+                        </div>
+                    `;
+                });
+
+            } catch(e) {
+                list.innerHTML = '<div class="text-center text-xs text-red-400 py-6">Failed to load requests.</div>';
+                console.error(e);
+            }
+        }
+
+        /**
+         * Load leave balances from the employee record
+         */
+        async function loadLeaveBalances() {
+            if (!currentUserData) return;
+            try {
+                const snap = await db.ref(`employees/${currentUserData.id}/leaveBalances`).once('value');
+                const balances = snap.val() || { annual: 15, sick: 30, family: 3, study: 5 };
+                document.getElementById('bal-annual').textContent = balances.annual ?? '—';
+                document.getElementById('bal-sick').textContent = balances.sick ?? '—';
+                document.getElementById('bal-family').textContent = balances.family ?? '—';
+                document.getElementById('bal-study').textContent = balances.study ?? '—';
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        /**
+         * Real-time listener: notify the employee when their leave status changes
+         */
+        function listenToLeaveStatusChanges() {
+            if (!currentUserData) return;
+            const leaveRef = db.ref('leave_requests').orderByChild('employeeId').equalTo(currentUserData.id);
+
+            leaveRef.on('child_changed', (snap) => {
+                const req = snap.val();
+                if (req.status === 'Approved') {
+                    showToast(`✅ Leave Approved: ${req.leaveType} (${req.startDate})`);
+                    document.getElementById('leave-badge').classList.remove('hidden');
+                    playNotificationSound();
+                } else if (req.status === 'Rejected') {
+                    showToast(`❌ Leave Rejected: ${req.leaveType}`, 'error');
+                    document.getElementById('leave-badge').classList.remove('hidden');
+                    playNotificationSound();
+                }
+            });
+        }
+
+        // ============================================================
+        // END LEAVE MANAGEMENT LOGIC
+        // ============================================================
+
+        // --- TEAM CHAT LOGIC ---
         function initChat() {
-            if (chatInitialized) return;
+            if(chatInitialized) return;
             chatInitialized = true;
+            
             const chatRef = db.ref('team_chat').limitToLast(50);
             const container = document.getElementById('chat-messages');
+
             let initialLoadDone = false;
             chatRef.once('value', () => { initialLoadDone = true; });
+            
             chatRef.on('child_added', (snap) => {
-                if (container.querySelector('.text-center')) container.innerHTML = '';
+                if(container.querySelector('.text-center')) container.innerHTML = ''; 
+                
                 const msg = snap.val();
                 const isMine = currentUserData && msg.senderId === currentUserData.id;
-                const timeString = new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-                container.insertAdjacentHTML('beforeend', `
+                const timeString = new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                const bubbleColor = isMine ? 'bg-[#d9fdd3] dark:bg-[#005c4b] chat-mine' : 'bg-[#ffffff] dark:bg-[#202c33] chat-theirs';
+                const textColor = 'text-gray-900 dark:text-gray-100';
+
+                const msgHTML = `
                     <div class="flex flex-col ${isMine ? 'items-end' : 'items-start'} mb-1">
-                        <div class="chat-bubble ${isMine ? 'bg-[#d9fdd3] dark:bg-[#005c4b] chat-mine' : 'bg-[#ffffff] dark:bg-[#202c33] chat-theirs'} text-gray-900 dark:text-gray-100 flex flex-col">
+                        <div class="chat-bubble ${bubbleColor} ${textColor} flex flex-col">
                             ${!isMine ? `<span class="text-[10px] font-bold text-blue-500 dark:text-blue-400 mb-0.5">${msg.senderName}</span>` : ''}
                             <span>${msg.text}</span>
                             <span class="text-[9px] text-gray-400 self-end mt-1 ml-4 -mb-1 block opacity-80">${timeString} ${isMine ? '<i class="fa-solid fa-check-double text-blue-400 ml-1"></i>' : ''}</span>
                         </div>
-                    </div>`);
+                    </div>
+                `;
+                
+                container.insertAdjacentHTML('beforeend', msgHTML);
                 scrollToBottomChat();
-                if (initialLoadDone && !isMine) handleIncomingChatMessage(msg.senderName || 'Team Member', msg.text || '', msg.senderId);
+
+                if (initialLoadDone && !isMine) {
+                    handleIncomingChatMessage(
+                        msg.senderName || 'Team Member',
+                        msg.text || '',
+                        msg.senderId
+                    );
+                }
             });
         }
 
-        function scrollToBottomChat() { setTimeout(() => { document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight; }, 50); }
-        function handleChatKeyPress(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); } }
+        function scrollToBottomChat() {
+            const container = document.getElementById('chat-messages');
+            setTimeout(() => { container.scrollTop = container.scrollHeight; }, 50);
+        }
+
+        function handleChatKeyPress(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendChatMessage();
+            }
+        }
+
         async function sendChatMessage() {
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
-            if (!text || !currentUserData) return;
-            input.value = ''; input.style.height = '';
-            await db.ref('team_chat').push({ text, senderId: currentUserData.id, senderName: currentUserData.name || "Employee", timestamp: firebase.database.ServerValue.TIMESTAMP });
+            if(!text || !currentUserData) return;
+            
+            input.value = '';
+            input.style.height = ''; 
+            
+            await db.ref('team_chat').push({
+                text,
+                senderId: currentUserData.id,
+                senderName: currentUserData.name || "Employee",
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
         }
 
-        // ─── ATTENDANCE ───────────────────────────────────────────────────────
+        // --- SETTINGS LOGIC ---
+        function clearCache() {
+            showToast("Clearing local data...");
+            setTimeout(() => {
+                const theme = localStorage.getItem('theme'); 
+                localStorage.clear();
+                if(theme) localStorage.setItem('theme', theme);
+                showToast("Cache cleared. Reloading...");
+                setTimeout(() => window.location.reload(), 1000);
+            }, 800);
+        }
+
+        // --- ATTENDANCE, HOURS & COOLDOWN LOGIC ---
         function listenToAttendance() {
             if (!currentUserData) return;
             const today = new Date().toISOString().split('T')[0];
             db.ref(`attendance/${today}/${currentUserData.id}`).on('value', (snap) => {
                 const data = snap.val() || {};
-                document.getElementById('log-in').innerText    = data.TimeIn   || '--:--';
-                document.getElementById('log-lout').innerText  = data.LunchOut || '--:--';
-                document.getElementById('log-lback').innerText = data.LunchBack|| '--:--';
-                document.getElementById('log-out').innerText   = data.TimeOut  || '--:--';
+                document.getElementById('log-in').innerText = data.TimeIn || '--:--';
+                document.getElementById('log-lout').innerText = data.LunchOut || '--:--';
+                document.getElementById('log-lback').innerText = data.LunchBack || '--:--';
+                document.getElementById('log-out').innerText = data.TimeOut || '--:--';
                 calculateHours(data.TimeIn, data.TimeOut);
             });
         }
@@ -1790,187 +2277,219 @@
             let outH, outM;
             if (timeOut) { [outH, outM] = timeOut.split(':').map(Number); }
             else { const now = new Date(); outH = now.getHours(); outM = now.getMinutes(); }
-            let diff = (outH * 60 + outM) - (inH * 60 + inM);
-            if (diff < 0) diff = 0;
-            display.innerText = `${Math.floor(diff/60)}h ${diff%60}m`;
+            let diffMins = (outH * 60 + outM) - (inH * 60 + inM);
+            if (diffMins < 0) diffMins = 0; 
+            display.innerText = `${Math.floor(diffMins / 60)}h ${diffMins % 60}m`;
         }
 
         function checkCooldown() {
             if (!currentUserData) return false;
-            const key = 'lastScanTime_' + currentUserData.id;
-            const last = localStorage.getItem(key);
-            const cdMs = 5 * 60 * 1000;
-            if (last && (Date.now() - parseInt(last)) < cdMs) { showCooldownModal(cdMs - (Date.now() - parseInt(last))); return true; }
+            const lastScanKey = 'lastScanTime_' + currentUserData.id;
+            const lastScan = localStorage.getItem(lastScanKey);
+            const cooldownMs = 5 * 60 * 1000; 
+            if (lastScan && (Date.now() - parseInt(lastScan)) < cooldownMs) {
+                showCooldownModal(cooldownMs - (Date.now() - parseInt(lastScan)));
+                return true; 
+            }
             return false;
         }
 
         function showCooldownModal(remainingMs) {
-            const modal = document.getElementById('cooldown-modal'), text = document.getElementById('cooldown-text');
-            modal.classList.remove('hidden'); setTimeout(() => modal.classList.remove('opacity-0'), 10);
+            const modal = document.getElementById('cooldown-modal');
+            const text = document.getElementById('cooldown-text');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
             clearInterval(cooldownTimerInterval);
-            let t = Math.ceil(remainingMs / 1000);
-            updateCooldownText(t, text);
-            cooldownTimerInterval = setInterval(() => { t--; if (t <= 0) closeCooldownModal(); else updateCooldownText(t, text); }, 1000);
+            let timeLeft = Math.ceil(remainingMs / 1000);
+            updateCooldownText(timeLeft, text);
+            cooldownTimerInterval = setInterval(() => {
+                timeLeft--;
+                if (timeLeft <= 0) closeCooldownModal();
+                else updateCooldownText(timeLeft, text);
+            }, 1000);
         }
 
-        function updateCooldownText(seconds, el) {
-            const m = Math.floor(seconds/60), s = seconds%60;
-            el.innerText = `You must wait 5 minutes between logs. Remaining: ${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        function updateCooldownText(seconds, textElement) {
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            textElement.innerText = `You must wait 5 minutes between logs. Remaining: ${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
         }
 
         function closeCooldownModal() {
-            clearInterval(cooldownTimerInterval);
             const modal = document.getElementById('cooldown-modal');
-            modal.classList.add('opacity-0'); setTimeout(() => modal.classList.add('hidden'), 300);
+            clearInterval(cooldownTimerInterval);
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
         }
 
-        // ─── SCANNER ──────────────────────────────────────────────────────────
+        // --- SCANNER LOGIC ---
         async function detectAndVerifyLocation() {
             showToast("Verifying location...");
             if (!navigator.geolocation) return showToast("GPS Not Supported", "error");
             navigator.geolocation.getCurrentPosition(async (pos) => {
-                const { latitude: uLat, longitude: uLon } = pos.coords;
+                const { latitude: userLat, longitude: userLon } = pos.coords;
                 const snap = await db.ref('settings/officeLocation').once('value');
                 if (!snap.exists()) return showToast("Admin hasn't set office location", "error");
-                const cfg = snap.val();
-                const dist = calculateDistance(uLat, uLon, cfg.lat, cfg.lng);
-                if (dist <= (cfg.radius || 150)) {
+                const adminConfig = snap.val();
+                const distance = calculateDistance(userLat, userLon, adminConfig.lat, adminConfig.lng);
+                if (distance <= (adminConfig.radius || 150)) {
                     locationVerified = true;
                     document.getElementById('location-overlay').classList.add('hidden');
                     document.getElementById('scanner-interface').classList.remove('hidden');
                     startScanner();
-                } else showToast(`Outside Range (${Math.round(dist)}m)`, "error");
-            }, () => showToast("Please grant GPS permission", "error"), { enableHighAccuracy: true });
+                } else { showToast(`Outside Range (${Math.round(distance)}m)`, "error"); }
+            }, () => { showToast("Please grant GPS permission", "error"); }, { enableHighAccuracy: true });
         }
 
         function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371e3, dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180;
-            const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            const R = 6371e3;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         }
 
         async function startScanner() {
             if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
             if (!html5QrCode.isScanning) {
-                try { await html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 }, onScanSuccess); }
-                catch(e) { console.error("Scanner error:", e); }
+                try { 
+                    await html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 }, onScanSuccess); 
+                } catch (e) { console.error("Scanner startup error:", e); }
             }
         }
 
         function onScanSuccess(decodedText) {
-            const scanned = decodedText.trim().toString();
-            if (scanned === lastScannedId) return;
-            const stored = currentUserData.id.toString().trim();
-            if (scanned !== stored) { showToast("ID Mismatch", "error"); return; }
-            if (checkCooldown()) return;
-            lastScannedId = scanned;
-            clearTimeout(scanTimeout); scanTimeout = setTimeout(() => { lastScannedId = null; }, 5000);
-            processAttendanceUpdate(stored);
+            const scannedId = decodedText.trim().toString();
+            if (scannedId === lastScannedId) return;
+            const storedId = currentUserData.id.toString().trim();
+            if (scannedId !== storedId) { showToast(`ID Mismatch`, "error"); return; }
+            if (checkCooldown()) return; 
+            lastScannedId = scannedId;
+            clearTimeout(scanTimeout);
+            scanTimeout = setTimeout(() => { lastScannedId = null; }, 5000);
+            processAttendanceUpdate(storedId);
         }
 
-        // ─── BIOMETRICS ───────────────────────────────────────────────────────
+        // --- BIOMETRICS ---
         function bufferToBase64url(buffer) {
-            const bytes = new Uint8Array(buffer); let str = '';
-            for (const c of bytes) str += String.fromCharCode(c);
-            return btoa(str).replace(/\+/g,"-").replace(/\//g,"_").replace(/=/g,"");
+            const bytes = new Uint8Array(buffer);
+            let str = '';
+            for (const char of bytes) str += String.fromCharCode(char);
+            return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
         }
-
-        function base64urlToBuffer(b64url) {
-            const pad = '==='.slice((b64url.length+4)%4);
-            const b64 = (b64url+pad).replace(/-/g,"+").replace(/_/g,"/");
-            const str = atob(b64); const buf = new ArrayBuffer(str.length); const bytes = new Uint8Array(buf);
+        
+        function base64urlToBuffer(base64url) {
+            const padding = '==='.slice((base64url.length + 4) % 4);
+            const base64 = (base64url + padding).replace(/-/g, "+").replace(/_/g, "/");
+            const str = atob(base64);
+            const buffer = new ArrayBuffer(str.length);
+            const bytes = new Uint8Array(buffer);
             for (let i = 0; i < str.length; i++) bytes[i] = str.charCodeAt(i);
-            return buf;
+            return buffer;
         }
 
         async function logWithBiometrics() {
-            if (checkCooldown()) return;
-            if (!window.PublicKeyCredential) return showToast("Biometrics not supported", "error");
+            if (checkCooldown()) return; 
+            if (!window.PublicKeyCredential) return showToast("Biometrics not supported on this device/browser", "error");
+
             let savedCred = null;
             try {
                 const snap = await db.ref(`employees/${currentUserData.id}/biometricCred`).once('value');
                 savedCred = snap.val();
+
                 if (!savedCred) {
                     showToast("Registering biometrics...");
-                    const challenge = new Uint8Array(32), userID = new Uint8Array(16);
-                    window.crypto.getRandomValues(challenge); window.crypto.getRandomValues(userID);
-                    const cred = await navigator.credentials.create({ publicKey: {
-                        challenge, rp: { name: "RareGrade Hub", id: window.location.hostname },
-                        user: { id: userID, name: currentUserData.email, displayName: currentUserData.name || "Employee" },
-                        pubKeyCredParams: [{alg:-7,type:"public-key"},{alg:-257,type:"public-key"}],
-                        authenticatorSelection: { userVerification: "preferred" }, timeout: 60000, attestation: "none"
-                    }});
-                    await db.ref(`employees/${currentUserData.id}/biometricCred`).set(bufferToBase64url(cred.rawId));
-                    showToast("Biometrics Registered!"); processAttendanceUpdate(currentUserData.id);
+                    const challenge = new Uint8Array(32);
+                    window.crypto.getRandomValues(challenge);
+                    const userID = new Uint8Array(16);
+                    window.crypto.getRandomValues(userID);
+
+                    const credential = await navigator.credentials.create({
+                        publicKey: {
+                            challenge, rp: { name: "RareGrade Hub", id: window.location.hostname },
+                            user: { id: userID, name: currentUserData.email, displayName: currentUserData.name || "Employee" },
+                            pubKeyCredParams: [{ alg: -7, type: "public-key" }, { alg: -257, type: "public-key" }],
+                            authenticatorSelection: { userVerification: "preferred" },
+                            timeout: 60000, attestation: "none"
+                        }
+                    });
+                    
+                    await db.ref(`employees/${currentUserData.id}/biometricCred`).set(bufferToBase64url(credential.rawId));
+                    showToast("Biometrics Registered! Logging in...");
+                    processAttendanceUpdate(currentUserData.id);
                 } else {
                     showToast("Verify identity...");
-                    const challenge = new Uint8Array(32); window.crypto.getRandomValues(challenge);
-                    await navigator.credentials.get({ publicKey: {
-                        challenge, allowCredentials: [{ id: base64urlToBuffer(savedCred), type: 'public-key' }],
-                        userVerification: "preferred", timeout: 60000
-                    }});
-                    showToast("Identity Verified!"); processAttendanceUpdate(currentUserData.id);
+                    const challenge = new Uint8Array(32);
+                    window.crypto.getRandomValues(challenge);
+                    await navigator.credentials.get({
+                        publicKey: {
+                            challenge, allowCredentials: [{ id: base64urlToBuffer(savedCred), type: 'public-key' }],
+                            userVerification: "preferred", timeout: 60000
+                        }
+                    });
+                    showToast("Identity Verified!");
+                    processAttendanceUpdate(currentUserData.id);
                 }
-            } catch(err) {
-                if (savedCred && (err.name === 'NotAllowedError' || err.message.toLowerCase().includes('passkey'))) {
+            } catch (err) {
+                console.error("Biometric error:", err);
+                if (savedCred && (err.name === 'NotAllowedError' || err.message.toLowerCase().includes('passkey') || err.message.toLowerCase().includes('authenticator'))) {
                     await db.ref(`employees/${currentUserData.id}/biometricCred`).remove();
-                    showToast("Passkey reset. Please try again.", "error");
-                } else showToast("Biometric auth failed", "error");
+                    showToast("Passkey invalid or missing. Registration reset. Please try scanning again.", "error");
+                } else {
+                    showToast("Biometric authentication failed or canceled", "error");
+                }
             }
         }
 
         function processAttendanceUpdate(employeeId) {
             if (window.isProcessingScan) return;
             window.isProcessingScan = true;
-            const today   = new Date().toISOString().split('T')[0];
+
+            const today = new Date().toISOString().split('T')[0];
             const nowTime = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
-            db.ref(`attendance/${today}/${employeeId}`).once('value', (snap) => {
+            
+            db.ref(`attendance/${today}/${employeeId}`).once('value', (attSnap) => {
                 let update = { name: currentUserData.name || "Employee", timestamp: firebase.database.ServerValue.TIMESTAMP };
-                const att = snap.val(); let label = "Logged";
-                if (!att)             { label = "Time In Recorded";    update.TimeIn    = nowTime; }
-                else if (!att.LunchOut)  { label = "Lunch Out Recorded";  update.LunchOut  = nowTime; }
-                else if (!att.LunchBack) { label = "Lunch Back Recorded"; update.LunchBack = nowTime; }
-                else if (!att.TimeOut)   { label = "Time Out Recorded";   update.TimeOut   = nowTime; }
+                const att = attSnap.val();
+                let actionLabel = "Logged";
+                
+                if (!att) { actionLabel = "Time In Recorded"; update.TimeIn = nowTime; } 
+                else if (!att.LunchOut) { actionLabel = "Lunch Out Recorded"; update.LunchOut = nowTime; } 
+                else if (!att.LunchBack) { actionLabel = "Lunch Back Recorded"; update.LunchBack = nowTime; } 
+                else if (!att.TimeOut) { actionLabel = "Time Out Recorded"; update.TimeOut = nowTime; } 
                 else { window.isProcessingScan = false; return showToast("Shift complete for today", "error"); }
+                
                 db.ref(`attendance/${today}/${employeeId}`).update(update).then(() => {
                     localStorage.setItem('lastScanTime_' + employeeId, Date.now());
-                    showToast(`✅ ${label}`); switchTab('home');
+                    showToast(`✅ ${actionLabel}`);
+                    switchTab('home'); 
                     setTimeout(() => window.isProcessingScan = false, 2000);
                 }).catch(() => { window.isProcessingScan = false; });
             });
         }
 
-        // ─── SETTINGS ─────────────────────────────────────────────────────────
-        function clearCache() {
-            showToast("Clearing local data...");
-            setTimeout(() => {
-                const theme = localStorage.getItem('theme');
-                localStorage.clear();
-                if (theme) localStorage.setItem('theme', theme);
-                showToast("Cache cleared. Reloading...");
-                setTimeout(() => window.location.reload(), 1000);
-            }, 800);
-        }
-
-        // ─── TOAST ────────────────────────────────────────────────────────────
-        function showToast(msg, type = "success") {
+        function showToast(msg, type="success") {
             const t = document.getElementById('toast');
             document.getElementById('toastMsg').innerHTML = msg;
-            if (type === "error") { t.classList.add('bg-red-500'); t.classList.remove('bg-gray-900','dark:bg-white'); }
-            else { t.classList.remove('bg-red-500'); t.classList.add('bg-gray-900','dark:bg-white'); }
-            t.classList.remove('opacity-0','translate-y-10','pointer-events-none');
-            setTimeout(() => t.classList.add('opacity-0','translate-y-10','pointer-events-none'), 3500);
+            if(type==="error") {
+                t.classList.add('bg-red-500'); t.classList.remove('bg-gray-900', 'dark:bg-white');
+            } else {
+                t.classList.remove('bg-red-500'); t.classList.add('bg-gray-900', 'dark:bg-white');
+            }
+            t.classList.remove('opacity-0', 'translate-y-10', 'pointer-events-none');
+            setTimeout(() => t.classList.add('opacity-0', 'translate-y-10', 'pointer-events-none'), 3000);
         }
 
-        // ─── CLOCK ────────────────────────────────────────────────────────────
         setInterval(() => {
             document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
         }, 1000);
 
-        // ─── PWA ──────────────────────────────────────────────────────────────
+        // --- PWA SERVICE WORKER ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(() => {});
+                navigator.serviceWorker.register('./sw.js')
+                    .then(() => console.log('ServiceWorker registered'))
+                    .catch(err => console.log('ServiceWorker failed:', err));
             });
         }
     </script>

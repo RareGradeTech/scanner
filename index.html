@@ -258,9 +258,9 @@
         .lnotif-close { color: rgba(255,255,255,0.7); font-size: 16px; padding: 4px; cursor: pointer; flex-shrink: 0; }
         .lnotif-close:hover { color: #fff; }
 
-        /* PWA Install Popup */
+        /* PWA Install Popup — drops from top */
         #pwa-install-popup {
-            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
         }
         #pwa-install-popup.show {
             transform: translateY(0);
@@ -282,9 +282,8 @@
         <p id="spinner-text" class="text-gray-800 dark:text-gray-200 mt-4 font-bold text-sm tracking-wide">Processing...</p>
     </div>
 
-    <div id="pwa-install-popup" class="fixed bottom-0 left-0 right-0 p-4 z-[100000] transform translate-y-[120%] pointer-events-none pb-[calc(1rem+env(safe-area-inset-bottom))]">
-        <div class="bg-white dark:bg-slate-800 rounded-3xl p-5 shadow-[0_-8px_40px_rgba(0,0,0,0.16)] border border-gray-200 dark:border-slate-700 pointer-events-auto touch-none">
-            <div class="pwa-handle"></div>
+    <div id="pwa-install-popup" class="fixed top-0 left-0 right-0 p-4 z-[100000] transform -translate-y-[120%] pointer-events-none pt-[calc(1rem+env(safe-area-inset-top))]">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl p-5 shadow-[0_8px_40px_rgba(0,0,0,0.16)] border border-gray-200 dark:border-slate-700 pointer-events-auto touch-none">
             <div class="flex items-center gap-4">
                 <div class="w-14 h-14 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center text-3xl shrink-0 shadow-inner border border-blue-200 dark:border-blue-800">
                     <i class="fa-solid fa-download"></i>
@@ -297,7 +296,8 @@
                     Install
                 </button>
             </div>
-            <p class="text-[10px] text-center text-gray-400 mt-4 font-medium uppercase tracking-widest">Swipe down to dismiss</p>
+            <p class="text-[10px] text-center text-gray-400 mt-4 font-medium uppercase tracking-widest">Swipe up to dismiss</p>
+            <div class="pwa-handle mt-3"></div>
         </div>
     </div>
 
@@ -1170,7 +1170,7 @@
             }
         }
 
-        // Swipe logic specific to PWA popup
+        // Swipe logic specific to PWA popup — swipe UP to dismiss (popup is at top)
         pwaPopup.addEventListener('touchstart', (e) => {
             pwaStartY = e.touches[0].clientY;
             pwaPopup.style.transition = 'none'; // remove transition for smooth dragging
@@ -1179,7 +1179,7 @@
         pwaPopup.addEventListener('touchmove', (e) => {
             const currentY = e.touches[0].clientY;
             const diff = currentY - pwaStartY;
-            if (diff > 0) { // Only allow swiping down
+            if (diff < 0) { // Only allow swiping up (negative diff = upward)
                 pwaPopup.style.transform = `translateY(${diff}px)`;
             }
         }, {passive: true});
@@ -1188,9 +1188,9 @@
             const currentY = e.changedTouches[0].clientY;
             const diff = currentY - pwaStartY;
             
-            pwaPopup.style.transition = 'transform 0.3s cubic-bezier(0.22, 1, 0.36, 1)';
+            pwaPopup.style.transition = 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1)';
             
-            if (diff > 60) { // Swipe threshold to dismiss
+            if (diff < -60) { // Swipe up threshold to dismiss
                 dismissPwaPopup();
             } else {
                 // Snap back to open state
@@ -1199,12 +1199,12 @@
         }, {passive: true});
 
         function dismissPwaPopup() {
-            pwaPopup.style.transform = 'translateY(120%)';
+            pwaPopup.style.transform = 'translateY(-120%)';
             localStorage.setItem('pwa_prompt_dismissed', 'true');
             setTimeout(() => {
                 pwaPopup.classList.remove('show');
-                pwaPopup.style.transform = ''; // reset just in case
-            }, 300);
+                pwaPopup.style.transform = ''; // reset after hidden
+            }, 350);
         }
 
 

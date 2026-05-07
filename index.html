@@ -1170,8 +1170,14 @@
                 if (outcome === 'accepted') {
                     localStorage.setItem('pwa_installed', 'true');
                     dismissPwaPopup(true);
+                } else {
+                    // User dismissed the native prompt — hide the banner for this session
+                    dismissPwaPopup(false);
                 }
                 deferredPrompt = null;
+            } else {
+                // No deferred prompt available — just hide the banner
+                dismissPwaPopup(false);
             }
         }
 

@@ -258,21 +258,20 @@
         .lnotif-close { color: rgba(255,255,255,0.7); font-size: 16px; padding: 4px; cursor: pointer; flex-shrink: 0; }
         .lnotif-close:hover { color: #fff; }
 
-        /* PWA Install Popup — drops from top */
+        /* PWA Install Banner — slim bar that slides just below the header */
         #pwa-install-popup {
+            position: fixed;
+            top: calc(env(safe-area-inset-top) + 64px);
+            left: 0; right: 0;
+            z-index: 49;
+            pointer-events: none;
+            transform: translateY(-110%);
             transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
         }
         #pwa-install-popup.show {
             transform: translateY(0);
+            pointer-events: auto;
         }
-        .pwa-handle {
-            width: 40px;
-            height: 5px;
-            background: #cbd5e1;
-            border-radius: 10px;
-            margin: 0 auto 12px auto;
-        }
-        .dark .pwa-handle { background: #475569; }
     </style>
 </head>
 <body class="h-screen flex flex-col relative bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
@@ -282,22 +281,21 @@
         <p id="spinner-text" class="text-gray-800 dark:text-gray-200 mt-4 font-bold text-sm tracking-wide">Processing...</p>
     </div>
 
-    <div id="pwa-install-popup" class="fixed top-0 left-0 right-0 p-4 z-[100000] transform -translate-y-[120%] pointer-events-none pt-[calc(1rem+env(safe-area-inset-top))]">
-        <div class="bg-white dark:bg-slate-800 rounded-3xl p-5 shadow-[0_8px_40px_rgba(0,0,0,0.16)] border border-gray-200 dark:border-slate-700 pointer-events-auto touch-none">
-            <div class="flex items-center gap-4">
-                <div class="w-14 h-14 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center text-3xl shrink-0 shadow-inner border border-blue-200 dark:border-blue-800">
-                    <i class="fa-solid fa-download"></i>
-                </div>
-                <div class="flex-1">
-                    <h4 class="font-bold text-base text-gray-900 dark:text-white">Install Hub App</h4>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-tight">Add to your home screen for quick offline access and full screen mode.</p>
-                </div>
-                <button onclick="installPWA()" class="bg-blue-600 text-white px-5 py-3 rounded-xl text-sm font-bold active:scale-95 shadow-md hover:bg-blue-700 transition-all shrink-0">
-                    Install
-                </button>
+    <div id="pwa-install-popup">
+        <div class="mx-3 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl shadow-lg px-3 py-2.5 flex items-center gap-3 touch-none">
+            <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-download text-sm"></i>
             </div>
-            <p class="text-[10px] text-center text-gray-400 mt-4 font-medium uppercase tracking-widest">Swipe up to dismiss</p>
-            <div class="pwa-handle mt-3"></div>
+            <div class="flex-1 min-w-0">
+                <p class="text-xs font-bold text-gray-900 dark:text-white leading-tight">Install RareGradeHub</p>
+                <p class="text-[10px] text-gray-400 dark:text-gray-500 leading-tight truncate">Add to home screen for offline access</p>
+            </div>
+            <button onclick="installPWA()" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold active:scale-95 transition-all shrink-0">
+                Install
+            </button>
+            <button onclick="dismissPwaPopup(false)" class="text-gray-400 dark:text-gray-500 p-1 shrink-0 active:text-gray-600" aria-label="Dismiss">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
         </div>
     </div>
 
@@ -1153,8 +1151,7 @@
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            // Always show the popup on every page load as long as the app
-            // has not been installed. Only skip if user actually installed it.
+            // Always show on every page load until the app is actually installed
             if (!localStorage.getItem('pwa_installed')) {
                 setTimeout(() => pwaPopup.classList.add('show'), 1500);
             }
@@ -1171,57 +1168,48 @@
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
                 if (outcome === 'accepted') {
-                    // User accepted install — permanently mark as installed
                     localStorage.setItem('pwa_installed', 'true');
                     dismissPwaPopup(true);
                 }
-                // If dismissed from native prompt, just hide for this session
-                // but show again next refresh
                 deferredPrompt = null;
             }
         }
 
-        // Swipe logic specific to PWA popup — swipe UP to dismiss (popup is at top)
+        // Swipe UP on the banner to session-dismiss
         pwaPopup.addEventListener('touchstart', (e) => {
             pwaStartY = e.touches[0].clientY;
-            pwaPopup.style.transition = 'none'; // remove transition for smooth dragging
-        }, {passive: true});
+            pwaPopup.style.transition = 'none';
+        }, { passive: true });
 
         pwaPopup.addEventListener('touchmove', (e) => {
-            const currentY = e.touches[0].clientY;
-            const diff = currentY - pwaStartY;
-            if (diff < 0) { // Only allow swiping up (negative diff = upward)
+            const diff = e.touches[0].clientY - pwaStartY;
+            if (diff < 0) { // upward only
                 pwaPopup.style.transform = `translateY(${diff}px)`;
             }
-        }, {passive: true});
+        }, { passive: true });
 
         pwaPopup.addEventListener('touchend', (e) => {
-            const currentY = e.changedTouches[0].clientY;
-            const diff = currentY - pwaStartY;
-            
+            const diff = e.changedTouches[0].clientY - pwaStartY;
             pwaPopup.style.transition = 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1)';
-            
-            if (diff < -60) { // Swipe up threshold — session dismiss only, NOT permanent
+            if (diff < -40) {
                 dismissPwaPopup(false);
             } else {
-                // Snap back to open state
                 pwaPopup.style.transform = '';
             }
-        }, {passive: true});
+        }, { passive: true });
 
         /**
-         * @param {boolean} permanent - true only when user actually installs the PWA.
-         *   false = session dismiss (swipe up) — popup returns next refresh.
+         * @param {boolean} permanent - true only when user actually installs.
+         * false = session dismiss — popup returns on next refresh.
          */
         function dismissPwaPopup(permanent = false) {
-            pwaPopup.style.transform = 'translateY(-120%)';
+            pwaPopup.style.transform = 'translateY(-110%)';
             if (permanent) {
                 localStorage.setItem('pwa_installed', 'true');
             }
-            // Never write 'pwa_prompt_dismissed' — that would suppress future visits
             setTimeout(() => {
                 pwaPopup.classList.remove('show');
-                pwaPopup.style.transform = ''; // reset after hidden
+                pwaPopup.style.transform = '';
             }, 350);
         }
 

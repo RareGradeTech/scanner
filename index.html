@@ -265,10 +265,14 @@
             left: 0; right: 0;
             z-index: 49;
             pointer-events: none;
+            display: none;
+            opacity: 0;
             transform: translateY(-110%);
-            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
         }
         #pwa-install-popup.show {
+            display: block;
+            opacity: 1;
             transform: translateY(0);
             pointer-events: auto;
         }
@@ -1191,16 +1195,20 @@
             const diff = e.touches[0].clientY - pwaStartY;
             if (diff < 0) { // upward only
                 pwaPopup.style.transform = `translateY(${diff}px)`;
+                // Fade as user swipes further up (fully gone at -80px)
+                pwaPopup.style.opacity = Math.max(0, 1 + diff / 80).toString();
             }
         }, { passive: true });
 
         pwaPopup.addEventListener('touchend', (e) => {
             const diff = e.changedTouches[0].clientY - pwaStartY;
-            pwaPopup.style.transition = 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1)';
+            pwaPopup.style.transition = 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease';
             if (diff < -40) {
                 dismissPwaPopup(false);
             } else {
+                // Snap back — restore fully visible state
                 pwaPopup.style.transform = '';
+                pwaPopup.style.opacity = '';
             }
         }, { passive: true });
 
@@ -1209,14 +1217,22 @@
          * false = session dismiss — popup returns on next refresh.
          */
         function dismissPwaPopup(permanent = false) {
-            pwaPopup.style.transform = 'translateY(-110%)';
             if (permanent) {
                 localStorage.setItem('pwa_installed', 'true');
             }
+            // Animate out: slide up and fade
+            pwaPopup.style.transition = 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease';
+            pwaPopup.style.transform = 'translateY(-110%)';
+            pwaPopup.style.opacity = '0';
+            pwaPopup.style.pointerEvents = 'none';
             setTimeout(() => {
+                // Fully remove from view — display:none means zero height, zero presence
                 pwaPopup.classList.remove('show');
                 pwaPopup.style.transform = '';
-            }, 350);
+                pwaPopup.style.opacity = '';
+                pwaPopup.style.transition = '';
+                pwaPopup.style.pointerEvents = '';
+            }, 360);
         }
 
 

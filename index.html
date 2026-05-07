@@ -120,6 +120,81 @@
         }
         .dark .sig-pad { border-color: #475569; background: #1e293b; }
 
+        /* =============================================
+           MOBILE OPTIMIZATION — spacing, layout, z-index
+           ============================================= */
+
+        /* Ensure main content never overflows or overlaps nav */
+        #app-content {
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+        }
+
+        /* Prevent leave/support inner views from clipping */
+        #leave-view-apply,
+        #leave-view-history,
+        #leave-view-balances,
+        #sup-view-register,
+        #sup-view-maintenance {
+            min-width: 0;
+        }
+
+        /* Leave type cards — responsive grid on tiny screens */
+        #leave-type-cards {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        @media (max-width: 360px) {
+            #leave-type-cards { grid-template-columns: repeat(2, 1fr); }
+            .leave-type-card .leave-label { font-size: 9px; }
+            .leave-type-card .leave-icon { width: 32px; height: 32px; }
+        }
+
+        /* Home shift cards — 2-col responsive */
+        @media (max-width: 320px) {
+            #app-content { padding-left: 0.75rem; padding-right: 0.75rem; }
+        }
+
+        /* Signature pad — always full width of parent */
+        .sig-pad {
+            border: 2px dashed #cbd5e1; background: #f8fafc; border-radius: 0.75rem;
+            width: 100%; touch-action: none; cursor: crosshair; display: block;
+        }
+        .dark .sig-pad { border-color: #475569; background: #1e293b; }
+
+        /* Bottom nav — safe z-index above content, below modals */
+        #bottom-nav { z-index: 50; }
+        #fab-scanner { z-index: 45; }
+
+        /* Toast — above everything except global spinner */
+        #toast { z-index: 9998; }
+
+        /* Cooldown modal — above nav, below spinner */
+        #cooldown-modal { z-index: 500; }
+
+        /* Notification popups — highest layer */
+        #chat-notif-popup { z-index: 9996; }
+        #leave-notif-popup { z-index: 9997; }
+        #global-spinner { z-index: 9999; }
+
+        /* Prevent text overflow in leave history cards */
+        #leave-history-list .app-card h4 {
+            word-break: break-word;
+        }
+
+        /* Balance grid — responsive */
+        @media (max-width: 340px) {
+            #leave-view-balances .grid { grid-template-columns: 1fr; }
+            #leave-view-balances .col-span-2 { grid-column: span 1; }
+        }
+
+        /* Support grid inputs — single col on very small screens */
+        @media (max-width: 360px) {
+            .grid.grid-cols-2 { grid-template-columns: 1fr; }
+        }
+
+        /* Edit leave banner */
+        #leave-edit-banner { margin-bottom: 0; }
+
         .custom-checkbox { width: 18px; height: 18px; border-radius: 4px; border: 2px solid #cbd5e1; cursor: pointer; accent-color: #2563eb; }
         
         .sup-tab { transition: all 0.3s; border-bottom: 2px solid transparent; }
@@ -187,7 +262,7 @@
         }
         #chat-notif-popup.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
         #chat-notif-popup .notif-inner {
-            background: rgba(255,255,255,0.92);
+            background: rgba(255,255,255,0.97);
             backdrop-filter: blur(20px) saturate(180%);
             -webkit-backdrop-filter: blur(20px) saturate(180%);
             border: 1px solid rgba(0,0,0,0.08);
@@ -195,9 +270,8 @@
             box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08);
             padding: 14px 16px;
             display: flex; align-items: center; gap: 12px;
-            cursor: pointer;
         }
-        .dark #chat-notif-popup .notif-inner { background: rgba(30,41,59,0.94); border-color: rgba(255,255,255,0.08); }
+        .dark #chat-notif-popup .notif-inner { background: rgba(30,41,59,0.97); border-color: rgba(255,255,255,0.08); }
         .notif-icon {
             width: 42px; height: 42px;
             background: linear-gradient(135deg, #075e54 0%, #128c7e 100%);
@@ -206,9 +280,10 @@
             flex-shrink: 0;
             box-shadow: 0 2px 8px rgba(7,94,84,0.35);
             position: relative;
+            cursor: pointer;
         }
         .notif-icon i { color: #fff; font-size: 18px; }
-        .notif-content { flex: 1; min-width: 0; }
+        .notif-content { flex: 1; min-width: 0; cursor: pointer; }
         .notif-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: #075e54; margin-bottom: 2px; }
         .dark .notif-title { color: #4ade80; }
         .notif-sender { font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 1px; }
@@ -216,6 +291,9 @@
         .notif-text { font-size: 12.5px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .dark .notif-text { color: #94a3b8; }
         .notif-time { font-size: 10px; color: #94a3b8; font-weight: 600; white-space: nowrap; align-self: flex-start; padding-top: 2px; }
+        .notif-dismiss { color: #94a3b8; font-size: 16px; padding: 4px; cursor: pointer; flex-shrink: 0; }
+        .notif-dismiss:active { color: #0f172a; }
+        .dark .notif-dismiss:active { color: #f1f5f9; }
         .notif-icon::after {
             content: ''; position: absolute; inset: -4px; border-radius: 16px;
             border: 2px solid rgba(7,94,84,0.4);
@@ -243,7 +321,6 @@
             box-shadow: 0 12px 40px rgba(0,0,0,0.22), 0 2px 12px rgba(0,0,0,0.10);
             padding: 16px 18px;
             display: flex; align-items: center; gap: 14px;
-            cursor: pointer;
             border: 1.5px solid rgba(255,255,255,0.18);
         }
         #leave-notif-popup.approved .lnotif-inner { background: linear-gradient(135deg, rgba(5,150,105,0.97) 0%, rgba(16,185,129,0.97) 100%); }
@@ -253,8 +330,8 @@
         .lnotif-title { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.80); margin-bottom: 3px; }
         .lnotif-main { font-size: 14px; font-weight: 800; color: #fff; line-height: 1.3; }
         .lnotif-sub { font-size: 11px; color: rgba(255,255,255,0.75); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .lnotif-close { color: rgba(255,255,255,0.7); font-size: 16px; padding: 4px; cursor: pointer; flex-shrink: 0; }
-        .lnotif-close:hover { color: #fff; }
+        .lnotif-close { color: rgba(255,255,255,0.85); font-size: 18px; padding: 6px; cursor: pointer; flex-shrink: 0; border-radius: 50%; background: rgba(0,0,0,0.15); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
+        .lnotif-close:hover { color: #fff; background: rgba(0,0,0,0.28); }
     </style>
 </head>
 <body class="h-screen flex flex-col relative bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
@@ -267,14 +344,15 @@
 
     <!-- CHAT NOTIFICATION POPUP -->
     <div id="chat-notif-popup" role="alertdialog" aria-live="assertive" aria-label="New chat message">
-        <div class="notif-inner" onclick="openChatFromNotif()">
-            <div class="notif-icon"><i class="fa-solid fa-message"></i></div>
-            <div class="notif-content">
+        <div class="notif-inner">
+            <div class="notif-icon" onclick="openChatFromNotif()"><i class="fa-solid fa-message"></i></div>
+            <div class="notif-content" onclick="openChatFromNotif()">
                 <div class="notif-title">Rare Grade Team</div>
                 <div class="notif-sender" id="notif-sender-name">Someone</div>
                 <div class="notif-text" id="notif-msg-text">New message</div>
             </div>
             <div class="notif-time" id="notif-time-text">now</div>
+            <div class="notif-dismiss" onclick="dismissNotifPopup()" aria-label="Dismiss"><i class="fa-solid fa-xmark"></i></div>
         </div>
     </div>
 
@@ -1070,6 +1148,9 @@
         // Selected leave type
         let selectedLeaveType = 'Annual Leave';
 
+        // Edit mode for pending leave requests
+        let editingLeaveKey = null;
+
         // ============================================================
         // LEAVE TYPE CARD SELECTION
         // ============================================================
@@ -1110,18 +1191,62 @@
         // SWIPE GESTURE NAVIGATION
         // ============================================================
         let touchStartX = 0;
+        let touchStartY = 0;
         let touchEndX = 0;
-        const swipeThreshold = 50; 
+        let touchEndY = 0;
+        let swipeBlocked = false;
+        const swipeThreshold = 60;
         const navTabs = ['home', 'support', 'leave', 'chat', 'profile', 'settings'];
 
-        document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
-        document.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; handleSwipeGesture(); }, { passive: true });
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+            swipeBlocked = false;
+
+            // Block swipe if starting inside a signature canvas
+            const target = e.target;
+            if (target.tagName === 'CANVAS' && target.classList.contains('sig-pad')) {
+                swipeBlocked = true;
+                return;
+            }
+
+            // Block swipe if starting inside a scrollable inner container
+            // (tab scroll containers, chat-messages, inner leave/support scroll areas)
+            let el = target;
+            while (el && el !== document.body) {
+                if (el.id === 'chat-messages') { swipeBlocked = true; return; }
+                if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT' || el.tagName === 'SELECT') {
+                    swipeBlocked = true; return;
+                }
+                // If the element scrolls horizontally (tab strip), block swipe
+                const style = window.getComputedStyle(el);
+                const overflowX = style.overflowX;
+                if ((overflowX === 'auto' || overflowX === 'scroll') && el.scrollWidth > el.clientWidth) {
+                    swipeBlocked = true; return;
+                }
+                el = el.parentElement;
+            }
+        }, { passive: true });
+
+        document.addEventListener('touchend', e => {
+            if (swipeBlocked) return;
+            touchEndX = e.changedTouches[0].screenX;
+            touchEndY = e.changedTouches[0].screenY;
+            handleSwipeGesture();
+        }, { passive: true });
 
         function handleSwipeGesture() {
             const loginView = document.getElementById('login-view');
             const scannerView = document.getElementById('view-scanner');
             if (!loginView.classList.contains('hidden') && loginView.classList.contains('active')) return;
             if (!scannerView.classList.contains('hidden')) return;
+
+            const dx = touchEndX - touchStartX;
+            const dy = touchEndY - touchStartY;
+
+            // Only handle predominantly horizontal swipes
+            if (Math.abs(dx) < swipeThreshold) return;
+            if (Math.abs(dy) > Math.abs(dx) * 0.75) return; // mostly vertical = scroll, not swipe
 
             let currentTabId = 'home';
             if (!document.getElementById('view-chat').classList.contains('hidden')) {
@@ -1134,10 +1259,9 @@
             const currentIndex = navTabs.indexOf(currentTabId);
             if (currentIndex === -1) return;
 
-            if (touchEndX < touchStartX - swipeThreshold) {
+            if (dx < 0) {
                 if (currentIndex < navTabs.length - 1) switchTab(navTabs[currentIndex + 1]);
-            }
-            if (touchEndX > touchStartX + swipeThreshold) {
+            } else {
                 if (currentIndex > 0) switchTab(navTabs[currentIndex - 1]);
             }
         }
@@ -1960,6 +2084,11 @@ ${sigUrl}
             document.getElementById('leave-view-balances').classList.add('hidden');
             document.getElementById('leave-view-' + tab).classList.remove('hidden');
 
+            // If leaving the apply tab while editing, cancel edit mode silently
+            if (tab !== 'apply' && editingLeaveKey) {
+                cancelLeaveEdit();
+            }
+
             if (tab === 'history') loadLeaveHistory();
             if (tab === 'balances') loadLeaveBalances();
         }
@@ -2112,6 +2241,157 @@ ${sigUrl}
         }
 
         /**
+         * Populate the Apply tab with existing pending leave data for editing
+         */
+        function editLeaveRequest(req) {
+            editingLeaveKey = req.key;
+
+            // Switch to the Apply sub-tab
+            switchLeaveTab('apply');
+
+            // Pre-select the leave type card
+            const typeMap = {
+                'Annual Leave': 0, 'Sick Leave': 1, 'Family Responsibility': 2,
+                'Study Leave': 3, 'Maternity Leave': 4, 'Paternity Leave': 5, 'Unpaid Leave': 6
+            };
+            const cards = document.querySelectorAll('#leave-type-cards .leave-type-card');
+            cards.forEach(c => c.classList.remove('selected'));
+            const idx = typeMap[req.leaveType];
+            if (idx !== undefined && cards[idx]) cards[idx].classList.add('selected');
+
+            selectedLeaveType = req.leaveType;
+            document.getElementById('leave-type').value = req.leaveType;
+            document.getElementById('leave-type-display').textContent = req.leaveType;
+
+            // Populate dates and reason
+            document.getElementById('leave-start').value = req.startDate || '';
+            document.getElementById('leave-end').value = req.endDate || '';
+            document.getElementById('leave-reason').value = req.reason || '';
+
+            // Recalculate days display
+            calculateLeaveDays();
+
+            // Show existing document if any
+            if (req.supportingDocUrl) {
+                leaveDocUrl = req.supportingDocUrl;
+                const nameEl = document.getElementById('leave-doc-name');
+                nameEl.textContent = '✓ Previous document attached (upload new to replace)';
+                nameEl.classList.remove('hidden');
+            }
+
+            // Swap submit button to Update mode
+            const submitBtn = document.querySelector('#leave-view-apply button[onclick="submitLeaveRequest()"]');
+            if (submitBtn) {
+                submitBtn.setAttribute('onclick', 'updateLeaveRequest()');
+                submitBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Update Leave Request';
+                submitBtn.classList.remove('bg-blue-600', 'shadow-blue-500/30', 'hover:bg-blue-700');
+                submitBtn.classList.add('bg-orange-500', 'shadow-orange-500/30', 'hover:bg-orange-600');
+            }
+
+            // Show a cancel-edit banner
+            let editBanner = document.getElementById('leave-edit-banner');
+            if (!editBanner) {
+                editBanner = document.createElement('div');
+                editBanner.id = 'leave-edit-banner';
+                editBanner.className = 'bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700/40 rounded-xl p-3 flex items-center justify-between gap-2 text-xs';
+                editBanner.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-pen-to-square text-orange-500"></i>
+                        <span class="font-bold text-orange-700 dark:text-orange-400">Editing: <span class="font-mono">${req.refId}</span></span>
+                    </div>
+                    <button onclick="cancelLeaveEdit()" class="font-bold text-red-500 dark:text-red-400 bg-white dark:bg-slate-800 px-2 py-1 rounded-lg border border-red-100 dark:border-red-900/30 active:scale-95 transition-transform">Cancel</button>
+                `;
+                const applyView = document.getElementById('leave-view-apply');
+                applyView.insertBefore(editBanner, applyView.firstChild);
+            } else {
+                editBanner.classList.remove('hidden');
+                editBanner.querySelector('span.font-mono').textContent = req.refId;
+            }
+
+            // Scroll to top
+            document.getElementById('app-content').scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        /**
+         * Reset Apply tab back to normal new-request mode
+         */
+        function cancelLeaveEdit() {
+            editingLeaveKey = null;
+            leaveDocUrl = null;
+
+            // Reset button back to Submit
+            const updateBtn = document.querySelector('#leave-view-apply button[onclick="updateLeaveRequest()"]');
+            if (updateBtn) {
+                updateBtn.setAttribute('onclick', 'submitLeaveRequest()');
+                updateBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Leave Request';
+                updateBtn.classList.remove('bg-orange-500', 'shadow-orange-500/30', 'hover:bg-orange-600');
+                updateBtn.classList.add('bg-blue-600', 'shadow-blue-500/30', 'hover:bg-blue-700');
+            }
+
+            const banner = document.getElementById('leave-edit-banner');
+            if (banner) banner.classList.add('hidden');
+
+            // Reset form
+            document.getElementById('leave-type').value = 'Annual Leave';
+            selectedLeaveType = 'Annual Leave';
+            document.querySelectorAll('#leave-type-cards .leave-type-card').forEach(c => c.classList.remove('selected'));
+            document.querySelector('#leave-type-cards .leave-type-card').classList.add('selected');
+            document.getElementById('leave-type-display').textContent = 'Annual Leave';
+            document.getElementById('leave-start').value = '';
+            document.getElementById('leave-end').value = '';
+            document.getElementById('leave-reason').value = '';
+            document.getElementById('leave-days-display').classList.add('hidden');
+            document.getElementById('leave-doc-name').classList.add('hidden');
+        }
+
+        /**
+         * Update an existing pending leave request
+         */
+        async function updateLeaveRequest() {
+            if (!currentUserData || !editingLeaveKey) return;
+
+            const leaveType = document.getElementById('leave-type').value || selectedLeaveType;
+            const startDate = document.getElementById('leave-start').value;
+            const endDate = document.getElementById('leave-end').value;
+            const reason = document.getElementById('leave-reason').value.trim();
+
+            if (!startDate || !endDate) return showToast("Please select start and end dates", "error");
+            if (new Date(endDate) < new Date(startDate)) return showToast("End date cannot be before start date", "error");
+
+            const days = countWorkingDays(startDate, endDate);
+            if (days === 0) return showToast("No working days in selected range", "error");
+
+            document.getElementById('global-spinner').classList.add('active');
+            document.getElementById('spinner-text').innerText = "Updating leave request...";
+
+            try {
+                const updatePayload = {
+                    leaveType,
+                    startDate,
+                    endDate,
+                    days,
+                    reason,
+                    supportingDocUrl: leaveDocUrl || null,
+                    status: 'Pending',
+                    updatedAt: firebase.database.ServerValue.TIMESTAMP
+                };
+
+                await db.ref(`leave_requests/${editingLeaveKey}`).update(updatePayload);
+                await db.ref(`admin_leave_pending/${editingLeaveKey}`).update(updatePayload);
+
+                document.getElementById('global-spinner').classList.remove('active');
+                showToast("Leave request updated successfully!");
+
+                cancelLeaveEdit();
+                switchLeaveTab('history');
+            } catch(e) {
+                document.getElementById('global-spinner').classList.remove('active');
+                showToast("Failed to update leave request", "error");
+                console.error(e);
+            }
+        }
+
+        /**
          * Load and render the employee's leave request history
          */
         async function loadLeaveHistory() {
@@ -2165,6 +2445,10 @@ ${sigUrl}
                         ? `<a href="${req.supportingDocUrl}" target="_blank" class="text-[10px] text-blue-500 underline mt-1 block"><i class="fa-solid fa-paperclip mr-1"></i>View Document</a>`
                         : '';
 
+                    const editBtnHtml = req.status === 'Pending'
+                        ? `<button onclick="editLeaveRequest(${JSON.stringify(req).replace(/"/g, '&quot;')})" class="mt-3 w-full py-2.5 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700/40 text-orange-700 dark:text-orange-400 rounded-xl font-bold text-xs active:scale-[0.98] transition-all flex items-center justify-center gap-2"><i class="fa-solid fa-pen-to-square"></i> Edit Request</button>`
+                        : '';
+
                     list.innerHTML += `
                         <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4">
                             <div class="flex items-start justify-between mb-2">
@@ -2176,13 +2460,14 @@ ${sigUrl}
                                     <i class="fa-solid ${statusIcon} text-[9px]"></i>${statusLabel}
                                 </span>
                             </div>
-                            <div class="flex gap-4 text-xs text-gray-600 dark:text-gray-400 mb-1">
-                                <span><i class="fa-regular fa-calendar text-blue-400 mr-1"></i>${req.startDate} → ${req.endDate}</span>
-                                <span class="font-bold text-blue-600 dark:text-blue-400">${req.days} day(s)</span>
+                            <div class="flex flex-wrap gap-2 text-xs text-gray-600 dark:text-gray-400 mb-1">
+                                <span class="shrink-0"><i class="fa-regular fa-calendar text-blue-400 mr-1"></i>${req.startDate} → ${req.endDate}</span>
+                                <span class="font-bold text-blue-600 dark:text-blue-400 shrink-0">${req.days} day(s)</span>
                             </div>
                             ${req.reason ? `<p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">${req.reason}</p>` : ''}
                             ${reviewNoteHtml}
                             ${docLinkHtml}
+                            ${editBtnHtml}
                             <p class="text-[9px] text-gray-400 mt-2 text-right">Submitted: ${submittedDate}</p>
                         </div>
                     `;
@@ -2339,8 +2624,8 @@ ${sigUrl}
             void popup.offsetWidth; // force reflow
             popup.classList.add('show');
 
-            if (leaveNotifTimer) clearTimeout(leaveNotifTimer);
-            leaveNotifTimer = setTimeout(() => dismissLeaveNotif(), 8000);
+            // No auto-dismiss — user must tap X to dismiss
+            if (leaveNotifTimer) { clearTimeout(leaveNotifTimer); leaveNotifTimer = null; }
 
             // OS notification if app is in background
             sendLeaveOsNotification(type, leaveType, days, reviewNote);
@@ -2420,10 +2705,11 @@ ${sigUrl}
             timeEl.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const icon   = popup.querySelector('.notif-icon');
             const cloned = icon.cloneNode(true);
+            cloned.onclick = openChatFromNotif;
             icon.parentNode.replaceChild(cloned, icon);
             popup.classList.add('show');
-            if (notifPopupTimer) clearTimeout(notifPopupTimer);
-            notifPopupTimer = setTimeout(() => dismissNotifPopup(), 5000);
+            // No auto-dismiss — user must tap X to dismiss
+            if (notifPopupTimer) { clearTimeout(notifPopupTimer); notifPopupTimer = null; }
         }
 
         function dismissNotifPopup() {

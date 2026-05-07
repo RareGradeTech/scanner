@@ -31,7 +31,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
-            overflow: hidden;
+            overflow-x: hidden;
             overscroll-behavior-y: contain;
             -webkit-tap-highlight-color: transparent;
             padding-top: env(safe-area-inset-top);
@@ -173,7 +173,7 @@
         .leave-type-card.selected .leave-label { color: #2563eb; }
         .dark .leave-type-card.selected .leave-label { color: #60a5fa; }
 
-        /* Notification popup */
+        /* Notification popup - Made persistent */
         #chat-notif-popup {
             position: fixed;
             top: calc(env(safe-area-inset-top) + 16px);
@@ -195,7 +195,6 @@
             box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08);
             padding: 14px 16px;
             display: flex; align-items: center; gap: 12px;
-            cursor: pointer;
         }
         .dark #chat-notif-popup .notif-inner { background: rgba(30,41,59,0.94); border-color: rgba(255,255,255,0.08); }
         .notif-icon {
@@ -206,9 +205,10 @@
             flex-shrink: 0;
             box-shadow: 0 2px 8px rgba(7,94,84,0.35);
             position: relative;
+            cursor: pointer;
         }
         .notif-icon i { color: #fff; font-size: 18px; }
-        .notif-content { flex: 1; min-width: 0; }
+        .notif-content { flex: 1; min-width: 0; cursor: pointer; }
         .notif-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: #075e54; margin-bottom: 2px; }
         .dark .notif-title { color: #4ade80; }
         .notif-sender { font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 1px; }
@@ -216,6 +216,8 @@
         .notif-text { font-size: 12.5px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .dark .notif-text { color: #94a3b8; }
         .notif-time { font-size: 10px; color: #94a3b8; font-weight: 600; white-space: nowrap; align-self: flex-start; padding-top: 2px; }
+        .notif-close-btn { color: #94a3b8; font-size: 16px; padding: 4px; cursor: pointer; flex-shrink: 0; }
+        .notif-close-btn:hover { color: #475569; }
         .notif-icon::after {
             content: ''; position: absolute; inset: -4px; border-radius: 16px;
             border: 2px solid rgba(7,94,84,0.4);
@@ -223,7 +225,7 @@
         }
         @keyframes notif-pulse { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.5); } }
 
-        /* Leave approval notification popup */
+        /* Leave approval notification popup - Made persistent */
         #leave-notif-popup {
             position: fixed;
             top: calc(env(safe-area-inset-top) + 16px);
@@ -243,13 +245,12 @@
             box-shadow: 0 12px 40px rgba(0,0,0,0.22), 0 2px 12px rgba(0,0,0,0.10);
             padding: 16px 18px;
             display: flex; align-items: center; gap: 14px;
-            cursor: pointer;
             border: 1.5px solid rgba(255,255,255,0.18);
         }
         #leave-notif-popup.approved .lnotif-inner { background: linear-gradient(135deg, rgba(5,150,105,0.97) 0%, rgba(16,185,129,0.97) 100%); }
         #leave-notif-popup.rejected .lnotif-inner { background: linear-gradient(135deg, rgba(220,38,38,0.97) 0%, rgba(239,68,68,0.97) 100%); }
-        .lnotif-icon { width: 46px; height: 46px; border-radius: 14px; background: rgba(255,255,255,0.22); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 22px; color: #fff; }
-        .lnotif-content { flex: 1; min-width: 0; }
+        .lnotif-icon { width: 46px; height: 46px; border-radius: 14px; background: rgba(255,255,255,0.22); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 22px; color: #fff; cursor: pointer; }
+        .lnotif-content { flex: 1; min-width: 0; cursor: pointer;}
         .lnotif-title { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.80); margin-bottom: 3px; }
         .lnotif-main { font-size: 14px; font-weight: 800; color: #fff; line-height: 1.3; }
         .lnotif-sub { font-size: 11px; color: rgba(255,255,255,0.75); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -259,30 +260,28 @@
 </head>
 <body class="h-screen flex flex-col relative bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
 
-    <!-- Upload Spinner -->
     <div id="global-spinner">
         <div class="spinner-ring"></div>
         <p id="spinner-text" class="text-gray-800 dark:text-gray-200 mt-4 font-bold text-sm tracking-wide">Processing...</p>
     </div>
 
-    <!-- CHAT NOTIFICATION POPUP -->
     <div id="chat-notif-popup" role="alertdialog" aria-live="assertive" aria-label="New chat message">
-        <div class="notif-inner" onclick="openChatFromNotif()">
-            <div class="notif-icon"><i class="fa-solid fa-message"></i></div>
-            <div class="notif-content">
+        <div class="notif-inner">
+            <div class="notif-icon" onclick="openChatFromNotif()"><i class="fa-solid fa-message"></i></div>
+            <div class="notif-content" onclick="openChatFromNotif()">
                 <div class="notif-title">Rare Grade Team</div>
                 <div class="notif-sender" id="notif-sender-name">Someone</div>
                 <div class="notif-text" id="notif-msg-text">New message</div>
             </div>
             <div class="notif-time" id="notif-time-text">now</div>
+            <div class="notif-close-btn" onclick="dismissNotifPopup()"><i class="fa-solid fa-xmark"></i></div>
         </div>
     </div>
 
-    <!-- LEAVE APPROVAL NOTIFICATION POPUP -->
     <div id="leave-notif-popup" role="alertdialog" aria-live="assertive">
-        <div class="lnotif-inner" onclick="dismissLeaveNotif()">
-            <div class="lnotif-icon" id="lnotif-icon"><i class="fa-solid fa-umbrella-beach"></i></div>
-            <div class="lnotif-content">
+        <div class="lnotif-inner">
+            <div class="lnotif-icon" id="lnotif-icon" onclick="openLeaveFromNotif()"><i class="fa-solid fa-umbrella-beach"></i></div>
+            <div class="lnotif-content" onclick="openLeaveFromNotif()">
                 <div class="lnotif-title" id="lnotif-title">Leave Update</div>
                 <div class="lnotif-main" id="lnotif-main">—</div>
                 <div class="lnotif-sub" id="lnotif-sub">—</div>
@@ -291,7 +290,6 @@
         </div>
     </div>
 
-    <!-- Top Header -->
     <header id="main-header" class="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-6 py-4 flex justify-between items-center z-10 shrink-0 transition-colors duration-300">
         <div class="flex items-center gap-2">
             <div class="bg-blue-100 dark:bg-blue-900/50 p-2 rounded-lg text-blue-600 dark:text-blue-400">
@@ -302,10 +300,8 @@
         <div class="text-xs font-semibold text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-slate-700 px-3 py-1.5 rounded-full transition-colors" id="clock">00:00:00</div>
     </header>
 
-    <!-- Main Content Area -->
     <main id="app-content" class="flex-1 overflow-y-auto pb-28 px-4 pt-4 w-full max-w-lg mx-auto transition-all relative">
         
-        <!-- HOME VIEW -->
         <section id="view-home" class="space-y-4">
             <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5 flex items-center justify-between">
                 <div class="flex items-center gap-4">
@@ -379,7 +375,6 @@
             </div>
         </section>
 
-        <!-- SUPPORT CLIENT REGISTRATION VIEW -->
         <section id="view-support" class="hidden space-y-4">
             
             <div class="flex bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden text-sm font-bold shadow-sm">
@@ -391,8 +386,7 @@
                 </button>
             </div>
 
-            <!-- SUB-VIEW: REGISTER CLIENT -->
-            <div id="sup-view-register" class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5">
+            <div id="sup-view-register" class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 sm:p-5">
                 <div class="flex items-center gap-3 mb-5">
                     <div class="bg-blue-100 dark:bg-blue-900/50 p-2 rounded-lg text-blue-600 dark:text-blue-400">
                         <i class="fa-solid fa-handshake"></i>
@@ -403,15 +397,15 @@
                     </div>
                 </div>
 
-                <div class="space-y-5">
-                    <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
+                <div class="space-y-4">
+                    <div class="bg-gray-50 dark:bg-slate-700/30 p-3 sm:p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
                         <h3 class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-slate-600 pb-2">1. Business Info</h3>
                         <input type="text" id="sup-biz-name" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Business / Company Name *">
                         <input type="text" id="sup-sector" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Industry / Sector (e.g. Retail)">
                         <input type="text" id="sup-address" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Physical Address">
                     </div>
 
-                    <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
+                    <div class="bg-gray-50 dark:bg-slate-700/30 p-3 sm:p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
                         <h3 class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-slate-600 pb-2">2. Primary Contact</h3>
                         <div class="grid grid-cols-2 gap-3">
                             <input type="text" id="sup-contact-name" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Full Name *">
@@ -423,7 +417,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
+                    <div class="bg-gray-50 dark:bg-slate-700/30 p-3 sm:p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
                         <h3 class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-slate-600 pb-2">3. Contract Details</h3>
                         <div class="grid grid-cols-2 gap-3">
                             <div class="flex flex-col">
@@ -444,20 +438,20 @@
 
                         <div class="pt-2">
                             <span class="text-[9px] font-bold text-gray-500 uppercase block mb-2">Scope of Services</span>
-                            <div class="grid grid-cols-2 gap-2 text-xs text-gray-700 dark:text-gray-300">
-                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 shadow-sm"><input type="checkbox" id="sup-scope-hardware" class="custom-checkbox shrink-0"> Hardware</label>
-                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 shadow-sm"><input type="checkbox" id="sup-scope-software" class="custom-checkbox shrink-0"> Software</label>
-                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 shadow-sm"><input type="checkbox" id="sup-scope-network" class="custom-checkbox shrink-0"> Network</label>
-                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 shadow-sm"><input type="checkbox" id="sup-scope-backup" class="custom-checkbox shrink-0"> Backups</label>
-                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 shadow-sm"><input type="checkbox" id="sup-scope-security" class="custom-checkbox shrink-0"> Security</label>
-                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 shadow-sm"><input type="checkbox" id="sup-scope-remote" class="custom-checkbox shrink-0"> Remote</label>
+                            <div class="flex flex-wrap gap-2 text-xs text-gray-700 dark:text-gray-300">
+                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 shadow-sm flex-1 min-w-[100px]"><input type="checkbox" id="sup-scope-hardware" class="custom-checkbox shrink-0"> Hardware</label>
+                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 shadow-sm flex-1 min-w-[100px]"><input type="checkbox" id="sup-scope-software" class="custom-checkbox shrink-0"> Software</label>
+                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 shadow-sm flex-1 min-w-[100px]"><input type="checkbox" id="sup-scope-network" class="custom-checkbox shrink-0"> Network</label>
+                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 shadow-sm flex-1 min-w-[100px]"><input type="checkbox" id="sup-scope-backup" class="custom-checkbox shrink-0"> Backups</label>
+                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 shadow-sm flex-1 min-w-[100px]"><input type="checkbox" id="sup-scope-security" class="custom-checkbox shrink-0"> Security</label>
+                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 shadow-sm flex-1 min-w-[100px]"><input type="checkbox" id="sup-scope-remote" class="custom-checkbox shrink-0"> Remote</label>
                             </div>
                         </div>
 
                         <textarea id="sup-notes" rows="2" class="w-full mt-2 p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all resize-none shadow-sm" placeholder="Additional notes or SLA requirements..."></textarea>
                     </div>
 
-                    <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
+                    <div class="bg-gray-50 dark:bg-slate-700/30 p-3 sm:p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
                         <div class="flex justify-between items-center border-b border-gray-200 dark:border-slate-600 pb-2">
                             <h3 class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">4. Log Devices</h3>
                             <button onclick="addDeviceField()" class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded shadow-sm font-bold active:scale-95 transition-transform"><i class="fa-solid fa-plus"></i> Add</button>
@@ -467,40 +461,39 @@
                         </div>
                     </div>
 
-                    <div class="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-xl border border-blue-100 dark:border-blue-900/30 space-y-3 shadow-inner">
+                    <div class="bg-blue-50 dark:bg-blue-900/10 p-3 sm:p-4 rounded-xl border border-blue-100 dark:border-blue-900/30 space-y-3 shadow-inner">
                         <div class="flex justify-between items-center">
                             <h3 class="text-xs font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wider">Client Signature</h3>
                             <button onclick="clearSupportSignature('sup-sig-canvas')" class="text-[10px] text-red-500 font-bold hover:underline bg-white dark:bg-slate-800 px-2 py-1 rounded shadow-sm border border-red-100 dark:border-slate-600">Clear</button>
                         </div>
                         <div class="grid grid-cols-2 gap-3 pb-2 border-b border-blue-200/50 dark:border-slate-600">
-                            <input type="text" id="sup-sig-name" class="w-full p-2 text-xs bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg outline-none dark:text-white" placeholder="Signatory Name *">
-                            <input type="text" id="sup-sig-title" class="w-full p-2 text-xs bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg outline-none dark:text-white" placeholder="Designation">
+                            <input type="text" id="sup-sig-name" class="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg outline-none dark:text-white" placeholder="Signatory Name *">
+                            <input type="text" id="sup-sig-title" class="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg outline-none dark:text-white" placeholder="Designation">
                         </div>
                         <canvas id="sup-sig-canvas" class="sig-pad w-full block shadow-sm"></canvas>
                         <p class="text-[9px] text-blue-600 dark:text-blue-500 leading-tight text-center font-medium mt-2">By signing, the client agrees to RareGrade Tech's SLA terms.</p>
                     </div>
 
-                    <button onclick="submitSupportClient()" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 hover:bg-blue-700 active:scale-[0.98] transition-all flex justify-center items-center gap-2 text-lg">
+                    <button onclick="submitSupportClient()" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 hover:bg-blue-700 active:scale-[0.98] transition-all flex justify-center items-center gap-2 text-base">
                         <i class="fa-solid fa-paper-plane"></i> Register Client SLA
                     </button>
                 </div>
             </div>
 
-            <!-- SUB-VIEW: LOG MAINTENANCE -->
             <div id="sup-view-maintenance" class="hidden space-y-4">
-                <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5">
+                <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 sm:p-5">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="font-bold text-sm text-gray-700 dark:text-gray-200"><i class="fa-solid fa-clipboard-check text-blue-500 mr-2"></i>Log Visit & Upload</h3>
                     </div>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">Complete an on-site digital job card for an existing client.</p>
                     
-                    <div class="space-y-5">
+                    <div class="space-y-4">
                         <div class="relative">
                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-mono font-bold text-sm">SUP-</span>
                             <input type="text" id="maint-job-id" placeholder="1234" class="w-full pl-16 pr-4 py-3 bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-xl font-mono font-bold focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" inputmode="numeric">
                         </div>
 
-                        <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
+                        <div class="bg-gray-50 dark:bg-slate-700/30 p-3 sm:p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
                             <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">1. Visit Details</span>
                             <select id="maint-visit-type" class="w-full p-3 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm">
                                 <option value="Routine Maintenance">Routine Maintenance</option>
@@ -510,19 +503,19 @@
                             </select>
                             
                             <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mt-4 border-t border-gray-200 dark:border-slate-600 pt-3">2. Checklist / Tasks Performed</span>
-                            <div class="grid grid-cols-2 gap-3 text-xs text-gray-700 dark:text-gray-300">
-                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-600 shadow-sm"><input type="checkbox" id="chk-maint-os" class="custom-checkbox shrink-0"> OS Updates</label>
-                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-600 shadow-sm"><input type="checkbox" id="chk-maint-av" class="custom-checkbox shrink-0"> Antivirus Checked</label>
-                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-600 shadow-sm"><input type="checkbox" id="chk-maint-backup" class="custom-checkbox shrink-0"> Backups Verified</label>
-                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-600 shadow-sm"><input type="checkbox" id="chk-maint-clean" class="custom-checkbox shrink-0"> Hardware Cleaned</label>
-                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-600 shadow-sm col-span-2"><input type="checkbox" id="chk-maint-net" class="custom-checkbox shrink-0"> Network Tested</label>
+                            <div class="flex flex-wrap gap-2 text-xs text-gray-700 dark:text-gray-300">
+                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-600 shadow-sm flex-1 min-w-[120px]"><input type="checkbox" id="chk-maint-os" class="custom-checkbox shrink-0"> OS Updates</label>
+                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-600 shadow-sm flex-1 min-w-[120px]"><input type="checkbox" id="chk-maint-av" class="custom-checkbox shrink-0"> Antivirus</label>
+                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-600 shadow-sm flex-1 min-w-[120px]"><input type="checkbox" id="chk-maint-backup" class="custom-checkbox shrink-0"> Backups</label>
+                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-600 shadow-sm flex-1 min-w-[120px]"><input type="checkbox" id="chk-maint-clean" class="custom-checkbox shrink-0"> Hardware</label>
+                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-600 shadow-sm flex-1 w-full"><input type="checkbox" id="chk-maint-net" class="custom-checkbox shrink-0"> Network Tested</label>
                             </div>
 
                             <input type="text" id="maint-parts" class="w-full mt-2 p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Parts / Consumables Used (if any)">
                             <input type="text" id="maint-next-steps" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Recommendations / Next Steps">
                         </div>
 
-                        <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
+                        <div class="bg-gray-50 dark:bg-slate-700/30 p-3 sm:p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
                             <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">3. Detailed Visit Log / Notes</span>
                             <textarea id="maint-notes" rows="3" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all resize-none shadow-sm" placeholder="Detail the work performed today..."></textarea>
                             
@@ -534,7 +527,7 @@
                             </select>
                         </div>
 
-                        <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
+                        <div class="bg-gray-50 dark:bg-slate-700/30 p-3 sm:p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
                             <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">5. Capture Evidence (Optional)</span>
                             <button onclick="document.getElementById('maint-evidence-upload').click()" class="w-full py-3.5 bg-gray-800 dark:bg-slate-600 text-white rounded-xl font-bold shadow-md active:scale-95 transition-all flex justify-center items-center gap-2 text-sm border border-gray-700 dark:border-slate-500">
                                 <i class="fa-solid fa-camera text-blue-400"></i> Capture On-Site Image
@@ -542,7 +535,7 @@
                             <input type="file" id="maint-evidence-upload" accept="image/*" capture="environment" class="hidden" onchange="uploadEvidenceToWorkspace(event, 'support')">
                         </div>
 
-                        <div class="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-xl border border-blue-100 dark:border-blue-900/30 space-y-3 shadow-inner">
+                        <div class="bg-blue-50 dark:bg-blue-900/10 p-3 sm:p-4 rounded-xl border border-blue-100 dark:border-blue-900/30 space-y-3 shadow-inner">
                             <div class="flex justify-between items-center">
                                 <h3 class="text-xs font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wider">6. Client Sign-off (Job Card)</h3>
                                 <button onclick="clearSupportSignature('maint-sig-canvas')" class="text-[10px] text-red-500 font-bold hover:underline bg-white dark:bg-slate-800 px-2 py-1 rounded shadow-sm border border-red-100 dark:border-slate-600">Clear</button>
@@ -552,14 +545,13 @@
                         </div>
 
                         <button onclick="submitMaintenanceLog()" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 hover:bg-blue-700 active:scale-[0.98] transition-all flex justify-center items-center gap-2 text-base mt-2">
-                            <i class="fa-solid fa-floppy-disk"></i> Submit Job Card & Notes
+                            <i class="fa-solid fa-floppy-disk"></i> Submit Job Card
                         </button>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- SCANNER VIEW -->
         <section id="view-scanner" class="hidden space-y-4 h-full flex flex-col pb-6">
             <div id="location-overlay" class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-6 text-center space-y-4 my-auto">
                 <div class="inline-block bg-blue-50 dark:bg-blue-900/30 p-4 rounded-full text-blue-500 dark:text-blue-400 mb-1">
@@ -586,12 +578,8 @@
             </div>
         </section>
 
-        <!-- ============================================================
-             LEAVE MANAGEMENT VIEW — REDESIGNED
-             ============================================================ -->
         <section id="view-leave" class="hidden space-y-4">
 
-            <!-- Sub-tabs -->
             <div class="flex bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden text-sm font-bold shadow-sm">
                 <button onclick="switchLeaveTab('apply')" id="tab-leave-apply" class="flex-1 py-3 text-center leave-tab active text-gray-500 dark:text-gray-400">
                     <i class="fa-solid fa-paper-plane mr-1"></i> Apply
@@ -604,10 +592,8 @@
                 </button>
             </div>
 
-            <!-- SUB-VIEW: APPLY FOR LEAVE (card picker redesign) -->
             <div id="leave-view-apply" class="space-y-4">
-                <!-- Leave Type Card Picker -->
-                <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5">
+                <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 sm:p-5">
                     <div class="flex items-center gap-3 mb-4">
                         <div class="bg-blue-100 dark:bg-blue-900/50 p-2 rounded-lg text-blue-600 dark:text-blue-400">
                             <i class="fa-solid fa-umbrella-beach"></i>
@@ -618,8 +604,7 @@
                         </div>
                     </div>
 
-                    <!-- Leave Type Cards Grid -->
-                    <div class="grid grid-cols-3 gap-2.5 mb-1" id="leave-type-cards">
+                    <div class="grid grid-cols-3 gap-2 mb-1" id="leave-type-cards">
                         <div class="leave-type-card selected" onclick="selectLeaveType(this, 'Annual Leave')">
                             <div class="leave-icon bg-green-100 dark:bg-green-900/30">
                                 <i class="fa-solid fa-sun text-green-600 dark:text-green-400"></i>
@@ -665,18 +650,15 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Hidden input to track selection -->
                     <input type="hidden" id="leave-type" value="Annual Leave">
 
-                    <!-- Selected type display -->
                     <div class="mt-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/30 rounded-xl px-4 py-2.5 flex items-center gap-2">
                         <i class="fa-solid fa-circle-check text-blue-500 text-sm"></i>
                         <span class="text-xs font-bold text-blue-700 dark:text-blue-400">Selected: <span id="leave-type-display">Annual Leave</span></span>
                     </div>
                 </div>
 
-                <!-- Dates & Reason -->
-                <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5 space-y-4">
+                <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 sm:p-5 space-y-4">
                     <h3 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date Range & Details</h3>
 
                     <div class="grid grid-cols-2 gap-3">
@@ -704,8 +686,8 @@
 
                     <div class="bg-gray-50 dark:bg-slate-700/30 p-3 rounded-xl border border-gray-100 dark:border-slate-700">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Supporting Document (Optional)</span>
-                            <span class="text-[9px] text-gray-400 italic">e.g. doctor's note</span>
+                            <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Supporting Document</span>
+                            <span class="text-[9px] text-gray-400 italic">Optional</span>
                         </div>
                         <button onclick="document.getElementById('leave-doc-upload').click()" class="w-full py-2.5 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-lg font-semibold text-xs shadow-sm active:scale-95 transition-all flex justify-center items-center gap-2">
                             <i class="fa-solid fa-paperclip text-blue-500"></i> Attach Document / Image
@@ -714,13 +696,17 @@
                         <p id="leave-doc-name" class="text-[10px] text-green-600 dark:text-green-400 mt-2 text-center font-semibold hidden"></p>
                     </div>
 
-                    <button onclick="submitLeaveRequest()" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 hover:bg-blue-700 active:scale-[0.98] transition-all flex justify-center items-center gap-2 text-base">
-                        <i class="fa-solid fa-paper-plane"></i> Submit Leave Request
-                    </button>
+                    <div class="flex gap-3">
+                        <button id="btn-cancel-edit-leave" onclick="cancelLeaveEdit()" class="hidden w-1/3 py-3.5 bg-gray-200 dark:bg-slate-700 dark:text-white text-gray-700 rounded-xl font-bold shadow-sm hover:bg-gray-300 dark:hover:bg-slate-600 transition-all text-sm">
+                            Cancel
+                        </button>
+                        <button id="btn-submit-leave" onclick="submitLeaveRequest()" class="flex-1 py-3.5 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 hover:bg-blue-700 active:scale-[0.98] transition-all flex justify-center items-center gap-2 text-sm">
+                            <i class="fa-solid fa-paper-plane"></i> Submit Request
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <!-- SUB-VIEW: MY REQUESTS HISTORY -->
             <div id="leave-view-history" class="hidden space-y-3">
                 <div class="flex justify-between items-center px-1">
                     <h3 class="font-bold text-sm text-gray-700 dark:text-gray-200">My Leave Requests</h3>
@@ -731,7 +717,6 @@
                 </div>
             </div>
 
-            <!-- SUB-VIEW: LEAVE BALANCES — ALL types shown -->
             <div id="leave-view-balances" class="hidden space-y-4">
                 <div class="flex justify-between items-center px-1">
                     <h3 class="font-bold text-sm text-gray-700 dark:text-gray-200">Leave Balances</h3>
@@ -739,77 +724,59 @@
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
-                    <!-- Annual Leave -->
                     <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 text-center">
                         <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
                             <i class="fa-solid fa-sun text-green-600 dark:text-green-400 text-sm"></i>
                         </div>
                         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Annual</p>
                         <p id="bal-annual" class="text-2xl font-black text-green-600 dark:text-green-400">--</p>
-                        <p class="text-[9px] text-gray-400">days remaining</p>
                     </div>
-                    <!-- Sick Leave -->
                     <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 text-center">
                         <div class="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
                             <i class="fa-solid fa-heart-pulse text-red-600 dark:text-red-400 text-sm"></i>
                         </div>
                         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Sick</p>
                         <p id="bal-sick" class="text-2xl font-black text-red-600 dark:text-red-400">--</p>
-                        <p class="text-[9px] text-gray-400">days remaining</p>
                     </div>
-                    <!-- Family Responsibility -->
                     <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 text-center">
                         <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
                             <i class="fa-solid fa-people-roof text-purple-600 dark:text-purple-400 text-sm"></i>
                         </div>
                         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Family</p>
                         <p id="bal-family" class="text-2xl font-black text-purple-600 dark:text-purple-400">--</p>
-                        <p class="text-[9px] text-gray-400">days remaining</p>
                     </div>
-                    <!-- Study Leave -->
                     <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 text-center">
                         <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
                             <i class="fa-solid fa-book text-blue-600 dark:text-blue-400 text-sm"></i>
                         </div>
                         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Study</p>
                         <p id="bal-study" class="text-2xl font-black text-blue-600 dark:text-blue-400">--</p>
-                        <p class="text-[9px] text-gray-400">days remaining</p>
                     </div>
-                    <!-- Maternity Leave -->
                     <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 text-center">
                         <div class="w-10 h-10 bg-pink-100 dark:bg-pink-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
                             <i class="fa-solid fa-baby text-pink-600 dark:text-pink-400 text-sm"></i>
                         </div>
                         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Maternity</p>
                         <p id="bal-maternity" class="text-2xl font-black text-pink-600 dark:text-pink-400">--</p>
-                        <p class="text-[9px] text-gray-400">days remaining</p>
                     </div>
-                    <!-- Paternity Leave -->
                     <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 text-center">
                         <div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
                             <i class="fa-solid fa-person text-indigo-600 dark:text-indigo-400 text-sm"></i>
                         </div>
                         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Paternity</p>
                         <p id="bal-paternity" class="text-2xl font-black text-indigo-600 dark:text-indigo-400">--</p>
-                        <p class="text-[9px] text-gray-400">days remaining</p>
                     </div>
-                    <!-- Unpaid Leave (full width) -->
                     <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 text-center col-span-2">
                         <div class="w-10 h-10 bg-gray-100 dark:bg-gray-700/50 rounded-full flex items-center justify-center mx-auto mb-2">
                             <i class="fa-solid fa-hand-holding-dollar text-gray-500 dark:text-gray-400 text-sm"></i>
                         </div>
                         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Unpaid</p>
                         <p id="bal-unpaid" class="text-2xl font-black text-gray-600 dark:text-gray-400">--</p>
-                        <p class="text-[9px] text-gray-400">days (as approved)</p>
                     </div>
                 </div>
-
-                <p class="text-[10px] text-center text-gray-400 italic px-2">Balances are updated by admin upon leave approval. Contact HR if balances appear incorrect.</p>
             </div>
         </section>
-        <!-- END LEAVE MANAGEMENT VIEW -->
 
-        <!-- PROFILE VIEW -->
         <section id="view-profile" class="hidden space-y-4">
             <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5 text-center">
                 <div class="relative inline-block mb-3">
@@ -856,7 +823,6 @@
             </button>
         </section>
 
-        <!-- SETTINGS VIEW -->
         <section id="view-settings" class="hidden space-y-4">
             <h2 class="text-xl font-bold mb-2 px-1">Settings</h2>
             <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-2 shadow-sm divide-y divide-gray-100 dark:divide-slate-700">
@@ -897,7 +863,7 @@
                         </div>
                         <div>
                             <p class="text-sm font-semibold">App Version</p>
-                            <p class="text-[10px] text-gray-500 dark:text-gray-400">RareGradeHub v3.0.0</p>
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400">RareGradeHub v3.1.0</p>
                         </div>
                     </div>
                     <span class="text-xs text-gray-400 font-mono">Up to date</span>
@@ -915,7 +881,6 @@
         </section>
     </main>
 
-    <!-- CHAT VIEW (Full Screen Overlay) -->
     <section id="view-chat" class="hidden fixed inset-0 z-40 bg-[#e5ddd5] dark:bg-[#0b141a] flex-col">
         <div class="bg-[#075e54] dark:bg-slate-800 shadow-sm p-3 pt-[calc(0.75rem+env(safe-area-inset-top))] flex items-center gap-3 shrink-0 text-white transition-colors z-10">
             <button onclick="switchTab('home')" class="text-white p-2 -ml-2 active:scale-95 transition-transform">
@@ -932,13 +897,13 @@
                 </p>
             </div>
         </div>
-        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 flex flex-col gap-2 pb-20 relative z-0">
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 flex flex-col gap-2 pb-20 relative z-0" style="overflow-wrap: anywhere;">
             <div class="text-center text-xs text-gray-500 bg-white/50 dark:bg-slate-800/50 rounded-full px-3 py-1 mx-auto my-2 backdrop-blur-sm shadow-sm">Loading messages...</div>
         </div>
         <div class="fixed bottom-0 left-0 right-0 bg-[#f0f0f0] dark:bg-slate-800 p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] flex items-end gap-2 shadow-[0_-1px_3px_rgba(0,0,0,0.1)] z-20">
             <div class="flex-1 bg-white dark:bg-slate-700 rounded-2xl flex items-center px-2 py-1 shadow-sm">
                 <i class="fa-regular fa-face-smile text-gray-400 dark:text-gray-300 p-2 text-xl"></i>
-                <textarea id="chat-input" placeholder="Message" rows="1" class="flex-1 bg-transparent border-none focus:ring-0 resize-none outline-none text-sm py-2 max-h-24 dark:text-white" oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'" onkeypress="handleChatKeyPress(event)"></textarea>
+                <textarea id="chat-input" placeholder="Message" rows="1" class="flex-1 bg-transparent border-none focus:ring-0 resize-none outline-none text-base sm:text-sm py-2 max-h-24 dark:text-white" oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'" onkeypress="handleChatKeyPress(event)"></textarea>
                 <i class="fa-solid fa-paperclip text-gray-400 dark:text-gray-300 p-2 text-xl"></i>
             </div>
             <button onclick="sendChatMessage()" class="bg-[#00a884] text-white w-12 h-12 rounded-full flex items-center justify-center hover:bg-[#008f6f] active:scale-95 transition-transform shadow-md shrink-0 mb-0.5">
@@ -947,12 +912,10 @@
         </div>
     </section>
 
-    <!-- Floating Action Button -->
-    <button onclick="switchTab('scanner')" id="fab-scanner" class="fixed bottom-20 right-4 bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/40 z-30 transform transition-transform duration-300 active:scale-95">
+    <button onclick="switchTab('scanner')" id="fab-scanner" class="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/40 z-30 transform transition-transform duration-300 active:scale-95">
         <i class="fa-solid fa-qrcode text-2xl"></i>
     </button>
 
-    <!-- Bottom Navigation Bar -->
     <nav id="bottom-nav" class="bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 fixed bottom-0 w-full z-20 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.02)] transition-transform duration-300">
         <div class="flex justify-around items-center h-16 px-1">
             <button onclick="switchTab('home')" class="nav-item active text-gray-500 dark:text-gray-400 flex flex-col items-center justify-center w-full h-full" id="nav-home">
@@ -984,7 +947,6 @@
         </div>
     </nav>
 
-    <!-- Login View -->
     <div id="login-view" class="flex-col justify-center items-center p-6 bg-gray-50 dark:bg-slate-900">
         <div class="w-full max-w-md text-center space-y-8">
             <div class="bg-blue-100 dark:bg-blue-900/50 w-24 h-24 rounded-full flex items-center justify-center mx-auto shadow-sm">
@@ -1002,7 +964,6 @@
         </div>
     </div>
 
-    <!-- Custom Cooldown Modal -->
     <div id="cooldown-modal" class="fixed inset-0 bg-black/50 z-[999] hidden flex items-center justify-center backdrop-blur-sm p-4 transition-opacity opacity-0 duration-300">
         <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 w-full max-w-[320px] text-center shadow-2xl transform transition-transform duration-300 scale-100">
             <div class="w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-orange-500">
@@ -1014,7 +975,6 @@
         </div>
     </div>
 
-    <!-- Toast Notification -->
     <div id="toast" class="fixed left-4 right-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-4 py-3 rounded-xl shadow-2xl transition-all duration-300 opacity-0 translate-y-10 pointer-events-none font-semibold text-sm text-center flex justify-center items-center max-w-sm mx-auto z-[9999]">
         <span id="toastMsg">Notification</span>
     </div>
@@ -1064,22 +1024,10 @@
         let isSigningMaint = false;
         let hasMaintSignature = false;
 
-        // Leave doc upload URL
+        // Leave doc upload URL & Editing state
         let leaveDocUrl = null;
-
-        // Selected leave type
         let selectedLeaveType = 'Annual Leave';
-
-        // ============================================================
-        // LEAVE TYPE CARD SELECTION
-        // ============================================================
-        function selectLeaveType(cardEl, type) {
-            document.querySelectorAll('#leave-type-cards .leave-type-card').forEach(c => c.classList.remove('selected'));
-            cardEl.classList.add('selected');
-            selectedLeaveType = type;
-            document.getElementById('leave-type').value = type;
-            document.getElementById('leave-type-display').textContent = type;
-        }
+        let editingLeaveId = null;
 
         // ============================================================
         // THEME INIT
@@ -1107,17 +1055,34 @@
         }
 
         // ============================================================
-        // SWIPE GESTURE NAVIGATION
+        // SWIPE GESTURE NAVIGATION - REFINED TO PREVENT CONFLICTS
         // ============================================================
-        let touchStartX = 0;
-        let touchEndX = 0;
+        let touchStartX = 0, touchStartY = 0, touchEndX = 0, touchEndY = 0;
         const swipeThreshold = 50; 
         const navTabs = ['home', 'support', 'leave', 'chat', 'profile', 'settings'];
 
-        document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
-        document.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; handleSwipeGesture(); }, { passive: true });
+        document.addEventListener('touchstart', e => { 
+            touchStartX = e.changedTouches[0].screenX; 
+            touchStartY = e.changedTouches[0].screenY; 
+        }, { passive: true });
+        
+        document.addEventListener('touchend', e => { 
+            // Ignore touches starting inside canvases (signatures) or elements intended for native scrolling
+            if (e.target.closest('canvas') || e.target.closest('.overflow-x-auto') || e.target.closest('.custom-scroll') || e.target.tagName.toLowerCase() === 'textarea') return;
 
-        function handleSwipeGesture() {
+            touchEndX = e.changedTouches[0].screenX; 
+            touchEndY = e.changedTouches[0].screenY; 
+            
+            const diffX = touchStartX - touchEndX; 
+            const diffY = touchStartY - touchEndY;
+            
+            // Only trigger tab switch if horizontal swipe dominates vertical movement
+            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > swipeThreshold) {
+                handleSwipeGesture(diffX); 
+            }
+        }, { passive: true });
+
+        function handleSwipeGesture(diffX) {
             const loginView = document.getElementById('login-view');
             const scannerView = document.getElementById('view-scanner');
             if (!loginView.classList.contains('hidden') && loginView.classList.contains('active')) return;
@@ -1134,10 +1099,9 @@
             const currentIndex = navTabs.indexOf(currentTabId);
             if (currentIndex === -1) return;
 
-            if (touchEndX < touchStartX - swipeThreshold) {
+            if (diffX > 0) { // Swipe Left -> move to next tab
                 if (currentIndex < navTabs.length - 1) switchTab(navTabs[currentIndex + 1]);
-            }
-            if (touchEndX > touchStartX + swipeThreshold) {
+            } else { // Swipe Right -> move to previous tab
                 if (currentIndex > 0) switchTab(navTabs[currentIndex - 1]);
             }
         }
@@ -1158,7 +1122,6 @@
                 mainHeader.style.display = 'none'; 
                 fab.style.transform = 'scale(0)';
                 document.getElementById('chat-badge').classList.add('hidden');
-                dismissNotifPopup();
                 scrollToBottomChat();
             } else {
                 chatOverlay.classList.add('hidden');
@@ -1183,7 +1146,6 @@
                 if (tabId === 'leave') {
                     loadLeaveHistory();
                     loadLeaveBalances();
-                    // Leave start/end dates are intentionally left empty unless user inputs them
                 }
 
                 if (tabId === 'profile') {
@@ -1246,18 +1208,12 @@
                     // Initialise default leave balances if not set (all 7 types)
                     if (!currentUserData.leaveBalances) {
                         const defaultBalances = {
-                            annual: 15,
-                            sick: 30,
-                            family: 3,
-                            study: 5,
-                            maternity: 120,
-                            paternity: 10,
-                            unpaid: 0
+                            annual: 15, sick: 30, family: 3, study: 5,
+                            maternity: 120, paternity: 10, unpaid: 0
                         };
                         await db.ref(`employees/${key}/leaveBalances`).set(defaultBalances);
                         currentUserData.leaveBalances = defaultBalances;
                     } else {
-                        // Ensure new keys exist on old records
                         const updates = {};
                         const bal = currentUserData.leaveBalances;
                         if (bal.maternity === undefined) updates.maternity = 120;
@@ -1454,7 +1410,6 @@
                 const dayOfWeek = new Date(year, month, i).getDay();
                 const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
 
-                // On Approved Leave — blue, overrides absent
                 if (isOnApprovedLeave) {
                     dayClass = 'bg-blue-500 text-white font-bold shadow-sm';
                     titleText = 'Approved Leave';
@@ -1464,16 +1419,9 @@
                     const tOut = rec.TimeOut;
 
                     if (tIn) {
-                        // -------------------------------------------------------
-                        // UPDATED LATE LOGIC:
-                        // Present (green)  = clocked in BEFORE 09:01 (i.e., up to 09:00)
-                        // Late   (orange)  = clocked in at 09:01 or later
-                        // -------------------------------------------------------
                         const [h, m] = tIn.split(':').map(Number);
                         const totalMinutes = h * 60 + m;
-
-                        // 9 * 60 + 1 = 541 minutes = 09:01
-                        const lateCutoff = 9 * 60 + 1; // 541
+                        const lateCutoff = 9 * 60 + 1; // 09:01
 
                         const isLate = totalMinutes >= lateCutoff;
                         const isHalfDay = i < today && !tOut;
@@ -1550,7 +1498,7 @@
         }
 
         // ============================================================
-        // SUPPORT TAB ROUTING
+        // SUPPORT TAB ROUTING & SIGNATURE
         // ============================================================
         function switchSupTab(tab) {
             document.querySelectorAll('.sup-tab').forEach(el => el.classList.remove('active'));
@@ -1567,22 +1515,16 @@
             }
         }
 
-        // ============================================================
-        // SIGNATURE PAD
-        // ============================================================
         function initSupportSignaturePad(canvasId, mode) {
             const canvas = document.getElementById(canvasId);
-            
             if (mode === 'register' && supCtx) return;
             if (mode === 'maintenance' && maintCtx) return;
-            
             if (!canvas) return;
 
             setTimeout(() => {
                 const rect = canvas.parentElement.getBoundingClientRect();
                 canvas.width = rect.width - 32; 
                 canvas.height = 140;
-                
                 if (mode === 'register') supCtx = canvas.getContext('2d');
                 else maintCtx = canvas.getContext('2d');
             }, 50);
@@ -1650,9 +1592,6 @@
             }
         }
 
-        // ============================================================
-        // DEVICE SETUP
-        // ============================================================
         function addDeviceField() {
             supportDeviceCount++;
             const container = document.getElementById('sup-devices-container');
@@ -1695,9 +1634,6 @@
             return devices;
         }
 
-        // ============================================================
-        // SUBMIT SUPPORT CLIENT REGISTRATION
-        // ============================================================
         async function submitSupportClient() {
             const bizName = document.getElementById('sup-biz-name').value.trim();
             const sector = document.getElementById('sup-sector').value.trim();
@@ -1770,9 +1706,6 @@
             }
         }
 
-        // ============================================================
-        // SUPPORT MAINTENANCE LOG
-        // ============================================================
         async function uploadCanvasToCloudinary(canvas) {
             return new Promise((resolve, reject) => {
                 canvas.toBlob(async (blob) => {
@@ -1878,9 +1811,6 @@ ${sigUrl}
             }
         }
 
-        // ============================================================
-        // REMOTE EVIDENCE UPLOAD
-        // ============================================================
         async function uploadEvidenceToWorkspace(event, sourceContext) {
             const file = event.target.files[0];
             let rawRef = '';
@@ -1950,8 +1880,18 @@ ${sigUrl}
         }
 
         // ============================================================
-        // LEAVE MANAGEMENT LOGIC
+        // LEAVE MANAGEMENT & EDITING
         // ============================================================
+        function selectLeaveTypeFromText(type) {
+            document.querySelectorAll('#leave-type-cards .leave-type-card').forEach(c => {
+                if (c.querySelector('.leave-label').innerText.trim() === type) {
+                    selectLeaveType(c, type);
+                } else if (type === 'Unpaid Leave' && c.querySelector('.leave-label').innerText.includes('Unpaid')) {
+                    selectLeaveType(c, type);
+                }
+            });
+        }
+
         function switchLeaveTab(tab) {
             document.querySelectorAll('.leave-tab').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-leave-' + tab).classList.add('active');
@@ -1964,9 +1904,6 @@ ${sigUrl}
             if (tab === 'balances') loadLeaveBalances();
         }
 
-        /**
-         * Count working days (Mon–Fri) between two date strings
-         */
         function countWorkingDays(startDateStr, endDateStr) {
             if (!startDateStr || !endDateStr) return 0;
             const start = new Date(startDateStr);
@@ -1999,9 +1936,6 @@ ${sigUrl}
         document.getElementById('leave-start').addEventListener('change', calculateLeaveDays);
         document.getElementById('leave-end').addEventListener('change', calculateLeaveDays);
 
-        /**
-         * Handle optional document upload for leave request
-         */
         async function handleLeaveDocUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -2029,11 +1963,6 @@ ${sigUrl}
             }
         }
 
-        /**
-         * Submit a new leave request to Firebase.
-         * The request goes to leave_requests node AND also to admin_leave_pending
-         * so the admin dashboard can see it immediately.
-         */
         async function submitLeaveRequest() {
             if (!currentUserData) return;
 
@@ -2049,71 +1978,101 @@ ${sigUrl}
             if (days === 0) return showToast("No working days in selected range", "error");
 
             document.getElementById('global-spinner').classList.add('active');
-            document.getElementById('spinner-text').innerText = "Submitting leave request...";
+            document.getElementById('spinner-text').innerText = editingLeaveId ? "Updating request..." : "Submitting leave request...";
 
             try {
-                const refId = 'LVE-' + Math.floor(1000 + Math.random() * 9000).toString();
+                if (editingLeaveId) {
+                    // Handle Edit
+                    const updatePayload = {
+                        leaveType, startDate, endDate, days, reason,
+                        supportingDocUrl: leaveDocUrl || null,
+                        status: 'Pending',
+                        submittedAt: firebase.database.ServerValue.TIMESTAMP // Push it back up the queue
+                    };
+                    await db.ref(`leave_requests/${editingLeaveId}`).update(updatePayload);
+                    await db.ref(`admin_leave_pending/${editingLeaveId}`).update(updatePayload);
+                    
+                    showToast(`Leave request updated successfully!`);
+                } else {
+                    // Handle New Submission
+                    const refId = 'LVE-' + Math.floor(1000 + Math.random() * 9000).toString();
+                    const leavePayload = {
+                        refId, employeeId: currentUserData.id, employeeName: currentUserData.name || 'Employee',
+                        employeeEmail: currentUserData.email || '', leaveType, startDate, endDate, days, reason,
+                        supportingDocUrl: leaveDocUrl || null, status: 'Pending',
+                        submittedAt: firebase.database.ServerValue.TIMESTAMP, reviewedBy: null, reviewNote: null, reviewedAt: null
+                    };
 
-                const leavePayload = {
-                    refId,
-                    employeeId: currentUserData.id,
-                    employeeName: currentUserData.name || 'Employee',
-                    employeeEmail: currentUserData.email || '',
-                    leaveType,
-                    startDate,
-                    endDate,
-                    days,
-                    reason,
-                    supportingDocUrl: leaveDocUrl || null,
-                    status: 'Pending',
-                    submittedAt: firebase.database.ServerValue.TIMESTAMP,
-                    reviewedBy: null,
-                    reviewNote: null,
-                    reviewedAt: null
-                };
-
-                // Save to global leave_requests (employee-facing)
-                const newRef = await db.ref('leave_requests').push(leavePayload);
-
-                // Also mirror to admin_leave_pending so the admin dashboard gets a dedicated node
-                await db.ref(`admin_leave_pending/${newRef.key}`).set({
-                    ...leavePayload,
-                    firebaseKey: newRef.key
-                });
-
-                await db.ref(`employees/${currentUserData.id}/work_history`).push({
-                    refId,
-                    title: `Leave Request: ${leaveType}`,
-                    timestamp: firebase.database.ServerValue.TIMESTAMP
-                });
+                    const newRef = await db.ref('leave_requests').push(leavePayload);
+                    await db.ref(`admin_leave_pending/${newRef.key}`).set({ ...leavePayload, firebaseKey: newRef.key });
+                    
+                    await db.ref(`employees/${currentUserData.id}/work_history`).push({
+                        refId, title: `Leave Request: ${leaveType}`, timestamp: firebase.database.ServerValue.TIMESTAMP
+                    });
+                    showToast(`Leave request submitted! Ref: ${refId}`);
+                }
 
                 document.getElementById('global-spinner').classList.remove('active');
-                showToast(`Leave request submitted! Ref: ${refId}`);
-
-                // Reset form — leave dates empty as requested
-                document.getElementById('leave-type').value = 'Annual Leave';
-                selectedLeaveType = 'Annual Leave';
-                document.querySelectorAll('#leave-type-cards .leave-type-card').forEach(c => c.classList.remove('selected'));
-                document.querySelector('#leave-type-cards .leave-type-card').classList.add('selected');
-                document.getElementById('leave-type-display').textContent = 'Annual Leave';
-                document.getElementById('leave-start').value = '';
-                document.getElementById('leave-end').value = '';
-                document.getElementById('leave-reason').value = '';
-                document.getElementById('leave-days-display').classList.add('hidden');
-                document.getElementById('leave-doc-name').classList.add('hidden');
-                leaveDocUrl = null;
-
-                switchLeaveTab('history');
+                cancelLeaveEdit(); // Resets UI and switches to history tab
             } catch(e) {
                 document.getElementById('global-spinner').classList.remove('active');
-                showToast("Failed to submit leave request", "error");
+                showToast("Failed to process leave request", "error");
                 console.error(e);
             }
         }
 
-        /**
-         * Load and render the employee's leave request history
-         */
+        async function editPendingLeave(key) {
+            const snap = await db.ref(`leave_requests/${key}`).once('value');
+            const req = snap.val();
+            if(!req || req.status !== 'Pending') return showToast("Cannot edit this request", "error");
+            
+            editingLeaveId = key;
+            
+            // Populate form
+            document.getElementById('leave-start').value = req.startDate;
+            document.getElementById('leave-end').value = req.endDate;
+            document.getElementById('leave-reason').value = req.reason || '';
+            leaveDocUrl = req.supportingDocUrl || null;
+            
+            const nameEl = document.getElementById('leave-doc-name');
+            if(leaveDocUrl) {
+                nameEl.textContent = `✓ Attached Document Retained`;
+                nameEl.classList.remove('hidden');
+            } else {
+                nameEl.classList.add('hidden');
+            }
+            
+            selectLeaveTypeFromText(req.leaveType);
+            calculateLeaveDays();
+            
+            // Change UI for updating
+            document.getElementById('btn-submit-leave').innerHTML = `<i class="fa-solid fa-pen"></i> Update Request`;
+            document.getElementById('btn-cancel-edit-leave').classList.remove('hidden');
+            
+            switchLeaveTab('apply');
+        }
+
+        function cancelLeaveEdit() {
+            editingLeaveId = null;
+            document.getElementById('btn-submit-leave').innerHTML = `<i class="fa-solid fa-paper-plane"></i> Submit Request`;
+            document.getElementById('btn-cancel-edit-leave').classList.add('hidden');
+            
+            // Reset standard form
+            document.getElementById('leave-type').value = 'Annual Leave';
+            selectedLeaveType = 'Annual Leave';
+            document.querySelectorAll('#leave-type-cards .leave-type-card').forEach(c => c.classList.remove('selected'));
+            document.querySelector('#leave-type-cards .leave-type-card').classList.add('selected');
+            document.getElementById('leave-type-display').textContent = 'Annual Leave';
+            document.getElementById('leave-start').value = '';
+            document.getElementById('leave-end').value = '';
+            document.getElementById('leave-reason').value = '';
+            document.getElementById('leave-days-display').classList.add('hidden');
+            document.getElementById('leave-doc-name').classList.add('hidden');
+            leaveDocUrl = null;
+            
+            switchLeaveTab('history');
+        }
+
         async function loadLeaveHistory() {
             if (!currentUserData) return;
             const list = document.getElementById('leave-history-list');
@@ -2131,9 +2090,7 @@ ${sigUrl}
                 }
 
                 let requests = [];
-                snap.forEach(child => {
-                    requests.push({ key: child.key, ...child.val() });
-                });
+                snap.forEach(child => { requests.push({ key: child.key, ...child.val() }); });
                 requests.sort((a, b) => (b.submittedAt || 0) - (a.submittedAt || 0));
 
                 list.innerHTML = '';
@@ -2142,6 +2099,8 @@ ${sigUrl}
                     let statusClass = 'badge-pending';
                     let statusIcon = 'fa-clock';
                     let statusLabel = 'Pending';
+                    
+                    let editBtnHtml = '';
 
                     if (req.status === 'Approved') {
                         statusClass = 'badge-approved';
@@ -2151,6 +2110,8 @@ ${sigUrl}
                         statusClass = 'badge-rejected';
                         statusIcon = 'fa-circle-xmark';
                         statusLabel = 'Rejected';
+                    } else if (req.status === 'Pending') {
+                        editBtnHtml = `<button onclick="editPendingLeave('${req.key}')" class="text-[10px] bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-3 py-1.5 rounded-lg font-bold hover:bg-blue-100 transition-colors mt-2 inline-flex items-center shadow-sm"><i class="fa-solid fa-pen mr-1.5"></i> Edit Request</button>`;
                     }
 
                     const submittedDate = req.submittedAt
@@ -2183,7 +2144,10 @@ ${sigUrl}
                             ${req.reason ? `<p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">${req.reason}</p>` : ''}
                             ${reviewNoteHtml}
                             ${docLinkHtml}
-                            <p class="text-[9px] text-gray-400 mt-2 text-right">Submitted: ${submittedDate}</p>
+                            <div class="flex justify-between items-end mt-1">
+                                <div>${editBtnHtml}</div>
+                                <p class="text-[9px] text-gray-400 text-right">Submitted: ${submittedDate}</p>
+                            </div>
                         </div>
                     `;
                 });
@@ -2194,9 +2158,6 @@ ${sigUrl}
             }
         }
 
-        /**
-         * Load leave balances for all 7 leave types from the employee record
-         */
         async function loadLeaveBalances() {
             if (!currentUserData) return;
             try {
@@ -2215,7 +2176,7 @@ ${sigUrl}
         }
 
         // ============================================================
-        // LEAVE STATUS REAL-TIME LISTENER WITH RICH NOTIFICATION
+        // LEAVE STATUS REAL-TIME LISTENER
         // ============================================================
         let leaveListenerInitialized = false;
 
@@ -2232,7 +2193,6 @@ ${sigUrl}
                     playLeaveApprovalSound('approved');
                     showLeaveNotification('approved', req.leaveType, req.startDate, req.endDate, req.days, req.reviewNote);
                     document.getElementById('leave-badge').classList.remove('hidden');
-                    // Refresh history if on that tab
                     if (!document.getElementById('leave-view-history').classList.contains('hidden')) {
                         loadLeaveHistory();
                     }
@@ -2248,9 +2208,6 @@ ${sigUrl}
             });
         }
 
-        // ============================================================
-        // LEAVE APPROVAL SOUND — distinct tones for approved/rejected
-        // ============================================================
         function playLeaveApprovalSound(type) {
             try {
                 const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -2258,12 +2215,11 @@ ${sigUrl}
                 const ctx = new AudioCtx();
 
                 if (type === 'approved') {
-                    // Three ascending triumphant notes
                     const notes = [
-                        { freq: 523.25, start: 0,    dur: 0.18, vol: 0.5 },  // C5
-                        { freq: 659.25, start: 0.18, dur: 0.18, vol: 0.5 },  // E5
-                        { freq: 783.99, start: 0.36, dur: 0.30, vol: 0.6 },  // G5
-                        { freq: 1046.5, start: 0.60, dur: 0.45, vol: 0.55 }, // C6
+                        { freq: 523.25, start: 0,    dur: 0.18, vol: 0.5 },  
+                        { freq: 659.25, start: 0.18, dur: 0.18, vol: 0.5 },  
+                        { freq: 783.99, start: 0.36, dur: 0.30, vol: 0.6 },  
+                        { freq: 1046.5, start: 0.60, dur: 0.45, vol: 0.55 }, 
                     ];
                     notes.forEach(({ freq, start, dur, vol }) => {
                         const osc  = ctx.createOscillator();
@@ -2280,7 +2236,6 @@ ${sigUrl}
                     });
                     setTimeout(() => ctx.close(), 1200);
                 } else {
-                    // Two descending harsh notes for rejected
                     const notes = [
                         { freq: 400, start: 0,    dur: 0.25, vol: 0.5 },
                         { freq: 280, start: 0.28, dur: 0.35, vol: 0.45 },
@@ -2300,15 +2255,8 @@ ${sigUrl}
                     });
                     setTimeout(() => ctx.close(), 800);
                 }
-            } catch(e) {
-                console.warn('Leave sound error:', e);
-            }
+            } catch(e) { console.warn('Leave sound error:', e); }
         }
-
-        // ============================================================
-        // LEAVE APPROVAL POPUP NOTIFICATION
-        // ============================================================
-        let leaveNotifTimer = null;
 
         function showLeaveNotification(type, leaveType, startDate, endDate, days, reviewNote) {
             const popup    = document.getElementById('leave-notif-popup');
@@ -2335,21 +2283,20 @@ ${sigUrl}
                 ? `Note: ${reviewNote}`
                 : `${startDate} → ${endDate}`;
 
-            // Animate in
-            void popup.offsetWidth; // force reflow
+            void popup.offsetWidth; 
             popup.classList.add('show');
-
-            if (leaveNotifTimer) clearTimeout(leaveNotifTimer);
-            leaveNotifTimer = setTimeout(() => dismissLeaveNotif(), 8000);
-
-            // OS notification if app is in background
             sendLeaveOsNotification(type, leaveType, days, reviewNote);
         }
 
         function dismissLeaveNotif() {
             const popup = document.getElementById('leave-notif-popup');
             popup.classList.remove('show');
-            if (leaveNotifTimer) { clearTimeout(leaveNotifTimer); leaveNotifTimer = null; }
+        }
+
+        function openLeaveFromNotif() {
+            dismissLeaveNotif();
+            switchTab('leave');
+            switchLeaveTab('history');
         }
 
         function sendLeaveOsNotification(type, leaveType, days, reviewNote) {
@@ -2373,8 +2320,6 @@ ${sigUrl}
         // ============================================================
         // CHAT NOTIFICATION SYSTEM
         // ============================================================
-        let notifPopupTimer = null;
-
         async function requestNotificationPermission() {
             if (!('Notification' in window)) return;
             if (Notification.permission === 'granted') return;
@@ -2405,9 +2350,7 @@ ${sigUrl}
                     osc.stop(ctx.currentTime + start + dur + 0.05);
                 });
                 setTimeout(() => ctx.close(), 600);
-            } catch(e) {
-                console.warn('Audio notification error:', e);
-            }
+            } catch(e) { console.warn('Audio notification error:', e); }
         }
 
         function showInAppNotificationPopup(senderName, msgText) {
@@ -2418,18 +2361,18 @@ ${sigUrl}
             sender.textContent = senderName;
             text.textContent   = msgText;
             timeEl.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const icon   = popup.querySelector('.notif-icon');
+            
+            // Re-trigger animation
+            const icon = popup.querySelector('.notif-icon');
             const cloned = icon.cloneNode(true);
             icon.parentNode.replaceChild(cloned, icon);
+            
             popup.classList.add('show');
-            if (notifPopupTimer) clearTimeout(notifPopupTimer);
-            notifPopupTimer = setTimeout(() => dismissNotifPopup(), 5000);
         }
 
         function dismissNotifPopup() {
             const popup = document.getElementById('chat-notif-popup');
             popup.classList.remove('show');
-            if (notifPopupTimer) { clearTimeout(notifPopupTimer); notifPopupTimer = null; }
         }
 
         function openChatFromNotif() {

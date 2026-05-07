@@ -1,0 +1,2803 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="RareGrade">
+    <title>Employee Attendance Portal</title>
+    
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="./icon-192x192.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        whatsapp: { light: '#e5ddd5', dark: '#0b141a', msgOut: '#d9fdd3', msgOutDark: '#005c4b', msgIn: '#ffffff', msgInDark: '#202c33' }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            overscroll-behavior-y: contain;
+            -webkit-tap-highlight-color: transparent;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .app-card {
+            border-radius: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        #login-view {
+            transition: all 0.4s ease-in-out;
+            transform: translateY(100%);
+            opacity: 0;
+            z-index: 100;
+            position: fixed;
+            inset: 0;
+            display: none;
+        }
+        #login-view.active { display: flex; transform: translateY(0); opacity: 1; }
+        
+        #reader { width: 100% !important; border-radius: 1rem; overflow: hidden; position: relative; border: none !important;}
+        #reader video { width: 100% !important; height: 100% !important; object-fit: cover; display: block; }
+        #reader__dashboard_section_csr span, #reader__dashboard_section_swaplink { display: none !important; }
+        
+        .nav-item { transition: color 0.2s, transform 0.1s; }
+        .nav-item.active { color: #2563eb; }
+        .dark .nav-item.active { color: #60a5fa; }
+        
+        #toast { bottom: max(90px, env(safe-area-inset-bottom) + 90px); z-index: 9999; }
+        input[type="file"] { display: none; }
+        
+        #chat-messages::-webkit-scrollbar { width: 4px; }
+        #chat-messages::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .dark #chat-messages::-webkit-scrollbar-thumb { background: #475569; }
+        
+        .chat-bubble { max-width: 85%; padding: 8px 12px; font-size: 0.9rem; line-height: 1.3; word-wrap: break-word; position: relative; box-shadow: 0 1px 1px rgba(0,0,0,0.1);}
+        .chat-mine { border-radius: 12px 0 12px 12px; }
+        .chat-theirs { border-radius: 0 12px 12px 12px; }
+        .chat-mine::after { content: ''; position: absolute; top: 0; right: -8px; width: 0; height: 0; border: 8px solid transparent; border-top-color: inherit; border-right: 0; border-bottom: 0; }
+        .chat-theirs::after { content: ''; position: absolute; top: 0; left: -8px; width: 0; height: 0; border: 8px solid transparent; border-top-color: inherit; border-left: 0; border-bottom: 0; }
+
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+        .calendar-day { padding: 8px 0; font-size: 0.75rem; border-radius: 0.5rem; font-weight: 500; }
+        .calendar-header { font-size: 0.65rem; text-transform: uppercase; font-weight: 700; margin-bottom: 4px;}
+        .day-empty { color: transparent; pointer-events: none; }
+
+        .shimmer {
+            position: relative;
+            overflow: hidden;
+            background-color: #e2e8f0;
+            color: transparent !important;
+            border-color: transparent !important;
+        }
+        .dark .shimmer { background-color: #334155; }
+        .shimmer::after {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+            transform: translateX(-100%);
+            background-image: linear-gradient(90deg, rgba(255,255,255, 0) 0, rgba(255,255,255, 0.3) 20%, rgba(255,255,255, 0.6) 60%, rgba(255,255,255, 0));
+            animation: shimmer-animation 1.5s infinite;
+        }
+        .dark .shimmer::after { background-image: linear-gradient(90deg, rgba(255,255,255, 0) 0, rgba(255,255,255, 0.05) 20%, rgba(255,255,255, 0.1) 60%, rgba(255,255,255, 0)); }
+        @keyframes shimmer-animation { 100% { transform: translateX(100%); } }
+        
+        .toggle-checkbox:checked { right: 0; border-color: #2563eb; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #2563eb; }
+
+        #global-spinner {
+            position: fixed; inset: 0; background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(4px);
+            z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        .dark #global-spinner { background: rgba(15, 23, 42, 0.8); }
+        #global-spinner.active { opacity: 1; pointer-events: all; }
+        .spinner-ring {
+            width: 50px; height: 50px; border: 4px solid rgba(37, 99, 235, 0.2); border-top-color: #3b82f6;
+            border-radius: 50%; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .sig-pad {
+            border: 2px dashed #cbd5e1; background: #f8fafc; border-radius: 0.75rem;
+            width: 100%; height: 140px; touch-action: none; cursor: crosshair;
+        }
+        .dark .sig-pad { border-color: #475569; background: #1e293b; }
+
+        .custom-checkbox { width: 18px; height: 18px; border-radius: 4px; border: 2px solid #cbd5e1; cursor: pointer; accent-color: #2563eb; }
+        
+        .sup-tab { transition: all 0.3s; border-bottom: 2px solid transparent; }
+        .sup-tab.active { border-bottom-color: #2563eb; color: #2563eb; font-weight: bold; }
+        .dark .sup-tab.active { border-bottom-color: #60a5fa; color: #60a5fa; }
+
+        .leave-tab { transition: all 0.3s; border-bottom: 2px solid transparent; }
+        .leave-tab.active { border-bottom-color: #2563eb; color: #2563eb; font-weight: bold; }
+        .dark .leave-tab.active { border-bottom-color: #60a5fa; color: #60a5fa; }
+
+        .badge-pending { background: #fef3c7; color: #92400e; }
+        .dark .badge-pending { background: #451a03; color: #fcd34d; }
+        .badge-approved { background: #d1fae5; color: #065f46; }
+        .dark .badge-approved { background: #022c22; color: #34d399; }
+        .badge-rejected { background: #fee2e2; color: #991b1b; }
+        .dark .badge-rejected { background: #450a0a; color: #f87171; }
+
+        /* Leave type selection cards */
+        .leave-type-card {
+            border: 2px solid transparent;
+            border-radius: 1rem;
+            padding: 14px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #f8fafc;
+        }
+        .dark .leave-type-card { background: #1e293b; }
+        .leave-type-card:active { transform: scale(0.97); }
+        .leave-type-card.selected {
+            border-color: #2563eb;
+            background: #eff6ff;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+        }
+        .dark .leave-type-card.selected {
+            border-color: #60a5fa;
+            background: #1e3a5f;
+        }
+        .leave-type-card .leave-icon {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 8px;
+            font-size: 16px;
+        }
+        .leave-type-card .leave-label {
+            font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+            color: #64748b;
+        }
+        .dark .leave-type-card .leave-label { color: #94a3b8; }
+        .leave-type-card.selected .leave-label { color: #2563eb; }
+        .dark .leave-type-card.selected .leave-label { color: #60a5fa; }
+
+        /* Notification popup */
+        #chat-notif-popup {
+            position: fixed;
+            top: calc(env(safe-area-inset-top) + 16px);
+            left: 12px; right: 12px;
+            max-width: 420px; margin: 0 auto;
+            z-index: 99998;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(-24px) scale(0.96);
+            transition: opacity 0.28s cubic-bezier(0.22,1,0.36,1), transform 0.28s cubic-bezier(0.22,1,0.36,1);
+        }
+        #chat-notif-popup.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
+        #chat-notif-popup .notif-inner {
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08);
+            padding: 14px 16px;
+            display: flex; align-items: center; gap: 12px;
+            cursor: pointer;
+        }
+        .dark #chat-notif-popup .notif-inner { background: rgba(30,41,59,0.94); border-color: rgba(255,255,255,0.08); }
+        .notif-icon {
+            width: 42px; height: 42px;
+            background: linear-gradient(135deg, #075e54 0%, #128c7e 100%);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(7,94,84,0.35);
+            position: relative;
+        }
+        .notif-icon i { color: #fff; font-size: 18px; }
+        .notif-content { flex: 1; min-width: 0; }
+        .notif-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: #075e54; margin-bottom: 2px; }
+        .dark .notif-title { color: #4ade80; }
+        .notif-sender { font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 1px; }
+        .dark .notif-sender { color: #f1f5f9; }
+        .notif-text { font-size: 12.5px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .dark .notif-text { color: #94a3b8; }
+        .notif-time { font-size: 10px; color: #94a3b8; font-weight: 600; white-space: nowrap; align-self: flex-start; padding-top: 2px; }
+        .notif-icon::after {
+            content: ''; position: absolute; inset: -4px; border-radius: 16px;
+            border: 2px solid rgba(7,94,84,0.4);
+            animation: notif-pulse 1.2s ease-out forwards;
+        }
+        @keyframes notif-pulse { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.5); } }
+
+        /* Leave approval notification popup */
+        #leave-notif-popup {
+            position: fixed;
+            top: calc(env(safe-area-inset-top) + 16px);
+            left: 12px; right: 12px;
+            max-width: 420px; margin: 0 auto;
+            z-index: 99999;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(-24px) scale(0.96);
+            transition: opacity 0.32s cubic-bezier(0.22,1,0.36,1), transform 0.32s cubic-bezier(0.22,1,0.36,1);
+        }
+        #leave-notif-popup.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
+        #leave-notif-popup .lnotif-inner {
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border-radius: 20px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.22), 0 2px 12px rgba(0,0,0,0.10);
+            padding: 16px 18px;
+            display: flex; align-items: center; gap: 14px;
+            cursor: pointer;
+            border: 1.5px solid rgba(255,255,255,0.18);
+        }
+        #leave-notif-popup.approved .lnotif-inner { background: linear-gradient(135deg, rgba(5,150,105,0.97) 0%, rgba(16,185,129,0.97) 100%); }
+        #leave-notif-popup.rejected .lnotif-inner { background: linear-gradient(135deg, rgba(220,38,38,0.97) 0%, rgba(239,68,68,0.97) 100%); }
+        .lnotif-icon { width: 46px; height: 46px; border-radius: 14px; background: rgba(255,255,255,0.22); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 22px; color: #fff; }
+        .lnotif-content { flex: 1; min-width: 0; }
+        .lnotif-title { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.80); margin-bottom: 3px; }
+        .lnotif-main { font-size: 14px; font-weight: 800; color: #fff; line-height: 1.3; }
+        .lnotif-sub { font-size: 11px; color: rgba(255,255,255,0.75); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .lnotif-close { color: rgba(255,255,255,0.7); font-size: 16px; padding: 4px; cursor: pointer; flex-shrink: 0; }
+        .lnotif-close:hover { color: #fff; }
+    </style>
+</head>
+<body class="h-screen flex flex-col relative bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+
+    <!-- Upload Spinner -->
+    <div id="global-spinner">
+        <div class="spinner-ring"></div>
+        <p id="spinner-text" class="text-gray-800 dark:text-gray-200 mt-4 font-bold text-sm tracking-wide">Processing...</p>
+    </div>
+
+    <!-- CHAT NOTIFICATION POPUP -->
+    <div id="chat-notif-popup" role="alertdialog" aria-live="assertive" aria-label="New chat message">
+        <div class="notif-inner" onclick="openChatFromNotif()">
+            <div class="notif-icon"><i class="fa-solid fa-message"></i></div>
+            <div class="notif-content">
+                <div class="notif-title">Rare Grade Team</div>
+                <div class="notif-sender" id="notif-sender-name">Someone</div>
+                <div class="notif-text" id="notif-msg-text">New message</div>
+            </div>
+            <div class="notif-time" id="notif-time-text">now</div>
+        </div>
+    </div>
+
+    <!-- LEAVE APPROVAL NOTIFICATION POPUP -->
+    <div id="leave-notif-popup" role="alertdialog" aria-live="assertive">
+        <div class="lnotif-inner" onclick="dismissLeaveNotif()">
+            <div class="lnotif-icon" id="lnotif-icon"><i class="fa-solid fa-umbrella-beach"></i></div>
+            <div class="lnotif-content">
+                <div class="lnotif-title" id="lnotif-title">Leave Update</div>
+                <div class="lnotif-main" id="lnotif-main">—</div>
+                <div class="lnotif-sub" id="lnotif-sub">—</div>
+            </div>
+            <div class="lnotif-close" onclick="dismissLeaveNotif()"><i class="fa-solid fa-xmark"></i></div>
+        </div>
+    </div>
+
+    <!-- Top Header -->
+    <header id="main-header" class="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-6 py-4 flex justify-between items-center z-10 shrink-0 transition-colors duration-300">
+        <div class="flex items-center gap-2">
+            <div class="bg-blue-100 dark:bg-blue-900/50 p-2 rounded-lg text-blue-600 dark:text-blue-400">
+                <i class="fa-solid fa-layer-group"></i>
+            </div>
+            <span class="font-bold tracking-wide">RareGrade<span class="text-blue-600 dark:text-blue-400">Hub</span></span>
+        </div>
+        <div class="text-xs font-semibold text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-slate-700 px-3 py-1.5 rounded-full transition-colors" id="clock">00:00:00</div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main id="app-content" class="flex-1 overflow-y-auto pb-28 px-4 pt-4 w-full max-w-lg mx-auto transition-all relative">
+        
+        <!-- HOME VIEW -->
+        <section id="view-home" class="space-y-4">
+            <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <img id="home-avatar" src="" onerror="handleImgError(this)" class="w-14 h-14 rounded-full object-cover border-2 border-gray-100 dark:border-slate-600 shimmer" alt="Profile">
+                    <div>
+                        <h2 class="text-lg font-bold shimmer rounded" id="home-name">Loading...</h2>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1">Employee Portal</p>
+                    </div>
+                </div>
+                <div class="text-center px-4 border-l border-gray-100 dark:border-slate-700">
+                    <p class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Auth PIN</p>
+                    <p id="emp-pin-display" class="font-mono text-xl font-black text-blue-600 dark:text-blue-400 shimmer rounded">-----</p>
+                </div>
+            </div>
+
+            <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-sm"><i class="fa-regular fa-clock mr-2 text-blue-500 dark:text-blue-400"></i>Today's Shift</h3>
+                    <span id="hours-worked" class="text-xs font-bold bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 px-2.5 py-1 rounded-md shimmer">0h 0m</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div class="p-3 rounded-xl bg-gray-50 dark:bg-slate-700/50 border border-gray-100 dark:border-slate-700 flex flex-col">
+                        <span class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Time In</span>
+                        <span id="log-in" class="text-sm font-semibold shimmer rounded w-12">--:--</span>
+                    </div>
+                    <div class="p-3 rounded-xl bg-gray-50 dark:bg-slate-700/50 border border-gray-100 dark:border-slate-700 flex flex-col">
+                        <span class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Lunch Out</span>
+                        <span id="log-lout" class="text-sm font-semibold shimmer rounded w-12">--:--</span>
+                    </div>
+                    <div class="p-3 rounded-xl bg-gray-50 dark:bg-slate-700/50 border border-gray-100 dark:border-slate-700 flex flex-col">
+                        <span class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Lunch Back</span>
+                        <span id="log-lback" class="text-sm font-semibold shimmer rounded w-12">--:--</span>
+                    </div>
+                    <div class="p-3 rounded-xl bg-gray-50 dark:bg-slate-700/50 border border-gray-100 dark:border-slate-700 flex flex-col">
+                        <span class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Time Out</span>
+                        <span id="log-out" class="text-sm font-semibold shimmer rounded w-12">--:--</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5 mt-4" id="home-upload-widget">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-bold text-sm text-gray-700 dark:text-gray-200">Workspace Upload</h3>
+                    <i class="fa-solid fa-cloud-arrow-up text-blue-500 dark:text-blue-400"></i>
+                </div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">Capture evidence directly from this device. It will sync real-time to the main workspace.</p>
+                <div class="space-y-4">
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-mono font-bold text-sm">RGT/SFT-</span>
+                        <input type="text" id="upload-job-id" placeholder="1234" class="w-full pl-24 pr-4 py-3 bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-xl font-mono font-bold focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all" inputmode="numeric">
+                    </div>
+                    <select id="upload-phase" class="w-full p-3 bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all">
+                        <option value="photosBefore">Pre-Repair Evidence</option>
+                        <option value="photosAfter">Post-Repair Evidence</option>
+                    </select>
+                    <button onclick="document.getElementById('evidence-upload').click()" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold shadow-md hover:bg-blue-700 active:scale-95 transition-all flex justify-center items-center gap-2">
+                        <i class="fa-solid fa-camera"></i> Capture & Link Image
+                    </button>
+                    <input type="file" id="evidence-upload" accept="image/*" capture="environment" class="hidden" onchange="uploadEvidenceToWorkspace(event, 'hardware_software')">
+                </div>
+            </div>
+
+            <div class="mt-6 px-1">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-bold text-sm text-gray-700 dark:text-gray-200">Recent Tasks Signed</h3>
+                    <i class="fa-solid fa-list-check text-gray-400"></i>
+                </div>
+                <div id="work-history-list" class="space-y-3">
+                    <div class="text-center text-xs text-gray-400 py-4 italic">No tasks signed yet.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SUPPORT CLIENT REGISTRATION VIEW -->
+        <section id="view-support" class="hidden space-y-4">
+            
+            <div class="flex bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden text-sm font-bold shadow-sm">
+                <button onclick="switchSupTab('register')" id="tab-sup-register" class="flex-1 py-3 text-center sup-tab active text-gray-500 dark:text-gray-400">
+                    <i class="fa-solid fa-user-plus mr-1"></i> Register Client
+                </button>
+                <button onclick="switchSupTab('maintenance')" id="tab-sup-maintenance" class="flex-1 py-3 text-center sup-tab text-gray-500 dark:text-gray-400">
+                    <i class="fa-solid fa-clipboard-check mr-1"></i> Log Visit
+                </button>
+            </div>
+
+            <!-- SUB-VIEW: REGISTER CLIENT -->
+            <div id="sup-view-register" class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5">
+                <div class="flex items-center gap-3 mb-5">
+                    <div class="bg-blue-100 dark:bg-blue-900/50 p-2 rounded-lg text-blue-600 dark:text-blue-400">
+                        <i class="fa-solid fa-handshake"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-gray-800 dark:text-gray-200 leading-tight">Add Support Client</h2>
+                        <p class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">Register a new maintenance SLA</p>
+                    </div>
+                </div>
+
+                <div class="space-y-5">
+                    <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
+                        <h3 class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-slate-600 pb-2">1. Business Info</h3>
+                        <input type="text" id="sup-biz-name" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Business / Company Name *">
+                        <input type="text" id="sup-sector" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Industry / Sector (e.g. Retail)">
+                        <input type="text" id="sup-address" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Physical Address">
+                    </div>
+
+                    <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
+                        <h3 class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-slate-600 pb-2">2. Primary Contact</h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <input type="text" id="sup-contact-name" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Full Name *">
+                            <input type="text" id="sup-contact-title" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Position / Title">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <input type="tel" id="sup-contact-phone" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Phone *">
+                            <input type="email" id="sup-contact-email" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Email Address">
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
+                        <h3 class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-slate-600 pb-2">3. Contract Details</h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="flex flex-col">
+                                <span class="text-[9px] font-bold text-gray-400 mb-1 ml-1">Type</span>
+                                <select id="sup-contract-type" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm">
+                                    <option value="Monthly Maintenance">Monthly Maintenance</option>
+                                    <option value="Quarterly Maintenance">Quarterly Maintenance</option>
+                                    <option value="Ad-hoc Support">Ad-hoc Support</option>
+                                    <option value="Annual Support Contract">Annual Support Contract</option>
+                                    <option value="Break-Fix Only">Break-Fix Only</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-[9px] font-bold text-gray-400 mb-1 ml-1">Start Date</span>
+                                <input type="date" id="sup-start-date" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm">
+                            </div>
+                        </div>
+
+                        <div class="pt-2">
+                            <span class="text-[9px] font-bold text-gray-500 uppercase block mb-2">Scope of Services</span>
+                            <div class="grid grid-cols-2 gap-2 text-xs text-gray-700 dark:text-gray-300">
+                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 shadow-sm"><input type="checkbox" id="sup-scope-hardware" class="custom-checkbox shrink-0"> Hardware</label>
+                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 shadow-sm"><input type="checkbox" id="sup-scope-software" class="custom-checkbox shrink-0"> Software</label>
+                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 shadow-sm"><input type="checkbox" id="sup-scope-network" class="custom-checkbox shrink-0"> Network</label>
+                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 shadow-sm"><input type="checkbox" id="sup-scope-backup" class="custom-checkbox shrink-0"> Backups</label>
+                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 shadow-sm"><input type="checkbox" id="sup-scope-security" class="custom-checkbox shrink-0"> Security</label>
+                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 shadow-sm"><input type="checkbox" id="sup-scope-remote" class="custom-checkbox shrink-0"> Remote</label>
+                            </div>
+                        </div>
+
+                        <textarea id="sup-notes" rows="2" class="w-full mt-2 p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all resize-none shadow-sm" placeholder="Additional notes or SLA requirements..."></textarea>
+                    </div>
+
+                    <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
+                        <div class="flex justify-between items-center border-b border-gray-200 dark:border-slate-600 pb-2">
+                            <h3 class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">4. Log Devices</h3>
+                            <button onclick="addDeviceField()" class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded shadow-sm font-bold active:scale-95 transition-transform"><i class="fa-solid fa-plus"></i> Add</button>
+                        </div>
+                        <div id="sup-devices-container" class="space-y-3">
+                            <p class="text-xs text-gray-400 text-center italic py-2" id="no-devices-msg">No devices added yet. Click Add to include devices.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-xl border border-blue-100 dark:border-blue-900/30 space-y-3 shadow-inner">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-xs font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wider">Client Signature</h3>
+                            <button onclick="clearSupportSignature('sup-sig-canvas')" class="text-[10px] text-red-500 font-bold hover:underline bg-white dark:bg-slate-800 px-2 py-1 rounded shadow-sm border border-red-100 dark:border-slate-600">Clear</button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 pb-2 border-b border-blue-200/50 dark:border-slate-600">
+                            <input type="text" id="sup-sig-name" class="w-full p-2 text-xs bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg outline-none dark:text-white" placeholder="Signatory Name *">
+                            <input type="text" id="sup-sig-title" class="w-full p-2 text-xs bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg outline-none dark:text-white" placeholder="Designation">
+                        </div>
+                        <canvas id="sup-sig-canvas" class="sig-pad w-full block shadow-sm"></canvas>
+                        <p class="text-[9px] text-blue-600 dark:text-blue-500 leading-tight text-center font-medium mt-2">By signing, the client agrees to RareGrade Tech's SLA terms.</p>
+                    </div>
+
+                    <button onclick="submitSupportClient()" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 hover:bg-blue-700 active:scale-[0.98] transition-all flex justify-center items-center gap-2 text-lg">
+                        <i class="fa-solid fa-paper-plane"></i> Register Client SLA
+                    </button>
+                </div>
+            </div>
+
+            <!-- SUB-VIEW: LOG MAINTENANCE -->
+            <div id="sup-view-maintenance" class="hidden space-y-4">
+                <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-sm text-gray-700 dark:text-gray-200"><i class="fa-solid fa-clipboard-check text-blue-500 mr-2"></i>Log Visit & Upload</h3>
+                    </div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">Complete an on-site digital job card for an existing client.</p>
+                    
+                    <div class="space-y-5">
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-mono font-bold text-sm">SUP-</span>
+                            <input type="text" id="maint-job-id" placeholder="1234" class="w-full pl-16 pr-4 py-3 bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-xl font-mono font-bold focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" inputmode="numeric">
+                        </div>
+
+                        <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
+                            <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">1. Visit Details</span>
+                            <select id="maint-visit-type" class="w-full p-3 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm">
+                                <option value="Routine Maintenance">Routine Maintenance</option>
+                                <option value="Emergency Callout">Emergency Callout</option>
+                                <option value="Installation / Setup">Installation / Setup</option>
+                                <option value="Assessment / Audit">Assessment / Audit</option>
+                            </select>
+                            
+                            <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mt-4 border-t border-gray-200 dark:border-slate-600 pt-3">2. Checklist / Tasks Performed</span>
+                            <div class="grid grid-cols-2 gap-3 text-xs text-gray-700 dark:text-gray-300">
+                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-600 shadow-sm"><input type="checkbox" id="chk-maint-os" class="custom-checkbox shrink-0"> OS Updates</label>
+                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-600 shadow-sm"><input type="checkbox" id="chk-maint-av" class="custom-checkbox shrink-0"> Antivirus Checked</label>
+                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-600 shadow-sm"><input type="checkbox" id="chk-maint-backup" class="custom-checkbox shrink-0"> Backups Verified</label>
+                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-600 shadow-sm"><input type="checkbox" id="chk-maint-clean" class="custom-checkbox shrink-0"> Hardware Cleaned</label>
+                                <label class="flex items-center gap-2 cursor-pointer p-2 bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-600 shadow-sm col-span-2"><input type="checkbox" id="chk-maint-net" class="custom-checkbox shrink-0"> Network Tested</label>
+                            </div>
+
+                            <input type="text" id="maint-parts" class="w-full mt-2 p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Parts / Consumables Used (if any)">
+                            <input type="text" id="maint-next-steps" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm" placeholder="Recommendations / Next Steps">
+                        </div>
+
+                        <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
+                            <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">3. Detailed Visit Log / Notes</span>
+                            <textarea id="maint-notes" rows="3" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all resize-none shadow-sm" placeholder="Detail the work performed today..."></textarea>
+                            
+                            <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mt-2 border-t border-gray-200 dark:border-slate-600 pt-3">4. Update Contract Status</span>
+                            <select id="maint-status" class="w-full p-3 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all shadow-sm">
+                                <option value="Active">Active</option>
+                                <option value="On Hold">On Hold</option>
+                                <option value="Terminated">Terminated</option>
+                            </select>
+                        </div>
+
+                        <div class="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700 space-y-3">
+                            <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">5. Capture Evidence (Optional)</span>
+                            <button onclick="document.getElementById('maint-evidence-upload').click()" class="w-full py-3.5 bg-gray-800 dark:bg-slate-600 text-white rounded-xl font-bold shadow-md active:scale-95 transition-all flex justify-center items-center gap-2 text-sm border border-gray-700 dark:border-slate-500">
+                                <i class="fa-solid fa-camera text-blue-400"></i> Capture On-Site Image
+                            </button>
+                            <input type="file" id="maint-evidence-upload" accept="image/*" capture="environment" class="hidden" onchange="uploadEvidenceToWorkspace(event, 'support')">
+                        </div>
+
+                        <div class="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-xl border border-blue-100 dark:border-blue-900/30 space-y-3 shadow-inner">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-xs font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wider">6. Client Sign-off (Job Card)</h3>
+                                <button onclick="clearSupportSignature('maint-sig-canvas')" class="text-[10px] text-red-500 font-bold hover:underline bg-white dark:bg-slate-800 px-2 py-1 rounded shadow-sm border border-red-100 dark:border-slate-600">Clear</button>
+                            </div>
+                            <input type="text" id="maint-sig-name" class="w-full p-3 text-sm bg-white dark:bg-slate-800 border border-blue-200 dark:border-slate-600 rounded-lg outline-none dark:text-white mb-2 shadow-sm" placeholder="Signatory Name *">
+                            <canvas id="maint-sig-canvas" class="sig-pad w-full block shadow-sm"></canvas>
+                        </div>
+
+                        <button onclick="submitMaintenanceLog()" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 hover:bg-blue-700 active:scale-[0.98] transition-all flex justify-center items-center gap-2 text-base mt-2">
+                            <i class="fa-solid fa-floppy-disk"></i> Submit Job Card & Notes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCANNER VIEW -->
+        <section id="view-scanner" class="hidden space-y-4 h-full flex flex-col pb-6">
+            <div id="location-overlay" class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-6 text-center space-y-4 my-auto">
+                <div class="inline-block bg-blue-50 dark:bg-blue-900/30 p-4 rounded-full text-blue-500 dark:text-blue-400 mb-1">
+                    <i class="fa-solid fa-location-dot text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-bold">Verify Location</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 px-4">You must be at the office coordinates to log attendance.</p>
+                <button onclick="detectAndVerifyLocation()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-colors mt-2 text-sm shadow-md">
+                    Check GPS Lock
+                </button>
+            </div>
+            <div id="scanner-interface" class="hidden flex-1 flex flex-col space-y-4 overflow-y-auto">
+                <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 shrink-0">
+                    <div class="flex justify-between items-center mb-3 px-1">
+                        <h2 class="font-bold text-sm"><i class="fa-solid fa-qrcode mr-2 text-blue-500"></i>Scan Office QR</h2>
+                    </div>
+                    <div id="reader-container" class="w-full aspect-square md:aspect-video overflow-hidden relative shadow-inner bg-black rounded-xl flex items-center justify-center">
+                        <div id="reader"></div>
+                    </div>
+                    <button onclick="logWithBiometrics()" class="w-full py-4 mt-4 bg-gray-900 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-white rounded-xl font-bold shadow-md active:scale-95 transition-all flex items-center justify-center gap-3 text-sm">
+                        <i class="fa-solid fa-fingerprint text-blue-400 text-xl"></i> Check in with Biometrics
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+             LEAVE MANAGEMENT VIEW — REDESIGNED
+             ============================================================ -->
+        <section id="view-leave" class="hidden space-y-4">
+
+            <!-- Sub-tabs -->
+            <div class="flex bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden text-sm font-bold shadow-sm">
+                <button onclick="switchLeaveTab('apply')" id="tab-leave-apply" class="flex-1 py-3 text-center leave-tab active text-gray-500 dark:text-gray-400">
+                    <i class="fa-solid fa-paper-plane mr-1"></i> Apply
+                </button>
+                <button onclick="switchLeaveTab('history')" id="tab-leave-history" class="flex-1 py-3 text-center leave-tab text-gray-500 dark:text-gray-400">
+                    <i class="fa-solid fa-clock-rotate-left mr-1"></i> My Requests
+                </button>
+                <button onclick="switchLeaveTab('balances')" id="tab-leave-balances" class="flex-1 py-3 text-center leave-tab text-gray-500 dark:text-gray-400">
+                    <i class="fa-solid fa-chart-pie mr-1"></i> Balances
+                </button>
+            </div>
+
+            <!-- SUB-VIEW: APPLY FOR LEAVE (card picker redesign) -->
+            <div id="leave-view-apply" class="space-y-4">
+                <!-- Leave Type Card Picker -->
+                <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="bg-blue-100 dark:bg-blue-900/50 p-2 rounded-lg text-blue-600 dark:text-blue-400">
+                            <i class="fa-solid fa-umbrella-beach"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-bold text-gray-800 dark:text-gray-200 leading-tight">Request Leave</h2>
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">Select leave type</p>
+                        </div>
+                    </div>
+
+                    <!-- Leave Type Cards Grid -->
+                    <div class="grid grid-cols-3 gap-2.5 mb-1" id="leave-type-cards">
+                        <div class="leave-type-card selected" onclick="selectLeaveType(this, 'Annual Leave')">
+                            <div class="leave-icon bg-green-100 dark:bg-green-900/30">
+                                <i class="fa-solid fa-sun text-green-600 dark:text-green-400"></i>
+                            </div>
+                            <div class="leave-label">Annual</div>
+                        </div>
+                        <div class="leave-type-card" onclick="selectLeaveType(this, 'Sick Leave')">
+                            <div class="leave-icon bg-red-100 dark:bg-red-900/30">
+                                <i class="fa-solid fa-heart-pulse text-red-600 dark:text-red-400"></i>
+                            </div>
+                            <div class="leave-label">Sick</div>
+                        </div>
+                        <div class="leave-type-card" onclick="selectLeaveType(this, 'Family Responsibility')">
+                            <div class="leave-icon bg-purple-100 dark:bg-purple-900/30">
+                                <i class="fa-solid fa-people-roof text-purple-600 dark:text-purple-400"></i>
+                            </div>
+                            <div class="leave-label">Family</div>
+                        </div>
+                        <div class="leave-type-card" onclick="selectLeaveType(this, 'Study Leave')">
+                            <div class="leave-icon bg-blue-100 dark:bg-blue-900/30">
+                                <i class="fa-solid fa-book text-blue-600 dark:text-blue-400"></i>
+                            </div>
+                            <div class="leave-label">Study</div>
+                        </div>
+                        <div class="leave-type-card" onclick="selectLeaveType(this, 'Maternity Leave')">
+                            <div class="leave-icon bg-pink-100 dark:bg-pink-900/30">
+                                <i class="fa-solid fa-baby text-pink-600 dark:text-pink-400"></i>
+                            </div>
+                            <div class="leave-label">Maternity</div>
+                        </div>
+                        <div class="leave-type-card" onclick="selectLeaveType(this, 'Paternity Leave')">
+                            <div class="leave-icon bg-indigo-100 dark:bg-indigo-900/30">
+                                <i class="fa-solid fa-person text-indigo-600 dark:text-indigo-400"></i>
+                            </div>
+                            <div class="leave-label">Paternity</div>
+                        </div>
+                        <div class="leave-type-card col-span-3" onclick="selectLeaveType(this, 'Unpaid Leave')">
+                            <div style="display:flex;align-items:center;gap:10px;justify-content:center;">
+                                <div class="leave-icon bg-gray-100 dark:bg-gray-700/50" style="width:32px;height:32px;min-width:32px;">
+                                    <i class="fa-solid fa-hand-holding-dollar text-gray-500 dark:text-gray-400" style="font-size:13px;"></i>
+                                </div>
+                                <div class="leave-label">Unpaid Leave</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Hidden input to track selection -->
+                    <input type="hidden" id="leave-type" value="Annual Leave">
+
+                    <!-- Selected type display -->
+                    <div class="mt-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/30 rounded-xl px-4 py-2.5 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-check text-blue-500 text-sm"></i>
+                        <span class="text-xs font-bold text-blue-700 dark:text-blue-400">Selected: <span id="leave-type-display">Annual Leave</span></span>
+                    </div>
+                </div>
+
+                <!-- Dates & Reason -->
+                <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5 space-y-4">
+                    <h3 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date Range & Details</h3>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide block mb-1">Start Date *</label>
+                            <input type="date" id="leave-start" class="w-full p-3 bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide block mb-1">End Date *</label>
+                            <input type="date" id="leave-end" class="w-full p-3 bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all">
+                        </div>
+                    </div>
+
+                    <div id="leave-days-display" class="hidden bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/30 rounded-xl p-3 text-center">
+                        <span class="text-xs text-blue-600 dark:text-blue-400 font-bold">
+                            <i class="fa-solid fa-calendar-days mr-1"></i>
+                            <span id="leave-days-count">0</span> working day(s) requested
+                        </span>
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide block mb-1">Reason / Notes</label>
+                        <textarea id="leave-reason" rows="3" class="w-full p-3 text-sm bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all resize-none" placeholder="Briefly describe the reason for your leave request..."></textarea>
+                    </div>
+
+                    <div class="bg-gray-50 dark:bg-slate-700/30 p-3 rounded-xl border border-gray-100 dark:border-slate-700">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Supporting Document (Optional)</span>
+                            <span class="text-[9px] text-gray-400 italic">e.g. doctor's note</span>
+                        </div>
+                        <button onclick="document.getElementById('leave-doc-upload').click()" class="w-full py-2.5 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-lg font-semibold text-xs shadow-sm active:scale-95 transition-all flex justify-center items-center gap-2">
+                            <i class="fa-solid fa-paperclip text-blue-500"></i> Attach Document / Image
+                        </button>
+                        <input type="file" id="leave-doc-upload" accept="image/*,application/pdf" class="hidden" onchange="handleLeaveDocUpload(event)">
+                        <p id="leave-doc-name" class="text-[10px] text-green-600 dark:text-green-400 mt-2 text-center font-semibold hidden"></p>
+                    </div>
+
+                    <button onclick="submitLeaveRequest()" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 hover:bg-blue-700 active:scale-[0.98] transition-all flex justify-center items-center gap-2 text-base">
+                        <i class="fa-solid fa-paper-plane"></i> Submit Leave Request
+                    </button>
+                </div>
+            </div>
+
+            <!-- SUB-VIEW: MY REQUESTS HISTORY -->
+            <div id="leave-view-history" class="hidden space-y-3">
+                <div class="flex justify-between items-center px-1">
+                    <h3 class="font-bold text-sm text-gray-700 dark:text-gray-200">My Leave Requests</h3>
+                    <i class="fa-solid fa-clock-rotate-left text-gray-400"></i>
+                </div>
+                <div id="leave-history-list" class="space-y-3">
+                    <div class="text-center text-xs text-gray-400 py-6 italic">No leave requests submitted yet.</div>
+                </div>
+            </div>
+
+            <!-- SUB-VIEW: LEAVE BALANCES — ALL types shown -->
+            <div id="leave-view-balances" class="hidden space-y-4">
+                <div class="flex justify-between items-center px-1">
+                    <h3 class="font-bold text-sm text-gray-700 dark:text-gray-200">Leave Balances</h3>
+                    <button onclick="loadLeaveBalances()" class="text-xs text-blue-600 dark:text-blue-400 font-bold"><i class="fa-solid fa-rotate-right mr-1"></i>Refresh</button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <!-- Annual Leave -->
+                    <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 text-center">
+                        <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
+                            <i class="fa-solid fa-sun text-green-600 dark:text-green-400 text-sm"></i>
+                        </div>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Annual</p>
+                        <p id="bal-annual" class="text-2xl font-black text-green-600 dark:text-green-400">--</p>
+                        <p class="text-[9px] text-gray-400">days remaining</p>
+                    </div>
+                    <!-- Sick Leave -->
+                    <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 text-center">
+                        <div class="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
+                            <i class="fa-solid fa-heart-pulse text-red-600 dark:text-red-400 text-sm"></i>
+                        </div>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Sick</p>
+                        <p id="bal-sick" class="text-2xl font-black text-red-600 dark:text-red-400">--</p>
+                        <p class="text-[9px] text-gray-400">days remaining</p>
+                    </div>
+                    <!-- Family Responsibility -->
+                    <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 text-center">
+                        <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
+                            <i class="fa-solid fa-people-roof text-purple-600 dark:text-purple-400 text-sm"></i>
+                        </div>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Family</p>
+                        <p id="bal-family" class="text-2xl font-black text-purple-600 dark:text-purple-400">--</p>
+                        <p class="text-[9px] text-gray-400">days remaining</p>
+                    </div>
+                    <!-- Study Leave -->
+                    <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 text-center">
+                        <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
+                            <i class="fa-solid fa-book text-blue-600 dark:text-blue-400 text-sm"></i>
+                        </div>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Study</p>
+                        <p id="bal-study" class="text-2xl font-black text-blue-600 dark:text-blue-400">--</p>
+                        <p class="text-[9px] text-gray-400">days remaining</p>
+                    </div>
+                    <!-- Maternity Leave -->
+                    <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 text-center">
+                        <div class="w-10 h-10 bg-pink-100 dark:bg-pink-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
+                            <i class="fa-solid fa-baby text-pink-600 dark:text-pink-400 text-sm"></i>
+                        </div>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Maternity</p>
+                        <p id="bal-maternity" class="text-2xl font-black text-pink-600 dark:text-pink-400">--</p>
+                        <p class="text-[9px] text-gray-400">days remaining</p>
+                    </div>
+                    <!-- Paternity Leave -->
+                    <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 text-center">
+                        <div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
+                            <i class="fa-solid fa-person text-indigo-600 dark:text-indigo-400 text-sm"></i>
+                        </div>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Paternity</p>
+                        <p id="bal-paternity" class="text-2xl font-black text-indigo-600 dark:text-indigo-400">--</p>
+                        <p class="text-[9px] text-gray-400">days remaining</p>
+                    </div>
+                    <!-- Unpaid Leave (full width) -->
+                    <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 text-center col-span-2">
+                        <div class="w-10 h-10 bg-gray-100 dark:bg-gray-700/50 rounded-full flex items-center justify-center mx-auto mb-2">
+                            <i class="fa-solid fa-hand-holding-dollar text-gray-500 dark:text-gray-400 text-sm"></i>
+                        </div>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Unpaid</p>
+                        <p id="bal-unpaid" class="text-2xl font-black text-gray-600 dark:text-gray-400">--</p>
+                        <p class="text-[9px] text-gray-400">days (as approved)</p>
+                    </div>
+                </div>
+
+                <p class="text-[10px] text-center text-gray-400 italic px-2">Balances are updated by admin upon leave approval. Contact HR if balances appear incorrect.</p>
+            </div>
+        </section>
+        <!-- END LEAVE MANAGEMENT VIEW -->
+
+        <!-- PROFILE VIEW -->
+        <section id="view-profile" class="hidden space-y-4">
+            <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5 text-center">
+                <div class="relative inline-block mb-3">
+                    <img id="profile-img" src="" onerror="handleImgError(this)" class="w-20 h-20 rounded-full object-cover border-4 border-white dark:border-slate-800 shadow-md mx-auto shimmer">
+                    <label for="image-upload" class="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full cursor-pointer shadow-md hover:bg-blue-700 transition transform hover:scale-105 active:scale-95 z-10">
+                        <i class="fa-solid fa-camera text-xs"></i>
+                    </label>
+                    <input type="file" id="image-upload" accept="image/*" onchange="handleImageUpload(event)">
+                </div>
+                <div class="space-y-3 text-left mt-2">
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Full Name</label>
+                        <input type="text" id="edit-name" class="w-full mt-1 p-2.5 text-sm bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition dark:text-white shimmer">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Email Address</label>
+                        <input type="email" id="edit-email" readonly class="w-full mt-1 p-2.5 text-sm bg-gray-100 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg text-gray-500 outline-none cursor-not-allowed shimmer">
+                    </div>
+                    <button onclick="saveProfile()" class="w-full py-2.5 bg-gray-900 dark:bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-gray-800 dark:hover:bg-blue-700 transition-colors shadow-sm">
+                        Save Changes
+                    </button>
+                </div>
+            </div>
+            <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-sm" id="cal-month-title">Calendar</h3>
+                    <i class="fa-regular fa-calendar text-blue-500 dark:text-blue-400"></i>
+                </div>
+                <div class="calendar-grid calendar-header text-gray-500">
+                    <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+                </div>
+                <div id="calendar-days" class="calendar-grid mt-1"></div>
+                
+                <div class="flex flex-wrap justify-center gap-3 mt-4 text-[10px] text-gray-500 dark:text-gray-400 font-medium">
+                    <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-green-500"></span> Present</div>
+                    <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-orange-500"></span> Late/Half</div>
+                    <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> Absent</div>
+                    <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span> Holiday</div>
+                    <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> On Leave</div>
+                </div>
+            </div>
+            <button onclick="signOutUser()" class="w-full py-3 text-red-600 dark:text-red-400 bg-white dark:bg-slate-800 border border-red-100 dark:border-red-900/30 font-bold text-sm rounded-xl hover:bg-red-50 dark:hover:bg-red-900/10 shadow-sm transition-colors mt-4">
+                Sign Out Account
+            </button>
+        </section>
+
+        <!-- SETTINGS VIEW -->
+        <section id="view-settings" class="hidden space-y-4">
+            <h2 class="text-xl font-bold mb-2 px-1">Settings</h2>
+            <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-2 shadow-sm divide-y divide-gray-100 dark:divide-slate-700">
+                <div class="flex items-center justify-between p-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300">
+                            <i class="fa-solid fa-moon text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold">Dark Theme</p>
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400">Reduce glare and save battery</p>
+                        </div>
+                    </div>
+                    <div class="relative inline-block w-12 align-middle select-none transition duration-200 ease-in">
+                        <input type="checkbox" name="toggle" id="theme-toggle" onchange="toggleTheme()" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-gray-300 dark:border-gray-600 z-10 top-0 left-0 transition-all duration-300"/>
+                        <label for="theme-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 dark:bg-gray-600 cursor-pointer transition-colors duration-300"></label>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between p-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                            <i class="fa-solid fa-bell text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold">Push Notifications</p>
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400">Shift reminders & chat alerts</p>
+                        </div>
+                    </div>
+                    <div class="relative inline-block w-12 align-middle select-none transition duration-200 ease-in">
+                        <input type="checkbox" checked class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-blue-600 z-10 top-0 right-0 transition-all duration-300"/>
+                        <label class="toggle-label block overflow-hidden h-6 rounded-full bg-blue-600 cursor-pointer transition-colors duration-300"></label>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between p-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-green-50 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
+                            <i class="fa-solid fa-code-branch text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold">App Version</p>
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400">RareGradeHub v3.0.0</p>
+                        </div>
+                    </div>
+                    <span class="text-xs text-gray-400 font-mono">Up to date</span>
+                </div>
+            </div>
+            <div class="mt-6 px-1">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">System Actions</p>
+                <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700">
+                    <button onclick="clearCache()" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-xl transition-colors">
+                        <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">Clear Local Cache</span>
+                        <i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- CHAT VIEW (Full Screen Overlay) -->
+    <section id="view-chat" class="hidden fixed inset-0 z-40 bg-[#e5ddd5] dark:bg-[#0b141a] flex-col">
+        <div class="bg-[#075e54] dark:bg-slate-800 shadow-sm p-3 pt-[calc(0.75rem+env(safe-area-inset-top))] flex items-center gap-3 shrink-0 text-white transition-colors z-10">
+            <button onclick="switchTab('home')" class="text-white p-2 -ml-2 active:scale-95 transition-transform">
+                <i class="fa-solid fa-arrow-left text-lg"></i>
+            </button>
+            <div class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
+                <i class="fa-solid fa-users text-sm"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-sm">Rare Grade Team</h3>
+                <p class="text-[10px] font-semibold flex items-center gap-1 opacity-90">
+                    <span class="w-1.5 h-1.5 rounded-full bg-green-400 block animate-pulse shadow-[0_0_5px_#4ade80]"></span>
+                    Active Online
+                </p>
+            </div>
+        </div>
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 flex flex-col gap-2 pb-20 relative z-0">
+            <div class="text-center text-xs text-gray-500 bg-white/50 dark:bg-slate-800/50 rounded-full px-3 py-1 mx-auto my-2 backdrop-blur-sm shadow-sm">Loading messages...</div>
+        </div>
+        <div class="fixed bottom-0 left-0 right-0 bg-[#f0f0f0] dark:bg-slate-800 p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] flex items-end gap-2 shadow-[0_-1px_3px_rgba(0,0,0,0.1)] z-20">
+            <div class="flex-1 bg-white dark:bg-slate-700 rounded-2xl flex items-center px-2 py-1 shadow-sm">
+                <i class="fa-regular fa-face-smile text-gray-400 dark:text-gray-300 p-2 text-xl"></i>
+                <textarea id="chat-input" placeholder="Message" rows="1" class="flex-1 bg-transparent border-none focus:ring-0 resize-none outline-none text-sm py-2 max-h-24 dark:text-white" oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'" onkeypress="handleChatKeyPress(event)"></textarea>
+                <i class="fa-solid fa-paperclip text-gray-400 dark:text-gray-300 p-2 text-xl"></i>
+            </div>
+            <button onclick="sendChatMessage()" class="bg-[#00a884] text-white w-12 h-12 rounded-full flex items-center justify-center hover:bg-[#008f6f] active:scale-95 transition-transform shadow-md shrink-0 mb-0.5">
+                <i class="fa-solid fa-paper-plane text-lg ml-[-2px]"></i>
+            </button>
+        </div>
+    </section>
+
+    <!-- Floating Action Button -->
+    <button onclick="switchTab('scanner')" id="fab-scanner" class="fixed bottom-20 right-4 bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/40 z-30 transform transition-transform duration-300 active:scale-95">
+        <i class="fa-solid fa-qrcode text-2xl"></i>
+    </button>
+
+    <!-- Bottom Navigation Bar -->
+    <nav id="bottom-nav" class="bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 fixed bottom-0 w-full z-20 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.02)] transition-transform duration-300">
+        <div class="flex justify-around items-center h-16 px-1">
+            <button onclick="switchTab('home')" class="nav-item active text-gray-500 dark:text-gray-400 flex flex-col items-center justify-center w-full h-full" id="nav-home">
+                <i class="fa-solid fa-house text-lg mb-1"></i>
+                <span class="text-[9px] font-bold uppercase tracking-wide">Home</span>
+            </button>
+            <button onclick="switchTab('support')" class="nav-item text-gray-500 dark:text-gray-400 flex flex-col items-center justify-center w-full h-full" id="nav-support">
+                <i class="fa-solid fa-headset text-lg mb-1"></i>
+                <span class="text-[9px] font-bold uppercase tracking-wide">Support</span>
+            </button>
+            <button onclick="switchTab('leave')" class="nav-item text-gray-500 dark:text-gray-400 flex flex-col items-center justify-center w-full h-full relative" id="nav-leave">
+                <i class="fa-solid fa-umbrella-beach text-lg mb-1"></i>
+                <span class="text-[9px] font-bold uppercase tracking-wide">Leave</span>
+                <span id="leave-badge" class="absolute top-2 right-4 w-2 h-2 bg-orange-500 rounded-full hidden"></span>
+            </button>
+            <button onclick="switchTab('chat')" class="nav-item text-gray-500 dark:text-gray-400 flex flex-col items-center justify-center w-full h-full relative" id="nav-chat">
+                <i class="fa-regular fa-comments text-lg mb-1"></i>
+                <span class="text-[9px] font-bold uppercase tracking-wide">Chat</span>
+                <span id="chat-badge" class="absolute top-2 right-6 w-2 h-2 bg-red-500 rounded-full hidden"></span>
+            </button>
+            <button onclick="switchTab('profile')" class="nav-item text-gray-500 dark:text-gray-400 flex flex-col items-center justify-center w-full h-full" id="nav-profile">
+                <i class="fa-regular fa-user text-lg mb-1"></i>
+                <span class="text-[9px] font-bold uppercase tracking-wide">Profile</span>
+            </button>
+            <button onclick="switchTab('settings')" class="nav-item text-gray-500 dark:text-gray-400 flex flex-col items-center justify-center w-full h-full" id="nav-settings">
+                <i class="fa-solid fa-gear text-lg mb-1"></i>
+                <span class="text-[9px] font-bold uppercase tracking-wide">Set</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Login View -->
+    <div id="login-view" class="flex-col justify-center items-center p-6 bg-gray-50 dark:bg-slate-900">
+        <div class="w-full max-w-md text-center space-y-8">
+            <div class="bg-blue-100 dark:bg-blue-900/50 w-24 h-24 rounded-full flex items-center justify-center mx-auto shadow-sm">
+                <i class="fa-solid fa-fingerprint text-blue-600 dark:text-blue-400 text-4xl"></i>
+            </div>
+            <div>
+                <h1 class="text-3xl font-extrabold tracking-tight">Portal Access</h1>
+                <p class="text-gray-500 dark:text-gray-400 mt-2 text-sm leading-relaxed px-4">Sign in using the email address registered for you on the system by the admin.</p>
+            </div>
+            <button onclick="signInWithGoogle()"
+                    class="w-full py-4 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-sm hover:bg-gray-50 dark:hover:bg-slate-700 active:scale-95 transition-all text-lg">
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-6 h-6" alt="Google">
+                Verify Email Address
+            </button>
+        </div>
+    </div>
+
+    <!-- Custom Cooldown Modal -->
+    <div id="cooldown-modal" class="fixed inset-0 bg-black/50 z-[999] hidden flex items-center justify-center backdrop-blur-sm p-4 transition-opacity opacity-0 duration-300">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 w-full max-w-[320px] text-center shadow-2xl transform transition-transform duration-300 scale-100">
+            <div class="w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-orange-500">
+                <i class="fa-solid fa-clock-rotate-left text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-extrabold mb-2 text-gray-900 dark:text-white">Action Paused</h3>
+            <p class="text-gray-500 dark:text-gray-400 text-sm mb-6 leading-relaxed" id="cooldown-text">You must wait 5 minutes between logs. Remaining: 00:00</p>
+            <button onclick="closeCooldownModal()" class="w-full py-3.5 bg-gray-900 dark:bg-slate-700 text-white rounded-xl font-bold active:scale-95 transition-transform">Understood</button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed left-4 right-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-4 py-3 rounded-xl shadow-2xl transition-all duration-300 opacity-0 translate-y-10 pointer-events-none font-semibold text-sm text-center flex justify-center items-center max-w-sm mx-auto z-[9999]">
+        <span id="toastMsg">Notification</span>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script>
+        // ============================================================
+        // CONFIGURATION
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCh7Ute6LeSAxcNDEQwZg5m0cA4ujnLCfg",
+            authDomain: "test-17881.firebaseapp.com",
+            projectId: "test-17881",
+            storageBucket: "test-17881.firebasestorage.app",
+            messagingSenderId: "1057428047643",
+            appId: "1:1057428047643:web:f3801c0d933225a5cd35be"
+        };
+        
+        const CLOUDINARY_UPLOAD_PRESET = "banter_box";
+        const CLOUDINARY_CLOUD_NAME = "dqkujefxj";
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const auth = firebase.auth();
+        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+        
+        // ============================================================
+        // STATE
+        // ============================================================
+        let currentUserData = null;
+        let html5QrCode = null;
+        let lastScannedId = null;
+        let scanTimeout = null;
+        let locationVerified = false;
+        let chatInitialized = false;
+        let cooldownTimerInterval = null;
+
+        // Signature Variables
+        let supCtx = null;
+        let isSigningSupport = false;
+        let hasSupportSignature = false;
+        let supportDeviceCount = 0;
+
+        let maintCtx = null;
+        let isSigningMaint = false;
+        let hasMaintSignature = false;
+
+        // Leave doc upload URL
+        let leaveDocUrl = null;
+
+        // Selected leave type
+        let selectedLeaveType = 'Annual Leave';
+
+        // ============================================================
+        // LEAVE TYPE CARD SELECTION
+        // ============================================================
+        function selectLeaveType(cardEl, type) {
+            document.querySelectorAll('#leave-type-cards .leave-type-card').forEach(c => c.classList.remove('selected'));
+            cardEl.classList.add('selected');
+            selectedLeaveType = type;
+            document.getElementById('leave-type').value = type;
+            document.getElementById('leave-type-display').textContent = type;
+        }
+
+        // ============================================================
+        // THEME INIT
+        // ============================================================
+        function initTheme() {
+            const isDark = localStorage.getItem('theme') === 'dark';
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                document.getElementById('theme-toggle').checked = true;
+            }
+        }
+        initTheme();
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+            if (supCtx) supCtx.strokeStyle = html.classList.contains('dark') ? '#ffffff' : '#0f172a';
+            if (maintCtx) maintCtx.strokeStyle = html.classList.contains('dark') ? '#ffffff' : '#0f172a';
+        }
+
+        // ============================================================
+        // SWIPE GESTURE NAVIGATION
+        // ============================================================
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const swipeThreshold = 50; 
+        const navTabs = ['home', 'support', 'leave', 'chat', 'profile', 'settings'];
+
+        document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+        document.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; handleSwipeGesture(); }, { passive: true });
+
+        function handleSwipeGesture() {
+            const loginView = document.getElementById('login-view');
+            const scannerView = document.getElementById('view-scanner');
+            if (!loginView.classList.contains('hidden') && loginView.classList.contains('active')) return;
+            if (!scannerView.classList.contains('hidden')) return;
+
+            let currentTabId = 'home';
+            if (!document.getElementById('view-chat').classList.contains('hidden')) {
+                currentTabId = 'chat';
+            } else {
+                const activeNav = document.querySelector('.nav-item.active');
+                if (activeNav) currentTabId = activeNav.id.replace('nav-', '');
+            }
+
+            const currentIndex = navTabs.indexOf(currentTabId);
+            if (currentIndex === -1) return;
+
+            if (touchEndX < touchStartX - swipeThreshold) {
+                if (currentIndex < navTabs.length - 1) switchTab(navTabs[currentIndex + 1]);
+            }
+            if (touchEndX > touchStartX + swipeThreshold) {
+                if (currentIndex > 0) switchTab(navTabs[currentIndex - 1]);
+            }
+        }
+
+        // ============================================================
+        // UI ROUTING
+        // ============================================================
+        function switchTab(tabId) {
+            document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
+            
+            const chatOverlay = document.getElementById('view-chat');
+            const mainHeader = document.getElementById('main-header');
+            const fab = document.getElementById('fab-scanner');
+
+            if (tabId === 'chat') {
+                chatOverlay.classList.remove('hidden');
+                chatOverlay.classList.add('flex');
+                mainHeader.style.display = 'none'; 
+                fab.style.transform = 'scale(0)';
+                document.getElementById('chat-badge').classList.add('hidden');
+                dismissNotifPopup();
+                scrollToBottomChat();
+            } else {
+                chatOverlay.classList.add('hidden');
+                chatOverlay.classList.remove('flex');
+                mainHeader.style.display = 'flex'; 
+                
+                const targetView = document.getElementById(`view-${tabId}`);
+                if (targetView) targetView.classList.remove('hidden');
+
+                if (tabId === 'scanner') {
+                    fab.style.transform = 'scale(0)';
+                } else {
+                    fab.style.transform = 'scale(1)';
+                }
+                
+                if (tabId === 'support') {
+                    const isRegisterActive = document.getElementById('tab-sup-register').classList.contains('active');
+                    if (isRegisterActive) initSupportSignaturePad('sup-sig-canvas', 'register');
+                    else initSupportSignaturePad('maint-sig-canvas', 'maintenance');
+                }
+
+                if (tabId === 'leave') {
+                    loadLeaveHistory();
+                    loadLeaveBalances();
+                    // Leave start/end dates are intentionally left empty unless user inputs them
+                }
+
+                if (tabId === 'profile') {
+                    generateCalendar();
+                }
+            }
+            
+            if (tabId !== 'scanner') {
+                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active', 'text-blue-600', 'dark:text-blue-400'));
+                const navTarget = document.getElementById(`nav-${tabId}`);
+                if (navTarget) {
+                    navTarget.classList.add('active', 'text-blue-600', 'dark:text-blue-400');
+                }
+            }
+            
+            window.scrollTo(0, 0);
+
+            if (tabId === 'scanner' && locationVerified) {
+                startScanner();
+            } else if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().catch(() => {});
+            }
+        }
+
+        function showPortal() {
+            document.getElementById('login-view').classList.add('active');
+            document.getElementById('app-content').classList.add('hidden');
+            document.getElementById('main-header').style.display = 'none';
+            document.getElementById('fab-scanner').style.display = 'none';
+            document.querySelector('nav').classList.add('hidden');
+        }
+        
+        function closePortal() {
+            document.getElementById('login-view').classList.remove('active');
+            document.getElementById('app-content').classList.remove('hidden');
+            document.getElementById('main-header').style.display = 'flex';
+            document.getElementById('fab-scanner').style.display = 'flex';
+            document.querySelector('nav').classList.remove('hidden');
+            switchTab('home');
+            generateCalendar();
+        }
+
+        // ============================================================
+        // AUTHENTICATION
+        // ============================================================
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                const snap = await db.ref('employees').orderByChild('email').equalTo(user.email.toLowerCase()).once('value');
+                if (snap.exists()) {
+                    const data = snap.val();
+                    const key = Object.keys(data)[0];
+                    currentUserData = { ...data[key], id: key };
+                    
+                    if (!currentUserData.employeeNumber) {
+                        const pin = Math.floor(10000 + Math.random() * 90000).toString();
+                        await db.ref(`employees/${key}`).update({ employeeNumber: pin });
+                        currentUserData.employeeNumber = pin;
+                    }
+
+                    // Initialise default leave balances if not set (all 7 types)
+                    if (!currentUserData.leaveBalances) {
+                        const defaultBalances = {
+                            annual: 15,
+                            sick: 30,
+                            family: 3,
+                            study: 5,
+                            maternity: 120,
+                            paternity: 10,
+                            unpaid: 0
+                        };
+                        await db.ref(`employees/${key}/leaveBalances`).set(defaultBalances);
+                        currentUserData.leaveBalances = defaultBalances;
+                    } else {
+                        // Ensure new keys exist on old records
+                        const updates = {};
+                        const bal = currentUserData.leaveBalances;
+                        if (bal.maternity === undefined) updates.maternity = 120;
+                        if (bal.paternity === undefined) updates.paternity = 10;
+                        if (bal.unpaid === undefined) updates.unpaid = 0;
+                        if (Object.keys(updates).length > 0) {
+                            await db.ref(`employees/${key}/leaveBalances`).update(updates);
+                            currentUserData.leaveBalances = { ...bal, ...updates };
+                        }
+                    }
+                    
+                    updateUIWithUserData();
+                    listenToAttendance();
+                    listenToWorkHistory();
+                    initChat();
+                    closePortal();
+                    requestNotificationPermission();
+                    listenToLeaveStatusChanges();
+
+                } else {
+                    showToast("Not registered - Alert sent to admin", "error");
+                    await auth.signOut();
+                    showPortal();
+                }
+            } else { showPortal(); }
+        });
+
+        async function signInWithGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            try { await auth.signInWithPopup(provider); } 
+            catch (error) { showToast(error.message ? error.message.split('.')[0] : "Login failed", "error"); }
+        }
+
+        async function signOutUser() {
+            if (html5QrCode && html5QrCode.isScanning) await html5QrCode.stop().catch(() => {});
+            await auth.signOut();
+            currentUserData = null;
+            locationVerified = false;
+            document.getElementById('location-overlay').classList.remove('hidden');
+            document.getElementById('scanner-interface').classList.add('hidden');
+            
+            document.querySelectorAll('.shimmer').forEach(el => {
+                if (el.tagName === 'INPUT') el.value = '';
+                else if (el.tagName !== 'IMG') el.innerText = 'Loading...';
+                el.classList.add('shimmer');
+            });
+            showPortal();
+        }
+
+        // ============================================================
+        // PROFILE, AVATAR & CALENDAR
+        // ============================================================
+        function generateFallbackAvatarUrl(name) {
+            return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=eff6ff&color=2563eb&bold=true`;
+        }
+
+        function handleImgError(imgNode) {
+            if (currentUserData && currentUserData.name) {
+                imgNode.src = generateFallbackAvatarUrl(currentUserData.name);
+            } else {
+                imgNode.src = generateFallbackAvatarUrl('User');
+            }
+        }
+
+        function updateUIWithUserData() {
+            const name = currentUserData.name || "Employee";
+            const dp = currentUserData.profilePic || generateFallbackAvatarUrl(name);
+            
+            document.querySelectorAll('.shimmer').forEach(el => el.classList.remove('shimmer'));
+
+            document.getElementById('home-name').innerText = name;
+            document.getElementById('home-avatar').src = dp;
+            document.getElementById('profile-img').src = dp;
+            document.getElementById('edit-name').value = name;
+            document.getElementById('edit-email').value = currentUserData.email;
+            document.getElementById('emp-pin-display').innerText = currentUserData.employeeNumber || 'ERROR';
+        }
+
+        async function saveProfile() {
+            const newName = document.getElementById('edit-name').value.trim();
+            if (!newName) return showToast("Name cannot be empty", "error");
+            try {
+                await db.ref(`employees/${currentUserData.id}`).update({ name: newName });
+                currentUserData.name = newName;
+                updateUIWithUserData();
+                showToast("Profile Updated");
+            } catch(e) { showToast("Failed to update profile", "error"); }
+        }
+
+        async function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            
+            showToast("Uploading picture...");
+            try {
+                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+                    method: 'POST', body: formData
+                });
+                const data = await res.json();
+                
+                if (data.secure_url) {
+                    await db.ref(`employees/${currentUserData.id}`).update({ profilePic: data.secure_url });
+                    currentUserData.profilePic = data.secure_url;
+                    updateUIWithUserData();
+                    showToast("Picture Updated");
+                } else { throw new Error(data.error.message); }
+            } catch(e) { showToast("Upload Failed. Check connection.", "error"); }
+        }
+
+        async function generateCalendar() {
+            const container = document.getElementById('calendar-days');
+            const title = document.getElementById('cal-month-title');
+            container.innerHTML = '<div class="col-span-7 text-xs text-center py-2 text-gray-400">Loading...</div>';
+            
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const today = date.getDate();
+            
+            const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+            title.innerHTML = `${monthNames[month]} ${year}`;
+
+            let allAtt = {};
+            let approvedLeaveDates = new Set();
+
+            if (currentUserData) {
+                try {
+                    const snap = await db.ref('attendance').once('value');
+                    allAtt = snap.val() || {};
+                } catch(e) { console.error(e); }
+
+                // Fetch approved leave requests for calendar overlay
+                try {
+                    const leaveSnap = await db.ref('leave_requests')
+                        .orderByChild('employeeId')
+                        .equalTo(currentUserData.id)
+                        .once('value');
+                    
+                    if (leaveSnap.exists()) {
+                        leaveSnap.forEach(child => {
+                            const req = child.val();
+                            if (req.status === 'Approved') {
+                                const start = new Date(req.startDate);
+                                const end = new Date(req.endDate);
+                                let cur = new Date(start);
+                                while (cur <= end) {
+                                    const dayOfWeek = cur.getDay();
+                                    if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+                                        approvedLeaveDates.add(cur.toISOString().split('T')[0]);
+                                    }
+                                    cur.setDate(cur.getDate() + 1);
+                                }
+                            }
+                        });
+                    }
+                } catch(e) { console.error(e); }
+            }
+
+            container.innerHTML = '';
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            const saHolidays = {
+                "01-01": "New Year's Day", "03-21": "Human Rights Day",
+                "04-03": "Good Friday", "04-06": "Family Day",
+                "04-27": "Freedom Day", "05-01": "Workers' Day",
+                "06-16": "Youth Day", "08-09": "National Women's Day",
+                "08-10": "Women's Day Observed", "09-24": "Heritage Day",
+                "12-16": "Day of Reconciliation", "12-25": "Christmas Day",
+                "12-26": "Day of Goodwill"
+            };
+
+            for (let i = 0; i < firstDay; i++) {
+                container.innerHTML += `<div class="calendar-day day-empty">0</div>`;
+            }
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayStr = String(i).padStart(2, '0');
+                const monthStr = String(month + 1).padStart(2, '0');
+                const dateKey = `${year}-${monthStr}-${dayStr}`;
+                const shortDateKey = `${monthStr}-${dayStr}`;
+                const isHoliday = saHolidays[shortDateKey];
+                const isOnApprovedLeave = approvedLeaveDates.has(dateKey);
+
+                let dayClass = 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300';
+                let todayRing = (i === today) ? 'ring-2 ring-blue-600 dark:ring-blue-400 ring-offset-2 dark:ring-offset-slate-800' : '';
+                let titleText = '';
+
+                const dayOfWeek = new Date(year, month, i).getDay();
+                const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+
+                // On Approved Leave — blue, overrides absent
+                if (isOnApprovedLeave) {
+                    dayClass = 'bg-blue-500 text-white font-bold shadow-sm';
+                    titleText = 'Approved Leave';
+                } else if (currentUserData && allAtt[dateKey] && allAtt[dateKey][currentUserData.id]) {
+                    const rec = allAtt[dateKey][currentUserData.id];
+                    const tIn = rec.TimeIn;
+                    const tOut = rec.TimeOut;
+
+                    if (tIn) {
+                        // -------------------------------------------------------
+                        // UPDATED LATE LOGIC:
+                        // Present (green)  = clocked in BEFORE 09:01 (i.e., up to 09:00)
+                        // Late   (orange)  = clocked in at 09:01 or later
+                        // -------------------------------------------------------
+                        const [h, m] = tIn.split(':').map(Number);
+                        const totalMinutes = h * 60 + m;
+
+                        // 9 * 60 + 1 = 541 minutes = 09:01
+                        const lateCutoff = 9 * 60 + 1; // 541
+
+                        const isLate = totalMinutes >= lateCutoff;
+                        const isHalfDay = i < today && !tOut;
+
+                        if (isLate || isHalfDay) {
+                            dayClass = 'bg-orange-500 text-white font-bold shadow-sm';
+                            titleText = isHoliday ? `${isHoliday} (Late/Half)` : isLate ? `Late (In: ${tIn})` : 'Half-day';
+                        } else {
+                            dayClass = 'bg-green-500 text-white font-bold shadow-sm';
+                            titleText = isHoliday ? `${isHoliday} (Worked)` : `Present (In: ${tIn})`;
+                        }
+                    }
+                } else if (isHoliday) {
+                    dayClass = 'bg-purple-500 text-white font-bold shadow-sm';
+                    titleText = isHoliday;
+                } else if (i < today && !isWeekend) {
+                    dayClass = 'bg-red-500 text-white font-bold shadow-sm'; 
+                    titleText = 'Absent';
+                } else if (i === today && !isWeekend) {
+                    const currentHour = date.getHours();
+                    if (currentHour >= 16) {
+                        dayClass = 'bg-red-500 text-white font-bold shadow-sm'; 
+                        titleText = 'Absent';
+                    }
+                }
+
+                const titleAttr = titleText ? `title="${titleText}"` : '';
+                container.innerHTML += `<div class="calendar-day ${dayClass} ${todayRing} m-[1px] transition-all cursor-default" ${titleAttr}>${i}</div>`;
+            }
+        }
+
+        // ============================================================
+        // WORK HISTORY
+        // ============================================================
+        function listenToWorkHistory() {
+            if (!currentUserData) return;
+            const historyRef = db.ref(`employees/${currentUserData.id}/work_history`).orderByChild('timestamp').limitToLast(10);
+            
+            historyRef.on('value', (snap) => {
+                const list = document.getElementById('work-history-list');
+                list.innerHTML = '';
+                
+                if (!snap.exists()) {
+                    list.innerHTML = `<div class="text-center text-xs text-gray-400 py-4 italic">No tasks signed yet.</div>`;
+                    return;
+                }
+                
+                let records = [];
+                snap.forEach(child => { records.push(child.val()); });
+                records.reverse(); 
+
+                records.forEach(rec => {
+                    const timeString = new Date(rec.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    const dateString = new Date(rec.timestamp).toLocaleDateString([], { day: 'numeric', month: 'short' });
+                    
+                    let refColor = "text-blue-600 dark:text-blue-400";
+                    if (rec.refId && rec.refId.startsWith("LVE")) refColor = "text-teal-600 dark:text-teal-400";
+                    else if (rec.refId && rec.refId.startsWith("SFT")) refColor = "text-purple-600 dark:text-purple-400";
+
+                    list.innerHTML += `
+                        <div class="bg-gray-50 dark:bg-slate-700/50 border border-gray-100 dark:border-slate-700 rounded-xl p-3 flex justify-between items-center">
+                            <div>
+                                <h4 class="font-bold text-sm text-gray-800 dark:text-gray-200 truncate w-40">${rec.title}</h4>
+                                <span class="font-mono text-[10px] ${refColor}">${rec.refId}</span>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs text-gray-500 font-medium">${timeString}</p>
+                                <p class="text-[9px] text-gray-400 uppercase tracking-widest">${dateString}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+        }
+
+        // ============================================================
+        // SUPPORT TAB ROUTING
+        // ============================================================
+        function switchSupTab(tab) {
+            document.querySelectorAll('.sup-tab').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-sup-' + tab).classList.add('active');
+
+            if (tab === 'register') {
+                document.getElementById('sup-view-register').classList.remove('hidden');
+                document.getElementById('sup-view-maintenance').classList.add('hidden');
+                initSupportSignaturePad('sup-sig-canvas', 'register');
+            } else {
+                document.getElementById('sup-view-register').classList.add('hidden');
+                document.getElementById('sup-view-maintenance').classList.remove('hidden');
+                initSupportSignaturePad('maint-sig-canvas', 'maintenance');
+            }
+        }
+
+        // ============================================================
+        // SIGNATURE PAD
+        // ============================================================
+        function initSupportSignaturePad(canvasId, mode) {
+            const canvas = document.getElementById(canvasId);
+            
+            if (mode === 'register' && supCtx) return;
+            if (mode === 'maintenance' && maintCtx) return;
+            
+            if (!canvas) return;
+
+            setTimeout(() => {
+                const rect = canvas.parentElement.getBoundingClientRect();
+                canvas.width = rect.width - 32; 
+                canvas.height = 140;
+                
+                if (mode === 'register') supCtx = canvas.getContext('2d');
+                else maintCtx = canvas.getContext('2d');
+            }, 50);
+
+            const getPos = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return { x: clientX - rect.left, y: clientY - rect.top };
+            };
+
+            const startDraw = (e) => {
+                if (e.type !== 'mousedown') e.preventDefault();
+                const ctx = mode === 'register' ? supCtx : maintCtx;
+                if (!ctx) return;
+                if (mode === 'register') { isSigningSupport = true; hasSupportSignature = true; }
+                else { isSigningMaint = true; hasMaintSignature = true; }
+                ctx.beginPath();
+                const pos = getPos(e);
+                ctx.moveTo(pos.x, pos.y);
+            };
+
+            const draw = (e) => {
+                const isSigning = mode === 'register' ? isSigningSupport : isSigningMaint;
+                const ctx = mode === 'register' ? supCtx : maintCtx;
+                if (!isSigning || !ctx) return;
+                if (e.type !== 'mousemove') e.preventDefault();
+                const pos = getPos(e);
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.strokeStyle = document.documentElement.classList.contains('dark') ? '#ffffff' : '#0f172a';
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+            };
+
+            const stopDraw = () => {
+                const isSigning = mode === 'register' ? isSigningSupport : isSigningMaint;
+                const ctx = mode === 'register' ? supCtx : maintCtx;
+                if (isSigning && ctx) {
+                    if (mode === 'register') isSigningSupport = false;
+                    else isSigningMaint = false;
+                    ctx.closePath();
+                }
+            };
+
+            canvas.addEventListener('mousedown', startDraw);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDraw);
+            canvas.addEventListener('mouseout', stopDraw);
+            canvas.addEventListener('touchstart', startDraw, { passive: false });
+            canvas.addEventListener('touchmove', draw, { passive: false });
+            canvas.addEventListener('touchend', stopDraw, { passive: false });
+        }
+
+        function clearSupportSignature(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            if (canvasId === 'sup-sig-canvas' && supCtx) {
+                supCtx.clearRect(0, 0, canvas.width, canvas.height);
+                hasSupportSignature = false;
+            } else if (canvasId === 'maint-sig-canvas' && maintCtx) {
+                maintCtx.clearRect(0, 0, canvas.width, canvas.height);
+                hasMaintSignature = false;
+            }
+        }
+
+        // ============================================================
+        // DEVICE SETUP
+        // ============================================================
+        function addDeviceField() {
+            supportDeviceCount++;
+            const container = document.getElementById('sup-devices-container');
+            document.getElementById('no-devices-msg').style.display = 'none';
+
+            const div = document.createElement('div');
+            div.className = "bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg p-3 relative device-entry shadow-sm";
+            div.innerHTML = `
+                <button onclick="this.parentElement.remove(); checkDeviceEmpty()" class="absolute top-2 right-2 text-red-400 hover:text-red-600"><i class="fa-solid fa-xmark"></i></button>
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                    <div><span class="text-[9px] text-gray-400 font-bold block mb-1">Type</span><input type="text" class="w-full text-xs p-1.5 border border-gray-200 dark:border-slate-600 rounded bg-gray-50 dark:bg-slate-700 dark:text-white" placeholder="PC / Printer" data-field="type"></div>
+                    <div><span class="text-[9px] text-gray-400 font-bold block mb-1">Make/Model</span><input type="text" class="w-full text-xs p-1.5 border border-gray-200 dark:border-slate-600 rounded bg-gray-50 dark:bg-slate-700 dark:text-white" placeholder="Dell 7090" data-field="makeModel"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div><span class="text-[9px] text-gray-400 font-bold block mb-1">Serial/Tag</span><input type="text" class="w-full text-xs p-1.5 border border-gray-200 dark:border-slate-600 rounded bg-gray-50 dark:bg-slate-700 dark:text-white" placeholder="S/N" data-field="serial"></div>
+                    <div><span class="text-[9px] text-gray-400 font-bold block mb-1">OS/Location</span><input type="text" class="w-full text-xs p-1.5 border border-gray-200 dark:border-slate-600 rounded bg-gray-50 dark:bg-slate-700 dark:text-white" placeholder="Win11 / Reception" data-field="location"></div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function checkDeviceEmpty() {
+            const container = document.getElementById('sup-devices-container');
+            if (container.querySelectorAll('.device-entry').length === 0) {
+                document.getElementById('no-devices-msg').style.display = 'block';
+            }
+        }
+
+        function collectSupportDevices() {
+            const devices = [];
+            document.querySelectorAll('.device-entry').forEach(entry => {
+                devices.push({
+                    type: entry.querySelector('[data-field="type"]').value,
+                    make: entry.querySelector('[data-field="makeModel"]').value,
+                    serial: entry.querySelector('[data-field="serial"]').value,
+                    location: entry.querySelector('[data-field="location"]').value,
+                    os: '', condition: ''
+                });
+            });
+            return devices;
+        }
+
+        // ============================================================
+        // SUBMIT SUPPORT CLIENT REGISTRATION
+        // ============================================================
+        async function submitSupportClient() {
+            const bizName = document.getElementById('sup-biz-name').value.trim();
+            const sector = document.getElementById('sup-sector').value.trim();
+            const address = document.getElementById('sup-address').value.trim();
+            const contactName = document.getElementById('sup-contact-name').value.trim();
+            const contactTitle = document.getElementById('sup-contact-title').value.trim();
+            const contactPhone = document.getElementById('sup-contact-phone').value.trim();
+            const contactEmail = document.getElementById('sup-contact-email').value.trim();
+            const contractType = document.getElementById('sup-contract-type').value;
+            const startDate = document.getElementById('sup-start-date').value;
+            const notes = document.getElementById('sup-notes').value.trim();
+            const sigName = document.getElementById('sup-sig-name').value.trim();
+            const sigTitle = document.getElementById('sup-sig-title').value.trim();
+            
+            if (!bizName || !contactName || !contactPhone || !sigName) {
+                return showToast("Please fill all required fields (*) and Signatory Name.", "error");
+            }
+            if (!hasSupportSignature) {
+                return showToast("Client signature is required", "error");
+            }
+
+            const scope = {
+                hardware: document.getElementById('sup-scope-hardware').checked,
+                software: document.getElementById('sup-scope-software').checked,
+                network: document.getElementById('sup-scope-network').checked,
+                backup: document.getElementById('sup-scope-backup').checked,
+                security: document.getElementById('sup-scope-security').checked,
+                remote: document.getElementById('sup-scope-remote').checked,
+            };
+
+            const devices = collectSupportDevices();
+
+            document.getElementById('global-spinner').classList.add('active');
+            document.getElementById('spinner-text').innerText = "Registering Support Client...";
+
+            try {
+                const refId = Math.floor(1000 + Math.random() * 9000).toString();
+                const canvas = document.getElementById('sup-sig-canvas');
+                
+                await db.ref('support_businesses').push({
+                    refId, bizName, sector, address, contractType, startDate,
+                    contactName, contactTitle, contactPhone, contactEmail,
+                    scope, sigName, sigTitle,
+                    signatureBase64: canvas.toDataURL('image/png'),
+                    status: 'Active',
+                    maintenanceNotes: notes,
+                    devices,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+
+                await db.ref(`employees/${currentUserData.id}/work_history`).push({
+                    refId: `SUP-${refId}`,
+                    title: `SLA Signed: ${bizName}`,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+
+                document.getElementById('global-spinner').classList.remove('active');
+                showToast(`Client Registered! Ref: SUP-${refId}`);
+                
+                document.querySelectorAll('#sup-view-register input[type="text"], #sup-view-register input[type="tel"], #sup-view-register input[type="email"], #sup-view-register input[type="date"], #sup-view-register textarea').forEach(i => i.value = '');
+                document.querySelectorAll('#sup-view-register input[type="checkbox"]').forEach(i => i.checked = false);
+                document.getElementById('sup-devices-container').innerHTML = '<p class="text-xs text-gray-400 text-center italic py-2" id="no-devices-msg">No devices added yet. Click Add to include devices.</p>';
+                supportDeviceCount = 0;
+                clearSupportSignature('sup-sig-canvas');
+                switchTab('home');
+            } catch (err) {
+                document.getElementById('global-spinner').classList.remove('active');
+                showToast("Failed to register client", "error");
+                console.error(err);
+            }
+        }
+
+        // ============================================================
+        // SUPPORT MAINTENANCE LOG
+        // ============================================================
+        async function uploadCanvasToCloudinary(canvas) {
+            return new Promise((resolve, reject) => {
+                canvas.toBlob(async (blob) => {
+                    const formData = new FormData();
+                    formData.append('file', blob);
+                    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+                    try {
+                        const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
+                        if (!res.ok) throw new Error("Upload failed");
+                        const data = await res.json();
+                        resolve(data.secure_url);
+                    } catch(e) { resolve(null); }
+                }, 'image/png');
+            });
+        }
+
+        async function submitMaintenanceLog() {
+            const rawRef = document.getElementById('maint-job-id').value.trim().toUpperCase();
+            const status = document.getElementById('maint-status').value;
+            const visitType = document.getElementById('maint-visit-type').value;
+            const partsUsed = document.getElementById('maint-parts').value.trim() || 'None';
+            const nextSteps = document.getElementById('maint-next-steps').value.trim() || 'None';
+            const notes = document.getElementById('maint-notes').value.trim();
+            const sigName = document.getElementById('maint-sig-name').value.trim();
+
+            if (!rawRef) return showToast("Please enter a SUP ID", "error");
+            if (!notes) return showToast("Please enter Visit Log / Notes", "error");
+            if (!sigName || !hasMaintSignature) return showToast("Client Sign-off required", "error");
+
+            const cleanRef = rawRef.replace('SUP-', '');
+            const checklist = [];
+            if (document.getElementById('chk-maint-os').checked) checklist.push("OS & Software Updated");
+            if (document.getElementById('chk-maint-av').checked) checklist.push("Antivirus Checked");
+            if (document.getElementById('chk-maint-backup').checked) checklist.push("Backups Verified");
+            if (document.getElementById('chk-maint-clean').checked) checklist.push("Hardware Cleaned/Inspected");
+            if (document.getElementById('chk-maint-net').checked) checklist.push("Network/Connectivity Tested");
+            const checklistStr = checklist.length > 0 ? checklist.map(t => `  - ${t}`).join('\n') : "  - No standard checklist items selected.";
+
+            document.getElementById('global-spinner').classList.add('active');
+            document.getElementById('spinner-text').innerText = "Generating Digital Job Card...";
+
+            try {
+                const snap = await db.ref('support_businesses').orderByChild('refId').equalTo(cleanRef).once('value');
+                if (!snap.exists()) {
+                    document.getElementById('global-spinner').classList.remove('active');
+                    return showToast("Support Contract not found.", "error");
+                }
+
+                const key = Object.keys(snap.val())[0];
+                const record = snap.val()[key];
+
+                document.getElementById('spinner-text').innerText = "Uploading Signature securely...";
+                const sigCanvas = document.getElementById('maint-sig-canvas');
+                let sigUrl = await uploadCanvasToCloudinary(sigCanvas);
+                if (!sigUrl) sigUrl = "[Image Upload Failed - Verify locally]";
+
+                const dateStr = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+                const newLogEntry = `
+====================================
+VISIT LOG: ${dateStr}
+TYPE: ${visitType}
+TECHNICIAN: ${currentUserData.name || 'Employee'}
+------------------------------------
+TASKS COMPLETED:
+${checklistStr}
+
+PARTS USED: ${partsUsed}
+NEXT STEPS: ${nextSteps}
+
+NOTES: 
+${notes}
+
+CLIENT SIG (${sigName}): 
+${sigUrl}
+====================================
+`;
+                const existingNotes = record.maintenanceNotes ? record.maintenanceNotes + "\n" : "";
+                const updatedNotes = newLogEntry + existingNotes;
+
+                document.getElementById('spinner-text').innerText = "Saving to Database...";
+                await db.ref(`support_businesses/${key}`).update({ status, maintenanceNotes: updatedNotes, lastUpdated: Date.now() });
+                await db.ref(`employees/${currentUserData.id}/work_history`).push({
+                    refId: `SUP-${cleanRef}`,
+                    title: `Job Card: ${record.bizName || 'Client'}`,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+
+                document.getElementById('global-spinner').classList.remove('active');
+                showToast("Job Card Saved & Synced!");
+                
+                document.getElementById('maint-job-id').value = '';
+                document.getElementById('maint-parts').value = '';
+                document.getElementById('maint-next-steps').value = '';
+                document.getElementById('maint-notes').value = '';
+                document.getElementById('maint-sig-name').value = '';
+                document.querySelectorAll('#sup-view-maintenance input[type="checkbox"]').forEach(c => c.checked = false);
+                clearSupportSignature('maint-sig-canvas');
+                switchTab('home');
+            } catch(e) {
+                document.getElementById('global-spinner').classList.remove('active');
+                showToast("Failed to submit Job Card", "error");
+                console.error(e);
+            }
+        }
+
+        // ============================================================
+        // REMOTE EVIDENCE UPLOAD
+        // ============================================================
+        async function uploadEvidenceToWorkspace(event, sourceContext) {
+            const file = event.target.files[0];
+            let rawRef = '';
+            let targetArrayName = 'photos';
+
+            if (sourceContext === 'hardware_software') {
+                rawRef = document.getElementById('upload-job-id').value.trim().toUpperCase();
+                targetArrayName = document.getElementById('upload-phase').value;
+            } else if (sourceContext === 'support') {
+                rawRef = document.getElementById('maint-job-id').value.trim().toUpperCase();
+            }
+            
+            if (!file || !rawRef) {
+                showToast("ID and Image required", "error");
+                event.target.value = '';
+                return;
+            }
+
+            const cleanRef = rawRef.replace('RGT-', '').replace('SFT-', '').replace('SUP-', '');
+            const spinner = document.getElementById('global-spinner');
+            const spinnerText = document.getElementById('spinner-text');
+            
+            if (spinner) spinner.classList.add('active');
+            if (spinnerText) spinnerText.innerText = "Routing Image to Workspace...";
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
+                if (!res.ok) throw new Error("Cloudinary upload failed");
+                const cloudData = await res.json();
+                const secureUrl = cloudData.secure_url;
+
+                let targetDb = '';
+                let snap = null;
+
+                if (sourceContext === 'support') {
+                    snap = await db.ref('support_businesses').orderByChild('refId').equalTo(cleanRef).once('value');
+                    targetDb = 'support_businesses';
+                } else {
+                    snap = await db.ref('reports').orderByChild('refId').equalTo(cleanRef).once('value');
+                    targetDb = 'reports';
+                    if (!snap || !snap.exists()) {
+                        snap = await db.ref('software_projects').orderByChild('refId').equalTo(cleanRef).once('value');
+                        targetDb = 'software_projects';
+                    }
+                }
+
+                if (!snap || !snap.exists()) throw new Error("Job ID not found in system.");
+
+                const key = Object.keys(snap.val())[0];
+                const record = snap.val()[key];
+                let currentPhotos = record[targetArrayName] || [];
+                currentPhotos.push(secureUrl);
+
+                await db.ref(`${targetDb}/${key}`).update({ [targetArrayName]: currentPhotos });
+                if (spinner) spinner.classList.remove('active');
+                showToast("Image synced securely!");
+            } catch(e) {
+                if (spinner) spinner.classList.remove('active');
+                showToast(e.message || "Failed to link image", "error");
+            }
+            
+            event.target.value = ''; 
+        }
+
+        // ============================================================
+        // LEAVE MANAGEMENT LOGIC
+        // ============================================================
+        function switchLeaveTab(tab) {
+            document.querySelectorAll('.leave-tab').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-leave-' + tab).classList.add('active');
+            document.getElementById('leave-view-apply').classList.add('hidden');
+            document.getElementById('leave-view-history').classList.add('hidden');
+            document.getElementById('leave-view-balances').classList.add('hidden');
+            document.getElementById('leave-view-' + tab).classList.remove('hidden');
+
+            if (tab === 'history') loadLeaveHistory();
+            if (tab === 'balances') loadLeaveBalances();
+        }
+
+        /**
+         * Count working days (Mon–Fri) between two date strings
+         */
+        function countWorkingDays(startDateStr, endDateStr) {
+            if (!startDateStr || !endDateStr) return 0;
+            const start = new Date(startDateStr);
+            const end = new Date(endDateStr);
+            if (end < start) return 0;
+            let count = 0;
+            let cur = new Date(start);
+            while (cur <= end) {
+                const day = cur.getDay();
+                if (day !== 0 && day !== 6) count++;
+                cur.setDate(cur.getDate() + 1);
+            }
+            return count;
+        }
+
+        function calculateLeaveDays() {
+            const start = document.getElementById('leave-start').value;
+            const end = document.getElementById('leave-end').value;
+            const display = document.getElementById('leave-days-display');
+            const countEl = document.getElementById('leave-days-count');
+            if (start && end) {
+                const days = countWorkingDays(start, end);
+                countEl.textContent = days;
+                display.classList.remove('hidden');
+            } else {
+                display.classList.add('hidden');
+            }
+        }
+
+        document.getElementById('leave-start').addEventListener('change', calculateLeaveDays);
+        document.getElementById('leave-end').addEventListener('change', calculateLeaveDays);
+
+        /**
+         * Handle optional document upload for leave request
+         */
+        async function handleLeaveDocUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            showToast("Uploading document...");
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+            try {
+                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`, { method: 'POST', body: formData });
+                const data = await res.json();
+                if (data.secure_url) {
+                    leaveDocUrl = data.secure_url;
+                    const nameEl = document.getElementById('leave-doc-name');
+                    nameEl.textContent = `✓ Attached: ${file.name}`;
+                    nameEl.classList.remove('hidden');
+                    showToast("Document attached!");
+                } else {
+                    throw new Error("Upload failed");
+                }
+            } catch(e) {
+                showToast("Document upload failed", "error");
+                leaveDocUrl = null;
+            }
+        }
+
+        /**
+         * Submit a new leave request to Firebase.
+         * The request goes to leave_requests node AND also to admin_leave_pending
+         * so the admin dashboard can see it immediately.
+         */
+        async function submitLeaveRequest() {
+            if (!currentUserData) return;
+
+            const leaveType = document.getElementById('leave-type').value || selectedLeaveType;
+            const startDate = document.getElementById('leave-start').value;
+            const endDate = document.getElementById('leave-end').value;
+            const reason = document.getElementById('leave-reason').value.trim();
+
+            if (!startDate || !endDate) return showToast("Please select start and end dates", "error");
+            if (new Date(endDate) < new Date(startDate)) return showToast("End date cannot be before start date", "error");
+
+            const days = countWorkingDays(startDate, endDate);
+            if (days === 0) return showToast("No working days in selected range", "error");
+
+            document.getElementById('global-spinner').classList.add('active');
+            document.getElementById('spinner-text').innerText = "Submitting leave request...";
+
+            try {
+                const refId = 'LVE-' + Math.floor(1000 + Math.random() * 9000).toString();
+
+                const leavePayload = {
+                    refId,
+                    employeeId: currentUserData.id,
+                    employeeName: currentUserData.name || 'Employee',
+                    employeeEmail: currentUserData.email || '',
+                    leaveType,
+                    startDate,
+                    endDate,
+                    days,
+                    reason,
+                    supportingDocUrl: leaveDocUrl || null,
+                    status: 'Pending',
+                    submittedAt: firebase.database.ServerValue.TIMESTAMP,
+                    reviewedBy: null,
+                    reviewNote: null,
+                    reviewedAt: null
+                };
+
+                // Save to global leave_requests (employee-facing)
+                const newRef = await db.ref('leave_requests').push(leavePayload);
+
+                // Also mirror to admin_leave_pending so the admin dashboard gets a dedicated node
+                await db.ref(`admin_leave_pending/${newRef.key}`).set({
+                    ...leavePayload,
+                    firebaseKey: newRef.key
+                });
+
+                await db.ref(`employees/${currentUserData.id}/work_history`).push({
+                    refId,
+                    title: `Leave Request: ${leaveType}`,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+
+                document.getElementById('global-spinner').classList.remove('active');
+                showToast(`Leave request submitted! Ref: ${refId}`);
+
+                // Reset form — leave dates empty as requested
+                document.getElementById('leave-type').value = 'Annual Leave';
+                selectedLeaveType = 'Annual Leave';
+                document.querySelectorAll('#leave-type-cards .leave-type-card').forEach(c => c.classList.remove('selected'));
+                document.querySelector('#leave-type-cards .leave-type-card').classList.add('selected');
+                document.getElementById('leave-type-display').textContent = 'Annual Leave';
+                document.getElementById('leave-start').value = '';
+                document.getElementById('leave-end').value = '';
+                document.getElementById('leave-reason').value = '';
+                document.getElementById('leave-days-display').classList.add('hidden');
+                document.getElementById('leave-doc-name').classList.add('hidden');
+                leaveDocUrl = null;
+
+                switchLeaveTab('history');
+            } catch(e) {
+                document.getElementById('global-spinner').classList.remove('active');
+                showToast("Failed to submit leave request", "error");
+                console.error(e);
+            }
+        }
+
+        /**
+         * Load and render the employee's leave request history
+         */
+        async function loadLeaveHistory() {
+            if (!currentUserData) return;
+            const list = document.getElementById('leave-history-list');
+            list.innerHTML = '<div class="text-center text-xs text-gray-400 py-6">Loading...</div>';
+
+            try {
+                const snap = await db.ref('leave_requests')
+                    .orderByChild('employeeId')
+                    .equalTo(currentUserData.id)
+                    .once('value');
+
+                if (!snap.exists()) {
+                    list.innerHTML = '<div class="text-center text-xs text-gray-400 py-6 italic">No leave requests submitted yet.</div>';
+                    return;
+                }
+
+                let requests = [];
+                snap.forEach(child => {
+                    requests.push({ key: child.key, ...child.val() });
+                });
+                requests.sort((a, b) => (b.submittedAt || 0) - (a.submittedAt || 0));
+
+                list.innerHTML = '';
+
+                requests.forEach(req => {
+                    let statusClass = 'badge-pending';
+                    let statusIcon = 'fa-clock';
+                    let statusLabel = 'Pending';
+
+                    if (req.status === 'Approved') {
+                        statusClass = 'badge-approved';
+                        statusIcon = 'fa-circle-check';
+                        statusLabel = 'Approved';
+                    } else if (req.status === 'Rejected') {
+                        statusClass = 'badge-rejected';
+                        statusIcon = 'fa-circle-xmark';
+                        statusLabel = 'Rejected';
+                    }
+
+                    const submittedDate = req.submittedAt
+                        ? new Date(req.submittedAt).toLocaleDateString([], { day: 'numeric', month: 'short', year: 'numeric' })
+                        : '—';
+
+                    const reviewNoteHtml = req.reviewNote
+                        ? `<p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1 italic">"${req.reviewNote}"</p>`
+                        : '';
+
+                    const docLinkHtml = req.supportingDocUrl
+                        ? `<a href="${req.supportingDocUrl}" target="_blank" class="text-[10px] text-blue-500 underline mt-1 block"><i class="fa-solid fa-paperclip mr-1"></i>View Document</a>`
+                        : '';
+
+                    list.innerHTML += `
+                        <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4">
+                            <div class="flex items-start justify-between mb-2">
+                                <div>
+                                    <h4 class="font-bold text-sm text-gray-800 dark:text-gray-200">${req.leaveType}</h4>
+                                    <p class="text-[10px] font-mono text-gray-400 mt-0.5">${req.refId}</p>
+                                </div>
+                                <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full ${statusClass}">
+                                    <i class="fa-solid ${statusIcon} text-[9px]"></i>${statusLabel}
+                                </span>
+                            </div>
+                            <div class="flex gap-4 text-xs text-gray-600 dark:text-gray-400 mb-1">
+                                <span><i class="fa-regular fa-calendar text-blue-400 mr-1"></i>${req.startDate} → ${req.endDate}</span>
+                                <span class="font-bold text-blue-600 dark:text-blue-400">${req.days} day(s)</span>
+                            </div>
+                            ${req.reason ? `<p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">${req.reason}</p>` : ''}
+                            ${reviewNoteHtml}
+                            ${docLinkHtml}
+                            <p class="text-[9px] text-gray-400 mt-2 text-right">Submitted: ${submittedDate}</p>
+                        </div>
+                    `;
+                });
+
+            } catch(e) {
+                list.innerHTML = '<div class="text-center text-xs text-red-400 py-6">Failed to load requests.</div>';
+                console.error(e);
+            }
+        }
+
+        /**
+         * Load leave balances for all 7 leave types from the employee record
+         */
+        async function loadLeaveBalances() {
+            if (!currentUserData) return;
+            try {
+                const snap = await db.ref(`employees/${currentUserData.id}/leaveBalances`).once('value');
+                const b = snap.val() || {};
+                document.getElementById('bal-annual').textContent   = b.annual   !== undefined ? b.annual   : '15';
+                document.getElementById('bal-sick').textContent     = b.sick     !== undefined ? b.sick     : '30';
+                document.getElementById('bal-family').textContent   = b.family   !== undefined ? b.family   : '3';
+                document.getElementById('bal-study').textContent    = b.study    !== undefined ? b.study    : '5';
+                document.getElementById('bal-maternity').textContent= b.maternity!== undefined ? b.maternity: '120';
+                document.getElementById('bal-paternity').textContent= b.paternity!== undefined ? b.paternity: '10';
+                document.getElementById('bal-unpaid').textContent   = b.unpaid   !== undefined ? b.unpaid   : '0';
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        // ============================================================
+        // LEAVE STATUS REAL-TIME LISTENER WITH RICH NOTIFICATION
+        // ============================================================
+        let leaveListenerInitialized = false;
+
+        function listenToLeaveStatusChanges() {
+            if (!currentUserData) return;
+            if (leaveListenerInitialized) return;
+            leaveListenerInitialized = true;
+
+            const leaveRef = db.ref('leave_requests').orderByChild('employeeId').equalTo(currentUserData.id);
+
+            leaveRef.on('child_changed', (snap) => {
+                const req = snap.val();
+                if (req.status === 'Approved') {
+                    playLeaveApprovalSound('approved');
+                    showLeaveNotification('approved', req.leaveType, req.startDate, req.endDate, req.days, req.reviewNote);
+                    document.getElementById('leave-badge').classList.remove('hidden');
+                    // Refresh history if on that tab
+                    if (!document.getElementById('leave-view-history').classList.contains('hidden')) {
+                        loadLeaveHistory();
+                    }
+                    loadLeaveBalances();
+                } else if (req.status === 'Rejected') {
+                    playLeaveApprovalSound('rejected');
+                    showLeaveNotification('rejected', req.leaveType, req.startDate, req.endDate, req.days, req.reviewNote);
+                    document.getElementById('leave-badge').classList.remove('hidden');
+                    if (!document.getElementById('leave-view-history').classList.contains('hidden')) {
+                        loadLeaveHistory();
+                    }
+                }
+            });
+        }
+
+        // ============================================================
+        // LEAVE APPROVAL SOUND — distinct tones for approved/rejected
+        // ============================================================
+        function playLeaveApprovalSound(type) {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+
+                if (type === 'approved') {
+                    // Three ascending triumphant notes
+                    const notes = [
+                        { freq: 523.25, start: 0,    dur: 0.18, vol: 0.5 },  // C5
+                        { freq: 659.25, start: 0.18, dur: 0.18, vol: 0.5 },  // E5
+                        { freq: 783.99, start: 0.36, dur: 0.30, vol: 0.6 },  // G5
+                        { freq: 1046.5, start: 0.60, dur: 0.45, vol: 0.55 }, // C6
+                    ];
+                    notes.forEach(({ freq, start, dur, vol }) => {
+                        const osc  = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
+                        gain.gain.setValueAtTime(0, ctx.currentTime + start);
+                        gain.gain.linearRampToValueAtTime(vol, ctx.currentTime + start + 0.04);
+                        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
+                        osc.start(ctx.currentTime + start);
+                        osc.stop(ctx.currentTime + start + dur + 0.05);
+                    });
+                    setTimeout(() => ctx.close(), 1200);
+                } else {
+                    // Two descending harsh notes for rejected
+                    const notes = [
+                        { freq: 400, start: 0,    dur: 0.25, vol: 0.5 },
+                        { freq: 280, start: 0.28, dur: 0.35, vol: 0.45 },
+                    ];
+                    notes.forEach(({ freq, start, dur, vol }) => {
+                        const osc  = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
+                        gain.gain.setValueAtTime(0, ctx.currentTime + start);
+                        gain.gain.linearRampToValueAtTime(vol, ctx.currentTime + start + 0.03);
+                        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
+                        osc.start(ctx.currentTime + start);
+                        osc.stop(ctx.currentTime + start + dur + 0.05);
+                    });
+                    setTimeout(() => ctx.close(), 800);
+                }
+            } catch(e) {
+                console.warn('Leave sound error:', e);
+            }
+        }
+
+        // ============================================================
+        // LEAVE APPROVAL POPUP NOTIFICATION
+        // ============================================================
+        let leaveNotifTimer = null;
+
+        function showLeaveNotification(type, leaveType, startDate, endDate, days, reviewNote) {
+            const popup    = document.getElementById('leave-notif-popup');
+            const titleEl  = document.getElementById('lnotif-title');
+            const mainEl   = document.getElementById('lnotif-main');
+            const subEl    = document.getElementById('lnotif-sub');
+            const iconEl   = document.getElementById('lnotif-icon');
+
+            popup.classList.remove('approved', 'rejected', 'show');
+
+            if (type === 'approved') {
+                popup.classList.add('approved');
+                titleEl.textContent = '✅ Leave Approved';
+                mainEl.textContent = `${leaveType} — ${days} day(s)`;
+                iconEl.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+            } else {
+                popup.classList.add('rejected');
+                titleEl.textContent = '❌ Leave Declined';
+                mainEl.textContent = `${leaveType} — ${days} day(s)`;
+                iconEl.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>';
+            }
+
+            subEl.textContent = reviewNote
+                ? `Note: ${reviewNote}`
+                : `${startDate} → ${endDate}`;
+
+            // Animate in
+            void popup.offsetWidth; // force reflow
+            popup.classList.add('show');
+
+            if (leaveNotifTimer) clearTimeout(leaveNotifTimer);
+            leaveNotifTimer = setTimeout(() => dismissLeaveNotif(), 8000);
+
+            // OS notification if app is in background
+            sendLeaveOsNotification(type, leaveType, days, reviewNote);
+        }
+
+        function dismissLeaveNotif() {
+            const popup = document.getElementById('leave-notif-popup');
+            popup.classList.remove('show');
+            if (leaveNotifTimer) { clearTimeout(leaveNotifTimer); leaveNotifTimer = null; }
+        }
+
+        function sendLeaveOsNotification(type, leaveType, days, reviewNote) {
+            if (!('Notification' in window)) return;
+            if (Notification.permission !== 'granted') return;
+            const title = type === 'approved' ? '✅ Leave Approved — RareGrade' : '❌ Leave Declined — RareGrade';
+            const body  = reviewNote
+                ? `${leaveType} (${days} day(s)): ${reviewNote}`
+                : `${leaveType} — ${days} working day(s)`;
+            const notif = new Notification(title, {
+                body,
+                icon: './icon-192x192.png',
+                badge: './icon-192x192.png',
+                tag: 'rargrade-leave',
+                renotify: true,
+                vibrate: type === 'approved' ? [100, 50, 100, 50, 200] : [300, 100, 300],
+            });
+            notif.onclick = () => { window.focus(); switchTab('leave'); notif.close(); };
+        }
+
+        // ============================================================
+        // CHAT NOTIFICATION SYSTEM
+        // ============================================================
+        let notifPopupTimer = null;
+
+        async function requestNotificationPermission() {
+            if (!('Notification' in window)) return;
+            if (Notification.permission === 'granted') return;
+            if (Notification.permission === 'denied') return;
+            setTimeout(async () => { await Notification.requestPermission(); }, 2500);
+        }
+
+        function playNotificationSound() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+                const notes = [
+                    { freq: 1046.50, start: 0,    dur: 0.15 },
+                    { freq: 783.99,  start: 0.15,  dur: 0.25 },
+                ];
+                notes.forEach(({ freq, start, dur }) => {
+                    const osc  = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
+                    gain.gain.setValueAtTime(0, ctx.currentTime + start);
+                    gain.gain.linearRampToValueAtTime(0.4, ctx.currentTime + start + 0.03);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
+                    osc.start(ctx.currentTime + start);
+                    osc.stop(ctx.currentTime + start + dur + 0.05);
+                });
+                setTimeout(() => ctx.close(), 600);
+            } catch(e) {
+                console.warn('Audio notification error:', e);
+            }
+        }
+
+        function showInAppNotificationPopup(senderName, msgText) {
+            const popup  = document.getElementById('chat-notif-popup');
+            const sender = document.getElementById('notif-sender-name');
+            const text   = document.getElementById('notif-msg-text');
+            const timeEl = document.getElementById('notif-time-text');
+            sender.textContent = senderName;
+            text.textContent   = msgText;
+            timeEl.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const icon   = popup.querySelector('.notif-icon');
+            const cloned = icon.cloneNode(true);
+            icon.parentNode.replaceChild(cloned, icon);
+            popup.classList.add('show');
+            if (notifPopupTimer) clearTimeout(notifPopupTimer);
+            notifPopupTimer = setTimeout(() => dismissNotifPopup(), 5000);
+        }
+
+        function dismissNotifPopup() {
+            const popup = document.getElementById('chat-notif-popup');
+            popup.classList.remove('show');
+            if (notifPopupTimer) { clearTimeout(notifPopupTimer); notifPopupTimer = null; }
+        }
+
+        function openChatFromNotif() {
+            dismissNotifPopup();
+            switchTab('chat');
+        }
+
+        function sendOsNotification(senderName, msgText) {
+            if (!('Notification' in window)) return;
+            if (Notification.permission !== 'granted') return;
+            if (!document.hidden && document.hasFocus()) return;
+            const notif = new Notification('Rare Grade Team 💬', {
+                body: `${senderName}: ${msgText}`,
+                icon: './icon-192x192.png',
+                badge: './icon-192x192.png',
+                tag: 'rargrade-chat',
+                renotify: true,
+                vibrate: [200, 100, 200],
+                silent: false
+            });
+            notif.onclick = () => { window.focus(); switchTab('chat'); notif.close(); };
+        }
+
+        function handleIncomingChatMessage(senderName, msgText, senderId) {
+            if (currentUserData && senderId === currentUserData.id) return;
+            const isChatTabOpen = !document.getElementById('view-chat').classList.contains('hidden');
+            playNotificationSound();
+            if (!isChatTabOpen) {
+                showInAppNotificationPopup(senderName, msgText);
+                document.getElementById('chat-badge').classList.remove('hidden');
+            }
+            sendOsNotification(senderName, msgText);
+        }
+
+        // ============================================================
+        // TEAM CHAT LOGIC
+        // ============================================================
+        function initChat() {
+            if (chatInitialized) return;
+            chatInitialized = true;
+            
+            const chatRef = db.ref('team_chat').limitToLast(50);
+            const container = document.getElementById('chat-messages');
+
+            let initialLoadDone = false;
+            chatRef.once('value', () => { initialLoadDone = true; });
+            
+            chatRef.on('child_added', (snap) => {
+                if (container.querySelector('.text-center')) container.innerHTML = ''; 
+                
+                const msg = snap.val();
+                const isMine = currentUserData && msg.senderId === currentUserData.id;
+                const timeString = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                const bubbleColor = isMine ? 'bg-[#d9fdd3] dark:bg-[#005c4b] chat-mine' : 'bg-[#ffffff] dark:bg-[#202c33] chat-theirs';
+                const textColor = 'text-gray-900 dark:text-gray-100';
+
+                const msgHTML = `
+                    <div class="flex flex-col ${isMine ? 'items-end' : 'items-start'} mb-1">
+                        <div class="chat-bubble ${bubbleColor} ${textColor} flex flex-col">
+                            ${!isMine ? `<span class="text-[10px] font-bold text-blue-500 dark:text-blue-400 mb-0.5">${msg.senderName}</span>` : ''}
+                            <span>${msg.text}</span>
+                            <span class="text-[9px] text-gray-400 self-end mt-1 ml-4 -mb-1 block opacity-80">${timeString} ${isMine ? '<i class="fa-solid fa-check-double text-blue-400 ml-1"></i>' : ''}</span>
+                        </div>
+                    </div>
+                `;
+                
+                container.insertAdjacentHTML('beforeend', msgHTML);
+                scrollToBottomChat();
+
+                if (initialLoadDone && !isMine) {
+                    handleIncomingChatMessage(msg.senderName || 'Team Member', msg.text || '', msg.senderId);
+                }
+            });
+        }
+
+        function scrollToBottomChat() {
+            const container = document.getElementById('chat-messages');
+            setTimeout(() => { container.scrollTop = container.scrollHeight; }, 50);
+        }
+
+        function handleChatKeyPress(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendChatMessage();
+            }
+        }
+
+        async function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text || !currentUserData) return;
+            
+            input.value = '';
+            input.style.height = ''; 
+            
+            await db.ref('team_chat').push({
+                text,
+                senderId: currentUserData.id,
+                senderName: currentUserData.name || "Employee",
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+        }
+
+        // ============================================================
+        // SETTINGS
+        // ============================================================
+        function clearCache() {
+            showToast("Clearing local data...");
+            setTimeout(() => {
+                const theme = localStorage.getItem('theme'); 
+                localStorage.clear();
+                if (theme) localStorage.setItem('theme', theme);
+                showToast("Cache cleared. Reloading...");
+                setTimeout(() => window.location.reload(), 1000);
+            }, 800);
+        }
+
+        // ============================================================
+        // ATTENDANCE, HOURS & COOLDOWN LOGIC
+        // ============================================================
+        function listenToAttendance() {
+            if (!currentUserData) return;
+            const today = new Date().toISOString().split('T')[0];
+            db.ref(`attendance/${today}/${currentUserData.id}`).on('value', (snap) => {
+                const data = snap.val() || {};
+                document.getElementById('log-in').innerText    = data.TimeIn    || '--:--';
+                document.getElementById('log-lout').innerText  = data.LunchOut  || '--:--';
+                document.getElementById('log-lback').innerText = data.LunchBack || '--:--';
+                document.getElementById('log-out').innerText   = data.TimeOut   || '--:--';
+                calculateHours(data.TimeIn, data.TimeOut);
+            });
+        }
+
+        function calculateHours(timeIn, timeOut) {
+            const display = document.getElementById('hours-worked');
+            if (!timeIn) { display.innerText = "0h 0m"; return; }
+            const [inH, inM] = timeIn.split(':').map(Number);
+            let outH, outM;
+            if (timeOut) { [outH, outM] = timeOut.split(':').map(Number); }
+            else { const now = new Date(); outH = now.getHours(); outM = now.getMinutes(); }
+            let diffMins = (outH * 60 + outM) - (inH * 60 + inM);
+            if (diffMins < 0) diffMins = 0; 
+            display.innerText = `${Math.floor(diffMins / 60)}h ${diffMins % 60}m`;
+        }
+
+        function checkCooldown() {
+            if (!currentUserData) return false;
+            const lastScanKey = 'lastScanTime_' + currentUserData.id;
+            const lastScan = localStorage.getItem(lastScanKey);
+            const cooldownMs = 5 * 60 * 1000; 
+            if (lastScan && (Date.now() - parseInt(lastScan)) < cooldownMs) {
+                showCooldownModal(cooldownMs - (Date.now() - parseInt(lastScan)));
+                return true; 
+            }
+            return false;
+        }
+
+        function showCooldownModal(remainingMs) {
+            const modal = document.getElementById('cooldown-modal');
+            const text  = document.getElementById('cooldown-text');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+            clearInterval(cooldownTimerInterval);
+            let timeLeft = Math.ceil(remainingMs / 1000);
+            updateCooldownText(timeLeft, text);
+            cooldownTimerInterval = setInterval(() => {
+                timeLeft--;
+                if (timeLeft <= 0) closeCooldownModal();
+                else updateCooldownText(timeLeft, text);
+            }, 1000);
+        }
+
+        function updateCooldownText(seconds, textElement) {
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            textElement.innerText = `You must wait 5 minutes between logs. Remaining: ${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function closeCooldownModal() {
+            const modal = document.getElementById('cooldown-modal');
+            clearInterval(cooldownTimerInterval);
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        // ============================================================
+        // SCANNER LOGIC
+        // ============================================================
+        async function detectAndVerifyLocation() {
+            showToast("Verifying location...");
+            if (!navigator.geolocation) return showToast("GPS Not Supported", "error");
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                const { latitude: userLat, longitude: userLon } = pos.coords;
+                const snap = await db.ref('settings/officeLocation').once('value');
+                if (!snap.exists()) return showToast("Admin hasn't set office location", "error");
+                const adminConfig = snap.val();
+                const distance = calculateDistance(userLat, userLon, adminConfig.lat, adminConfig.lng);
+                if (distance <= (adminConfig.radius || 150)) {
+                    locationVerified = true;
+                    document.getElementById('location-overlay').classList.add('hidden');
+                    document.getElementById('scanner-interface').classList.remove('hidden');
+                    startScanner();
+                } else { showToast(`Outside Range (${Math.round(distance)}m)`, "error"); }
+            }, () => { showToast("Please grant GPS permission", "error"); }, { enableHighAccuracy: true });
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371e3;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        }
+
+        async function startScanner() {
+            if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
+            if (!html5QrCode.isScanning) {
+                try { 
+                    await html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 }, onScanSuccess); 
+                } catch (e) { console.error("Scanner startup error:", e); }
+            }
+        }
+
+        function onScanSuccess(decodedText) {
+            const scannedId = decodedText.trim().toString();
+            if (scannedId === lastScannedId) return;
+            const storedId = currentUserData.id.toString().trim();
+            if (scannedId !== storedId) { showToast(`ID Mismatch`, "error"); return; }
+            if (checkCooldown()) return; 
+            lastScannedId = scannedId;
+            clearTimeout(scanTimeout);
+            scanTimeout = setTimeout(() => { lastScannedId = null; }, 5000);
+            processAttendanceUpdate(storedId);
+        }
+
+        // ============================================================
+        // BIOMETRICS
+        // ============================================================
+        function bufferToBase64url(buffer) {
+            const bytes = new Uint8Array(buffer);
+            let str = '';
+            for (const char of bytes) str += String.fromCharCode(char);
+            return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+        }
+        
+        function base64urlToBuffer(base64url) {
+            const padding = '==='.slice((base64url.length + 4) % 4);
+            const base64 = (base64url + padding).replace(/-/g, "+").replace(/_/g, "/");
+            const str = atob(base64);
+            const buffer = new ArrayBuffer(str.length);
+            const bytes = new Uint8Array(buffer);
+            for (let i = 0; i < str.length; i++) bytes[i] = str.charCodeAt(i);
+            return buffer;
+        }
+
+        async function logWithBiometrics() {
+            if (checkCooldown()) return; 
+            if (!window.PublicKeyCredential) return showToast("Biometrics not supported on this device/browser", "error");
+
+            let savedCred = null;
+            try {
+                const snap = await db.ref(`employees/${currentUserData.id}/biometricCred`).once('value');
+                savedCred = snap.val();
+
+                if (!savedCred) {
+                    showToast("Registering biometrics...");
+                    const challenge = new Uint8Array(32);
+                    window.crypto.getRandomValues(challenge);
+                    const userID = new Uint8Array(16);
+                    window.crypto.getRandomValues(userID);
+
+                    const credential = await navigator.credentials.create({
+                        publicKey: {
+                            challenge, rp: { name: "RareGrade Hub", id: window.location.hostname },
+                            user: { id: userID, name: currentUserData.email, displayName: currentUserData.name || "Employee" },
+                            pubKeyCredParams: [{ alg: -7, type: "public-key" }, { alg: -257, type: "public-key" }],
+                            authenticatorSelection: { userVerification: "preferred" },
+                            timeout: 60000, attestation: "none"
+                        }
+                    });
+                    
+                    await db.ref(`employees/${currentUserData.id}/biometricCred`).set(bufferToBase64url(credential.rawId));
+                    showToast("Biometrics Registered! Logging in...");
+                    processAttendanceUpdate(currentUserData.id);
+                } else {
+                    showToast("Verify identity...");
+                    const challenge = new Uint8Array(32);
+                    window.crypto.getRandomValues(challenge);
+                    await navigator.credentials.get({
+                        publicKey: {
+                            challenge, allowCredentials: [{ id: base64urlToBuffer(savedCred), type: 'public-key' }],
+                            userVerification: "preferred", timeout: 60000
+                        }
+                    });
+                    showToast("Identity Verified!");
+                    processAttendanceUpdate(currentUserData.id);
+                }
+            } catch (err) {
+                console.error("Biometric error:", err);
+                if (savedCred && (err.name === 'NotAllowedError' || err.message.toLowerCase().includes('passkey') || err.message.toLowerCase().includes('authenticator'))) {
+                    await db.ref(`employees/${currentUserData.id}/biometricCred`).remove();
+                    showToast("Passkey invalid or missing. Registration reset. Please try scanning again.", "error");
+                } else {
+                    showToast("Biometric authentication failed or canceled", "error");
+                }
+            }
+        }
+
+        function processAttendanceUpdate(employeeId) {
+            if (window.isProcessingScan) return;
+            window.isProcessingScan = true;
+
+            const today = new Date().toISOString().split('T')[0];
+            const nowTime = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+            
+            db.ref(`attendance/${today}/${employeeId}`).once('value', (attSnap) => {
+                let update = { name: currentUserData.name || "Employee", timestamp: firebase.database.ServerValue.TIMESTAMP };
+                const att = attSnap.val();
+                let actionLabel = "Logged";
+                
+                if (!att) { actionLabel = "Time In Recorded"; update.TimeIn = nowTime; } 
+                else if (!att.LunchOut) { actionLabel = "Lunch Out Recorded"; update.LunchOut = nowTime; } 
+                else if (!att.LunchBack) { actionLabel = "Lunch Back Recorded"; update.LunchBack = nowTime; } 
+                else if (!att.TimeOut) { actionLabel = "Time Out Recorded"; update.TimeOut = nowTime; } 
+                else { window.isProcessingScan = false; return showToast("Shift complete for today", "error"); }
+                
+                db.ref(`attendance/${today}/${employeeId}`).update(update).then(() => {
+                    localStorage.setItem('lastScanTime_' + employeeId, Date.now());
+                    showToast(`✅ ${actionLabel}`);
+                    switchTab('home'); 
+                    setTimeout(() => window.isProcessingScan = false, 2000);
+                }).catch(() => { window.isProcessingScan = false; });
+            });
+        }
+
+        // ============================================================
+        // TOAST
+        // ============================================================
+        function showToast(msg, type="success") {
+            const t = document.getElementById('toast');
+            document.getElementById('toastMsg').innerHTML = msg;
+            if (type === "error") {
+                t.classList.add('bg-red-500'); t.classList.remove('bg-gray-900', 'dark:bg-white');
+            } else {
+                t.classList.remove('bg-red-500'); t.classList.add('bg-gray-900', 'dark:bg-white');
+            }
+            t.classList.remove('opacity-0', 'translate-y-10', 'pointer-events-none');
+            setTimeout(() => t.classList.add('opacity-0', 'translate-y-10', 'pointer-events-none'), 3000);
+        }
+
+        // ============================================================
+        // CLOCK
+        // ============================================================
+        setInterval(() => {
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+        }, 1000);
+
+        // ============================================================
+        // PWA SERVICE WORKER
+        // ============================================================
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(() => console.log('ServiceWorker registered'))
+                    .catch(err => console.log('ServiceWorker failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>

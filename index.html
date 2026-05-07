@@ -1153,10 +1153,17 @@
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            if(!localStorage.getItem('pwa_prompt_dismissed')) {
-                // slight delay to let app load
+            // Always show the popup on every page load as long as the app
+            // has not been installed. Only skip if user actually installed it.
+            if (!localStorage.getItem('pwa_installed')) {
                 setTimeout(() => pwaPopup.classList.add('show'), 1500);
             }
+        });
+
+        // If the app gets installed via the browser's own UI, mark it and hide popup
+        window.addEventListener('appinstalled', () => {
+            localStorage.setItem('pwa_installed', 'true');
+            dismissPwaPopup(true);
         });
 
         async function installPWA() {
@@ -1164,8 +1171,12 @@
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
                 if (outcome === 'accepted') {
-                    dismissPwaPopup();
+                    // User accepted install — permanently mark as installed
+                    localStorage.setItem('pwa_installed', 'true');
+                    dismissPwaPopup(true);
                 }
+                // If dismissed from native prompt, just hide for this session
+                // but show again next refresh
                 deferredPrompt = null;
             }
         }
@@ -1190,17 +1201,24 @@
             
             pwaPopup.style.transition = 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1)';
             
-            if (diff < -60) { // Swipe up threshold to dismiss
-                dismissPwaPopup();
+            if (diff < -60) { // Swipe up threshold — session dismiss only, NOT permanent
+                dismissPwaPopup(false);
             } else {
                 // Snap back to open state
                 pwaPopup.style.transform = '';
             }
         }, {passive: true});
 
-        function dismissPwaPopup() {
+        /**
+         * @param {boolean} permanent - true only when user actually installs the PWA.
+         *   false = session dismiss (swipe up) — popup returns next refresh.
+         */
+        function dismissPwaPopup(permanent = false) {
             pwaPopup.style.transform = 'translateY(-120%)';
-            localStorage.setItem('pwa_prompt_dismissed', 'true');
+            if (permanent) {
+                localStorage.setItem('pwa_installed', 'true');
+            }
+            // Never write 'pwa_prompt_dismissed' — that would suppress future visits
             setTimeout(() => {
                 pwaPopup.classList.remove('show');
                 pwaPopup.style.transform = ''; // reset after hidden

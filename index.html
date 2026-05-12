@@ -118,6 +118,18 @@
 
         .custom-checkbox { width: 18px; height: 18px; border-radius: 4px; border: 2px solid #cbd5e1; cursor: pointer; accent-color: #2563eb; }
         
+        @keyframes scanLine {
+            0%   { top: 10%; }
+            50%  { top: 88%; }
+            100% { top: 10%; }
+        }
+        @keyframes fpPulse {
+            0%   { transform: scale(1);   opacity: 1; }
+            50%  { transform: scale(1.12); opacity: 0.7; }
+            100% { transform: scale(1);   opacity: 1; }
+        }
+        .fp-scanning { animation: fpPulse 0.9s ease-in-out infinite; color: #2563eb !important; }
+        
         .sup-tab { transition: all 0.3s; border-bottom: 2px solid transparent; }
         .sup-tab.active { border-bottom-color: #2563eb; color: #2563eb; font-weight: bold; }
         .dark .sup-tab.active { border-bottom-color: #60a5fa; color: #60a5fa; }
@@ -658,25 +670,96 @@
             </div>
             
             <div id="scanner-interface" class="hidden flex-1 flex flex-col space-y-4 overflow-y-auto">
-                <div class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 shrink-0">
-                    <div class="flex justify-between items-center mb-3 px-1">
+
+                <!-- METHOD PICKER -->
+                <div id="method-picker" class="app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-5">
+                    <h2 class="font-bold text-sm mb-1 text-center"><i class="fa-solid fa-shield-halved mr-2 text-blue-500"></i>Biometric Verification</h2>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 text-center mb-4">Choose your verification method to clock in/out</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="selectVerifyMethod('face')" class="method-btn flex flex-col items-center gap-3 p-4 rounded-2xl border-2 border-blue-500 bg-blue-50 dark:bg-blue-900/30 active:scale-95 transition-all">
+                            <div class="w-14 h-14 rounded-full bg-blue-100 dark:bg-blue-900/60 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/><path d="M9 9.5a3 3 0 0 1 6 0"/><path d="M9 14.5a3 3 0 0 0 6 0"/></svg>
+                            </div>
+                            <div class="text-center">
+                                <p class="font-bold text-sm text-blue-700 dark:text-blue-300">Face ID</p>
+                                <p class="text-[10px] text-gray-500 dark:text-gray-400">Camera scan</p>
+                            </div>
+                        </button>
+                        <button onclick="selectVerifyMethod('fingerprint')" class="method-btn flex flex-col items-center gap-3 p-4 rounded-2xl border-2 border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700/50 active:scale-95 transition-all">
+                            <div class="w-14 h-14 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
+                                <i class="fa-solid fa-fingerprint text-3xl text-gray-500 dark:text-gray-400"></i>
+                            </div>
+                            <div class="text-center">
+                                <p class="font-bold text-sm text-gray-700 dark:text-gray-300">Fingerprint</p>
+                                <p class="text-[10px] text-gray-500 dark:text-gray-400">Touch / WebAuthn</p>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- FACE ID PANEL -->
+                <div id="face-panel" class="hidden app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4">
+                    <div class="flex items-center justify-between mb-3 px-1">
+                        <button onclick="backToMethodPicker()" class="text-gray-400 hover:text-blue-500 transition-colors">
+                            <i class="fa-solid fa-arrow-left mr-1"></i><span class="text-xs font-bold">Back</span>
+                        </button>
                         <h2 class="font-bold text-sm"><i class="fa-solid fa-face-viewfinder mr-2 text-blue-500"></i>Face Verification</h2>
+                        <div class="w-12"></div>
                     </div>
                     
-                    <div id="webcam-container" class="w-full aspect-square md:aspect-video overflow-hidden relative shadow-inner bg-black rounded-xl flex items-center justify-center">
+                    <div id="webcam-container" class="w-full aspect-square overflow-hidden relative shadow-inner bg-black rounded-2xl flex items-center justify-center">
                         <video id="webcam" autoplay playsinline muted class="w-full h-full object-cover transform scale-x-[-1]"></video>
                         <canvas id="snapshot-canvas" class="hidden"></canvas>
-                        
-                        <div class="absolute inset-0 border-4 border-blue-500/30 rounded-xl pointer-events-none"></div>
-                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <div class="w-3/4 h-3/4 border-2 border-dashed border-white/50 rounded-full"></div>
+                        <!-- Scan frame overlay -->
+                        <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+                            <div id="face-scan-frame" class="relative w-56 h-56">
+                                <!-- Corner brackets -->
+                                <div class="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-blue-400 rounded-tl-xl"></div>
+                                <div class="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-blue-400 rounded-tr-xl"></div>
+                                <div class="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-blue-400 rounded-bl-xl"></div>
+                                <div class="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-blue-400 rounded-br-xl"></div>
+                                <!-- Scan line -->
+                                <div id="scan-line" class="absolute left-2 right-2 h-0.5 bg-blue-400 opacity-80" style="top:50%;animation:scanLine 2s ease-in-out infinite;"></div>
+                            </div>
+                        </div>
+                        <!-- Status badge -->
+                        <div id="face-status-badge" class="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/60 text-white text-xs font-bold px-3 py-1.5 rounded-full backdrop-blur-sm">
+                            Position your face in the frame
                         </div>
                     </div>
 
-                    <button onclick="captureAndVerifyFace()" class="w-full py-4 mt-4 bg-gray-900 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-white rounded-xl font-bold shadow-md active:scale-95 transition-all flex items-center justify-center gap-3 text-sm">
-                        <i class="fa-solid fa-camera text-blue-400 text-xl"></i> Verify & Clock In
-                    </button>
+                    <div id="face-action-area" class="mt-4 space-y-2">
+                        <button onclick="captureAndVerifyFace()" id="btn-verify-face" class="w-full py-4 bg-blue-600 dark:bg-blue-600 border border-blue-500 text-white rounded-xl font-bold shadow-md active:scale-95 transition-all flex items-center justify-center gap-3 text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/></svg>
+                            Scan & Verify Face
+                        </button>
+                        <button onclick="registerMyFace()" id="btn-register-face" class="hidden w-full py-3 bg-emerald-600 text-white rounded-xl font-bold shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 text-sm">
+                            <i class="fa-solid fa-plus-circle"></i> Register My Face
+                        </button>
+                    </div>
+                    <p id="face-hint" class="text-[10px] text-gray-400 text-center mt-2">Look directly at the camera in good lighting.</p>
                 </div>
+
+                <!-- FINGERPRINT PANEL -->
+                <div id="fingerprint-panel" class="hidden app-card bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-6 text-center space-y-4">
+                    <button onclick="backToMethodPicker()" class="flex items-center gap-1 text-gray-400 hover:text-blue-500 transition-colors text-xs font-bold mb-2">
+                        <i class="fa-solid fa-arrow-left"></i> Back
+                    </button>
+                    <div id="fp-icon-wrap" class="w-24 h-24 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center mx-auto">
+                        <i class="fa-solid fa-fingerprint text-5xl text-gray-400 dark:text-gray-500" id="fp-icon"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg text-gray-800 dark:text-gray-200" id="fp-title">Fingerprint / Device Auth</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1" id="fp-subtitle">Use your device's biometric sensor or PIN</p>
+                    </div>
+                    <button onclick="triggerFingerprintAuth()" id="btn-fingerprint" class="w-full py-4 bg-gray-900 dark:bg-slate-700 text-white rounded-xl font-bold shadow-md active:scale-95 transition-all flex items-center justify-center gap-3 text-sm">
+                        <i class="fa-solid fa-fingerprint text-xl text-blue-400"></i> Authenticate Now
+                    </button>
+                    <p class="text-[10px] text-gray-400">Uses your device's built-in security (fingerprint, Face ID, PIN, or pattern).</p>
+                </div>
+
+            </div>
+        </section>
             </div>
         </section>
 
@@ -1017,8 +1100,8 @@
         </div>
     </section>
 
-    <button onclick="switchTab('scanner')" id="fab-scanner" class="fixed bottom-20 right-4 bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/40 z-30 transform transition-transform duration-300 active:scale-95">
-        <i class="fa-solid fa-face-viewfinder text-2xl"></i>
+    <button onclick="switchTab('scanner')" id="fab-scanner" class="fixed bottom-20 right-4 bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/40 z-30 transform transition-transform duration-300 active:scale-95" style="min-width:56px;min-height:56px;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:26px;height:26px;display:block;flex-shrink:0;"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/><path d="M12 9a4 4 0 0 1 4 4"/><path d="M8 12a4 4 0 0 1 4-4"/></svg>
     </button>
 
     <nav id="bottom-nav" class="bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 fixed bottom-0 w-full z-20 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.02)] transition-transform duration-300">
@@ -1206,14 +1289,96 @@
         }
 
         // ============================================================
-        // WEBCAM LOGIC
+        // BIOMETRIC STATE
+        // ============================================================
+        let faceApiLoaded = false;
+        let faceApiLoading = false;
+        let currentVerifyMethod = null; // 'face' | 'fingerprint'
+
+        // ============================================================
+        // METHOD PICKER
+        // ============================================================
+        function selectVerifyMethod(method) {
+            currentVerifyMethod = method;
+            document.getElementById('method-picker').classList.add('hidden');
+
+            if (method === 'face') {
+                document.getElementById('face-panel').classList.remove('hidden');
+                document.getElementById('fingerprint-panel').classList.add('hidden');
+                startWebcam();
+                loadFaceApi();
+            } else {
+                document.getElementById('fingerprint-panel').classList.remove('hidden');
+                document.getElementById('face-panel').classList.add('hidden');
+                stopWebcam();
+            }
+        }
+
+        function backToMethodPicker() {
+            currentVerifyMethod = null;
+            document.getElementById('method-picker').classList.remove('hidden');
+            document.getElementById('face-panel').classList.add('hidden');
+            document.getElementById('fingerprint-panel').classList.add('hidden');
+            stopWebcam();
+        }
+
+        // ============================================================
+        // LOAD FACE-API.JS MODELS
+        // ============================================================
+        async function loadFaceApi() {
+            if (faceApiLoaded || faceApiLoading) return;
+            faceApiLoading = true;
+            setFaceBadge('Loading face detection models...', 'neutral');
+            try {
+                if (typeof faceapi === 'undefined') {
+                    await loadScript('https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js');
+                }
+                const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
+                await Promise.all([
+                    faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+                    faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+                    faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
+                ]);
+                faceApiLoaded = true;
+                faceApiLoading = false;
+                setFaceBadge('Position your face in the frame', 'neutral');
+            } catch(e) {
+                faceApiLoading = false;
+                console.error('face-api load error', e);
+                setFaceBadge('Face models failed to load', 'error');
+                showToast('Face detection unavailable — check connection', 'error');
+            }
+        }
+
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const s = document.createElement('script');
+                s.src = src; s.onload = resolve; s.onerror = reject;
+                document.head.appendChild(s);
+            });
+        }
+
+        function setFaceBadge(text, state) {
+            const badge = document.getElementById('face-status-badge');
+            if (!badge) return;
+            badge.textContent = text;
+            badge.className = 'absolute bottom-3 left-1/2 -translate-x-1/2 text-xs font-bold px-3 py-1.5 rounded-full backdrop-blur-sm ';
+            if (state === 'success') badge.className += 'bg-green-600/90 text-white';
+            else if (state === 'error')   badge.className += 'bg-red-600/90 text-white';
+            else if (state === 'warn')    badge.className += 'bg-orange-500/90 text-white';
+            else                          badge.className += 'bg-black/60 text-white';
+        }
+
+        // ============================================================
+        // WEBCAM
         // ============================================================
         async function startWebcam() {
             const video = document.getElementById('webcam');
+            if (!video) return;
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                 try {
                     webcamStream = await navigator.mediaDevices.getUserMedia({ 
-                        video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } } 
+                        video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 640 } } 
                     });
                     video.srcObject = webcamStream;
                 } catch (err) {
@@ -1229,58 +1394,265 @@
             if (webcamStream) {
                 webcamStream.getTracks().forEach(track => track.stop());
                 webcamStream = null;
+                const video = document.getElementById('webcam');
+                if (video) video.srcObject = null;
             }
         }
 
+        // ============================================================
+        // FACE CAPTURE & VERIFY
+        // ============================================================
         async function captureAndVerifyFace() {
-            if (checkCooldown()) return; 
+            if (checkCooldown()) return;
+            if (!faceApiLoaded) {
+                showToast('Face detection still loading, please wait...', 'error');
+                await loadFaceApi();
+                return;
+            }
 
             const video = document.getElementById('webcam');
             const canvas = document.getElementById('snapshot-canvas');
-            const ctx = canvas.getContext('2d');
+            if (!video || !video.videoWidth) { showToast('Camera not ready', 'error'); return; }
 
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-
-            ctx.translate(canvas.width, 0);
-            ctx.scale(-1, 1);
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            const base64Image = canvas.toDataURL('image/jpeg', 0.8);
-
-            document.getElementById('global-spinner').classList.add('active');
-            document.getElementById('spinner-text').innerText = "Verifying Identity...";
+            // Detect face + get descriptor from live video
+            setFaceBadge('Detecting face...', 'neutral');
+            const btn = document.getElementById('btn-verify-face');
+            if (btn) { btn.disabled = true; btn.textContent = 'Scanning...'; }
 
             try {
-                // ====================================================================
-                // AI BACKEND INTEGRATION POINT
-                // ====================================================================
-                // Send 'base64Image' to your Python backend for embedding comparison.
-                // 
-                // const response = await fetch('https://your-api.com/verify-face', {
-                //     method: 'POST',
-                //     headers: { 'Content-Type': 'application/json' },
-                //     body: JSON.stringify({ 
-                //         employeeId: currentUserData.id, 
-                //         image: base64Image 
-                //     })
-                // });
-                // const result = await response.json();
-                // if (!result.verified) throw new Error("Face not recognized");
-                // ====================================================================
+                const detection = await faceapi
+                    .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.5 }))
+                    .withFaceLandmarks()
+                    .withFaceDescriptor();
 
-                // Simulated network delay for testing
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                
-                document.getElementById('global-spinner').classList.remove('active');
-                showToast("Identity Verified!");
-                
-                stopWebcam();
-                processAttendanceUpdate(currentUserData.id);
+                if (!detection) {
+                    setFaceBadge('No face detected — look at camera', 'warn');
+                    showToast('No face detected. Please look directly at the camera.', 'error');
+                    if (btn) { btn.disabled = false; btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/></svg> Scan & Verify Face'; }
+                    return;
+                }
 
-            } catch (err) {
-                document.getElementById('global-spinner').classList.remove('active');
-                showToast(err.message || "Face Verification Failed", "error");
+                setFaceBadge('Face found — matching identity...', 'neutral');
+                const liveDescriptor = detection.descriptor; // Float32Array
+
+                // Load stored descriptor from Firebase
+                const snap = await db.ref(`employees/${currentUserData.id}/faceDescriptor`).once('value');
+
+                if (!snap.exists()) {
+                    // No face registered — prompt to register
+                    setFaceBadge('Face not registered', 'warn');
+                    if (btn) { btn.disabled = false; btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/></svg> Scan & Verify Face'; }
+                    const regBtn = document.getElementById('btn-register-face');
+                    if (regBtn) regBtn.classList.remove('hidden');
+                    document.getElementById('face-hint').textContent = 'Your face is not registered. Register it first to use face scanning.';
+                    showToast('Face not registered — please register your face first', 'error');
+                    return;
+                }
+
+                // Convert stored array back to Float32Array
+                const storedArray = Object.values(snap.val());
+                const storedDescriptor = new Float32Array(storedArray);
+
+                // Calculate Euclidean distance (threshold 0.50 = strict, 0.60 = moderate)
+                const distance = faceapi.euclideanDistance(liveDescriptor, storedDescriptor);
+                const THRESHOLD = 0.52;
+
+                if (distance <= THRESHOLD) {
+                    // ✅ MATCH
+                    setFaceBadge('✅ Identity Verified!', 'success');
+                    showToast('✅ Face Verified!');
+                    if (btn) { btn.disabled = false; btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/></svg> Scan & Verify Face'; }
+                    stopWebcam();
+                    processAttendanceUpdate(currentUserData.id);
+                } else {
+                    // ❌ NO MATCH
+                    setFaceBadge('❌ Face not recognised', 'error');
+                    showToast('Face not recognised. This does not match your registered face.', 'error');
+                    if (btn) { btn.disabled = false; btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/></svg> Scan & Verify Face'; }
+                    console.log('Face distance:', distance.toFixed(4), '> threshold', THRESHOLD);
+                }
+
+            } catch(err) {
+                console.error('Face verify error:', err);
+                setFaceBadge('Scan failed', 'error');
+                showToast('Face scan failed: ' + (err.message || 'Unknown error'), 'error');
+                if (btn) { btn.disabled = false; btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/></svg> Scan & Verify Face'; }
+            }
+        }
+
+        // ============================================================
+        // REGISTER FACE
+        // ============================================================
+        async function registerMyFace() {
+            if (!faceApiLoaded) { showToast('Face detection loading...', 'error'); return; }
+            const video = document.getElementById('webcam');
+            if (!video || !video.videoWidth) { showToast('Camera not ready', 'error'); return; }
+
+            setFaceBadge('Capturing face for registration...', 'neutral');
+            const regBtn = document.getElementById('btn-register-face');
+            if (regBtn) { regBtn.disabled = true; regBtn.textContent = 'Capturing...'; }
+
+            try {
+                // Take multiple captures and average them for robustness
+                const descriptors = [];
+                for (let i = 0; i < 3; i++) {
+                    await new Promise(r => setTimeout(r, 400));
+                    const det = await faceapi
+                        .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.5 }))
+                        .withFaceLandmarks()
+                        .withFaceDescriptor();
+                    if (det) descriptors.push(det.descriptor);
+                }
+
+                if (descriptors.length === 0) {
+                    setFaceBadge('No face detected — try again', 'warn');
+                    showToast('No face detected. Ensure good lighting and look at the camera.', 'error');
+                    if (regBtn) { regBtn.disabled = false; regBtn.innerHTML = '<i class="fa-solid fa-plus-circle"></i> Register My Face'; }
+                    return;
+                }
+
+                // Average the descriptors for a more stable embedding
+                const avgDescriptor = new Float32Array(128);
+                descriptors.forEach(d => { for (let i = 0; i < 128; i++) avgDescriptor[i] += d[i]; });
+                for (let i = 0; i < 128; i++) avgDescriptor[i] /= descriptors.length;
+
+                // Store as plain array in Firebase (Float32Array not directly serialisable)
+                await db.ref(`employees/${currentUserData.id}/faceDescriptor`).set(Array.from(avgDescriptor));
+                await db.ref(`employees/${currentUserData.id}`).update({ faceRegistered: true });
+
+                setFaceBadge('✅ Face registered successfully!', 'success');
+                showToast('✅ Face registered! You can now scan to clock in.');
+                if (regBtn) { regBtn.classList.add('hidden'); }
+                document.getElementById('face-hint').textContent = 'Face registered. Tap Scan & Verify Face to clock in.';
+                if (regBtn) { regBtn.disabled = false; }
+
+            } catch(err) {
+                console.error('Face registration error:', err);
+                setFaceBadge('Registration failed', 'error');
+                showToast('Registration failed: ' + (err.message || 'Unknown error'), 'error');
+                if (regBtn) { regBtn.disabled = false; regBtn.innerHTML = '<i class="fa-solid fa-plus-circle"></i> Register My Face'; }
+            }
+        }
+
+        // ============================================================
+        // FINGERPRINT / WEBAUTHN
+        // ============================================================
+        async function triggerFingerprintAuth() {
+            if (checkCooldown()) return;
+
+            const btn = document.getElementById('btn-fingerprint');
+            const icon = document.getElementById('fp-icon');
+            const title = document.getElementById('fp-title');
+            const sub = document.getElementById('fp-subtitle');
+
+            if (!window.PublicKeyCredential) {
+                showToast('WebAuthn not supported on this device/browser', 'error');
+                return;
+            }
+
+            try {
+                // Check if platform authenticator (fingerprint/FaceID sensor) available
+                const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+                if (!available) {
+                    showToast('No biometric sensor found on this device', 'error');
+                    return;
+                }
+            } catch(e) { /* continue anyway */ }
+
+            if (btn) { btn.disabled = true; }
+            if (icon) { icon.classList.add('fp-scanning'); }
+            if (title) title.textContent = 'Waiting for your touch...';
+            if (sub) sub.textContent = 'Use your fingerprint, Face ID, PIN, or pattern';
+
+            try {
+                // Check if a credential is already registered for this employee
+                const credSnap = await db.ref(`employees/${currentUserData.id}/webauthnCredential`).once('value');
+                
+                if (!credSnap.exists()) {
+                    // REGISTER: create new credential tied to this employee
+                    if (title) title.textContent = 'Registering your device biometric...';
+                    const challenge = new Uint8Array(32);
+                    crypto.getRandomValues(challenge);
+
+                    const userId = new TextEncoder().encode(currentUserData.id.substring(0, 16).padEnd(16, '0'));
+
+                    const publicKeyOptions = {
+                        challenge,
+                        rp: { name: 'RareGrade Employee Portal', id: location.hostname },
+                        user: {
+                            id: userId,
+                            name: currentUserData.email || currentUserData.id,
+                            displayName: currentUserData.name || 'Employee'
+                        },
+                        pubKeyCredParams: [
+                            { alg: -7,  type: 'public-key' }, // ES256
+                            { alg: -257, type: 'public-key' } // RS256
+                        ],
+                        authenticatorSelection: {
+                            authenticatorAttachment: 'platform',
+                            userVerification: 'required',
+                            requireResidentKey: false
+                        },
+                        timeout: 60000,
+                        attestation: 'none'
+                    };
+
+                    const credential = await navigator.credentials.create({ publicKey: publicKeyOptions });
+
+                    // Store credential ID in Firebase (we only need the id for verification)
+                    const credIdBase64 = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
+                    await db.ref(`employees/${currentUserData.id}/webauthnCredential`).set({ credId: credIdBase64, registered: Date.now() });
+
+                    if (icon) { icon.classList.remove('fp-scanning'); icon.style.color = '#10b981'; }
+                    if (title) title.textContent = 'Biometric Registered & Verified!';
+                    if (sub) sub.textContent = 'Your device biometric is now linked to your account';
+                    showToast('✅ Biometric registered & attendance logged!');
+                    if (btn) { btn.disabled = false; }
+                    processAttendanceUpdate(currentUserData.id);
+
+                } else {
+                    // VERIFY: challenge-response with existing credential
+                    const credIdBase64 = credSnap.val().credId;
+                    const credIdBytes = Uint8Array.from(atob(credIdBase64), c => c.charCodeAt(0));
+
+                    const challenge = new Uint8Array(32);
+                    crypto.getRandomValues(challenge);
+
+                    const assertionOptions = {
+                        challenge,
+                        allowCredentials: [{ type: 'public-key', id: credIdBytes, transports: ['internal'] }],
+                        userVerification: 'required',
+                        timeout: 60000
+                    };
+
+                    await navigator.credentials.get({ publicKey: assertionOptions });
+
+                    // WebAuthn succeeded — user passed device biometric
+                    if (icon) { icon.classList.remove('fp-scanning'); icon.style.color = '#10b981'; }
+                    if (title) title.textContent = 'Identity Verified!';
+                    if (sub) sub.textContent = 'Biometric authentication successful';
+                    showToast('✅ Biometric Verified!');
+                    if (btn) { btn.disabled = false; }
+                    stopWebcam();
+                    processAttendanceUpdate(currentUserData.id);
+                }
+
+            } catch(err) {
+                if (icon) { icon.classList.remove('fp-scanning'); icon.style.color = ''; }
+                if (title) title.textContent = 'Fingerprint / Device Auth';
+                if (sub) sub.textContent = 'Use your device\'s biometric sensor or PIN';
+                if (btn) { btn.disabled = false; }
+
+                if (err.name === 'NotAllowedError') {
+                    showToast('Authentication cancelled or denied', 'error');
+                } else if (err.name === 'InvalidStateError') {
+                    showToast('Credential error — try re-registering', 'error');
+                    // Clear stored credential so user re-registers
+                    await db.ref(`employees/${currentUserData.id}/webauthnCredential`).remove();
+                } else {
+                    showToast('Biometric auth failed: ' + (err.message || err.name), 'error');
+                }
+                console.error('WebAuthn error:', err);
             }
         }
 
@@ -1312,6 +1684,19 @@
 
                 if (tabId === 'scanner') {
                     fab.style.transform = 'scale(0)';
+                    // Reset to method picker when entering scanner tab
+                    document.getElementById('method-picker').classList.remove('hidden');
+                    document.getElementById('face-panel').classList.add('hidden');
+                    document.getElementById('fingerprint-panel').classList.add('hidden');
+                    // Reset fingerprint icon state
+                    const fpIcon = document.getElementById('fp-icon');
+                    if (fpIcon) { fpIcon.classList.remove('fp-scanning'); fpIcon.style.color = ''; }
+                    const fpTitle = document.getElementById('fp-title');
+                    const fpSub = document.getElementById('fp-subtitle');
+                    if (fpTitle) fpTitle.textContent = 'Fingerprint / Device Auth';
+                    if (fpSub) fpSub.textContent = "Use your device's biometric sensor or PIN";
+                    const fpBtn = document.getElementById('btn-fingerprint');
+                    if (fpBtn) fpBtn.disabled = false;
                 } else {
                     fab.style.transform = 'scale(1)';
                 }

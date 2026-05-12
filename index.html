@@ -251,6 +251,110 @@
         .lnotif-sub { font-size: 11px; color: rgba(255,255,255,0.75); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .lnotif-close { color: rgba(255,255,255,0.7); font-size: 16px; padding: 4px; cursor: pointer; flex-shrink: 0; }
         .lnotif-close:hover { color: #fff; }
+
+        /* ============================================================
+           BIRTHDAY & WORK ANNIVERSARY OVERLAY
+        ============================================================ */
+        #bday-overlay {
+            position: fixed; inset: 0; z-index: 999999;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+            background: rgba(0,0,0,0.72);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+        #bday-overlay.show { opacity: 1; pointer-events: all; }
+
+        .bday-card {
+            width: 100%; max-width: 400px;
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+            position: relative;
+            animation: bdayCardIn 0.5s cubic-bezier(0.22,1,0.36,1) forwards;
+        }
+        @keyframes bdayCardIn {
+            from { transform: scale(0.82) translateY(30px); opacity: 0; }
+            to   { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        .bday-confetti-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            padding: 32px 28px 24px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .bday-confetti-bg.anniversary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 40%, #fda085 100%);
+        }
+        .bday-confetti-bg.belated {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        .bday-confetti-bg.belated-others {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+        .bday-emoji-bounce {
+            font-size: 64px; display: block; line-height: 1;
+            animation: emojiBounce 0.8s ease infinite alternate;
+        }
+        @keyframes emojiBounce {
+            from { transform: translateY(0) scale(1); }
+            to   { transform: translateY(-10px) scale(1.08); }
+        }
+        .bday-sparkle {
+            position: absolute; width: 8px; height: 8px; border-radius: 50%;
+            background: rgba(255,255,255,0.7);
+            animation: sparkleFly 2s ease-in-out infinite;
+        }
+        @keyframes sparkleFly {
+            0%,100% { transform: translateY(0) scale(1); opacity:0.7; }
+            50%      { transform: translateY(-18px) scale(1.4); opacity:1; }
+        }
+        .bday-card-body {
+            background: #fff;
+            padding: 24px 28px 28px;
+        }
+        .dark .bday-card-body { background: #1e293b; }
+        .bday-dismiss-btn {
+            width: 100%; padding: 14px;
+            border-radius: 16px;
+            font-weight: 800; font-size: 15px;
+            border: none; cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            color: #fff;
+        }
+        .bday-dismiss-btn:active { transform: scale(0.97); }
+        .bday-dismiss-btn.purple { background: linear-gradient(135deg,#667eea,#764ba2); box-shadow: 0 6px 20px rgba(102,126,234,0.45); }
+        .bday-dismiss-btn.anniv  { background: linear-gradient(135deg,#f093fb,#f5576c); box-shadow: 0 6px 20px rgba(245,87,108,0.4); }
+        .bday-dismiss-btn.belated { background: linear-gradient(135deg,#4facfe,#00f2fe); box-shadow: 0 6px 20px rgba(79,172,254,0.4); color: #1e293b; }
+        .bday-dismiss-btn.belated-others { background: linear-gradient(135deg,#43e97b,#38f9d7); box-shadow: 0 6px 20px rgba(67,233,123,0.4); color: #1e293b; }
+        .bday-dl-btn {
+            width: 100%; padding: 12px; margin-top: 10px;
+            border-radius: 14px; font-weight: 700; font-size: 13px;
+            background: #f1f5f9; color: #334155;
+            border: 1.5px solid #e2e8f0; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: background 0.2s;
+        }
+        .dark .bday-dl-btn { background: #334155; color: #cbd5e1; border-color: #475569; }
+        .bday-dl-btn:hover { background: #e2e8f0; }
+        .dark .bday-dl-btn:hover { background: #475569; }
+
+        /* Floating confetti pieces */
+        .confetti-piece {
+            position: absolute;
+            width: 8px; height: 8px;
+            border-radius: 2px;
+            animation: confettiFall linear infinite;
+            pointer-events: none;
+        }
+        @keyframes confettiFall {
+            0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(160px) rotate(720deg); opacity: 0; }
+        }
     </style>
 </head>
 <body class="h-screen flex flex-col relative bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
@@ -284,7 +388,30 @@
         </div>
     </div>
 
-    <header id="main-header" class="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-6 py-4 flex justify-between items-center z-10 shrink-0 transition-colors duration-300">
+    <!-- ============================================================
+         BIRTHDAY & WORK ANNIVERSARY OVERLAY
+    ============================================================ -->
+    <div id="bday-overlay" role="dialog" aria-modal="true" aria-labelledby="bday-title">
+        <div class="bday-card" id="bday-card-inner">
+            <!-- Coloured header – class swapped by JS -->
+            <div class="bday-confetti-bg" id="bday-header">
+                <!-- Confetti pieces injected by JS -->
+                <span class="bday-emoji-bounce" id="bday-emoji">🎂</span>
+                <h2 id="bday-headline" class="text-white font-extrabold text-2xl mt-4 leading-tight"></h2>
+                <p id="bday-sub-headline" class="text-white/80 text-sm mt-1 font-semibold"></p>
+            </div>
+            <div class="bday-card-body" id="bday-body">
+                <p id="bday-message" class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed text-center mb-5"></p>
+                <!-- PDF download button — only shown for the birthday person -->
+                <button id="bday-dl-btn" class="bday-dl-btn hidden" onclick="downloadBirthdayCard()">
+                    <i class="fa-solid fa-download"></i> Download Birthday Card (PDF)
+                </button>
+                <button id="bday-dismiss-btn" class="bday-dismiss-btn purple mt-4" onclick="dismissBdayOverlay()">
+                    <i class="fa-solid fa-heart mr-2"></i> <span id="bday-dismiss-label">Wonderful!</span>
+                </button>
+            </div>
+        </div>
+    </div> class="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-6 py-4 flex justify-between items-center z-10 shrink-0 transition-colors duration-300">
         <div class="flex items-center gap-2">
             <div class="bg-blue-100 dark:bg-blue-900/50 p-2 rounded-lg text-blue-600 dark:text-blue-400">
                 <i class="fa-solid fa-layer-group"></i>
@@ -1311,6 +1438,7 @@
                     closePortal();
                     requestNotificationPermission();
                     listenToLeaveStatusChanges();
+                    checkBirthdayAndAnniversary();
 
                 } else {
                     showToast("Not registered - Alert sent to admin", "error");
@@ -2688,6 +2816,407 @@ ${sigUrl}
         setInterval(() => {
             document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
         }, 1000);
+
+        // ============================================================
+        // BIRTHDAY & WORK ANNIVERSARY SYSTEM
+        // ============================================================
+
+        const COMPANY_NAME = "RareGrade Tech";
+
+        /**
+         * Returns the ISO date string for "today" in local time  YYYY-MM-DD
+         */
+        function getLocalDateStr(d) {
+            const date = d || new Date();
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        }
+
+        /**
+         * Returns true if today is a weekday Monday and yesterday or
+         * the day before (Sat/Sun) was a birthday/anniversary date.
+         */
+        function wasBirthdayOnWeekend(birthdayMMDD) {
+            const today = new Date();
+            const dow = today.getDay(); // 0=Sun, 1=Mon ... 6=Sat
+            if (dow !== 1) return false; // only fire on Monday
+
+            const thisYear = today.getFullYear();
+            const [bMon, bDay] = birthdayMMDD.split('-').map(Number);
+
+            // Check Saturday (2 days ago) and Sunday (1 day ago)
+            const sat = new Date(today); sat.setDate(today.getDate() - 2);
+            const sun = new Date(today); sun.setDate(today.getDate() - 1);
+
+            for (const day of [sat, sun]) {
+                if (day.getMonth() + 1 === bMon && day.getDate() === bDay) return true;
+            }
+            return false;
+        }
+
+        /**
+         * Today's MM-DD
+         */
+        function todayMMDD() {
+            const d = new Date();
+            return `${String(d.getMonth() + 1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        }
+
+        /**
+         * Given a full date string "YYYY-MM-DD" return "MM-DD"
+         */
+        function toMMDD(dateStr) {
+            if (!dateStr) return '';
+            const parts = dateStr.split('-');
+            if (parts.length >= 3) return `${parts[1]}-${parts[2]}`;
+            return dateStr.slice(5); // fallback
+        }
+
+        /**
+         * Compute years since a date.
+         */
+        function yearsSince(dateStr) {
+            if (!dateStr) return 0;
+            const start = new Date(dateStr);
+            const now = new Date();
+            return now.getFullYear() - start.getFullYear();
+        }
+
+        /**
+         * Generate sparkle/confetti child elements inside the header
+         */
+        function buildConfetti(container) {
+            container.querySelectorAll('.confetti-piece,.bday-sparkle').forEach(el => el.remove());
+            const colors = ['#FFD700','#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFEAA7','#DDA0DD','#98FB98'];
+            for (let i = 0; i < 18; i++) {
+                const el = document.createElement('div');
+                el.className = 'confetti-piece';
+                el.style.cssText = `
+                    left: ${Math.random() * 100}%;
+                    top: ${Math.random() * 40}%;
+                    background: ${colors[Math.floor(Math.random() * colors.length)]};
+                    animation-duration: ${1.2 + Math.random() * 1.8}s;
+                    animation-delay: ${Math.random() * 1.5}s;
+                    width: ${5 + Math.random() * 8}px;
+                    height: ${5 + Math.random() * 8}px;
+                    border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+                `;
+                container.appendChild(el);
+            }
+        }
+
+        /**
+         * Show the birthday/anniversary overlay.
+         * type: 'birthday_self' | 'birthday_others' | 'anniversary_self' | 'anniversary_others'
+         *       'belated_self' | 'belated_others'
+         * person: { name, years? }
+         */
+        function showBdayOverlay(type, person) {
+            const overlay   = document.getElementById('bday-overlay');
+            const header    = document.getElementById('bday-header');
+            const emoji     = document.getElementById('bday-emoji');
+            const headline  = document.getElementById('bday-headline');
+            const subHl     = document.getElementById('bday-sub-headline');
+            const msgEl     = document.getElementById('bday-message');
+            const dlBtn     = document.getElementById('bday-dl-btn');
+            const dismissBtn= document.getElementById('bday-dismiss-btn');
+            const dismissLbl= document.getElementById('bday-dismiss-label');
+
+            // Reset classes
+            header.className    = 'bday-confetti-bg';
+            dismissBtn.className= 'bday-dismiss-btn purple';
+            dlBtn.classList.add('hidden');
+
+            if (type === 'birthday_self') {
+                emoji.textContent    = '🎂';
+                headline.textContent = `Happy Birthday, ${person.name}! 🎉`;
+                subHl.textContent    = `From all of us at ${COMPANY_NAME}`;
+                msgEl.textContent    = `Wishing you an absolutely wonderful birthday filled with joy, laughter, and all your favourite things. You are an incredible part of our team! 🥳`;
+                dismissLbl.textContent = 'Thank you! 🎁';
+                dlBtn.classList.remove('hidden');
+                dismissBtn.className = 'bday-dismiss-btn purple';
+            } else if (type === 'birthday_others') {
+                emoji.textContent    = '🎉';
+                headline.textContent = `It's ${person.name}'s Birthday!`;
+                subHl.textContent    = 'Remember to wish them well today 💛';
+                msgEl.textContent    = `Today is ${person.name}'s special day! Take a moment to send them warm birthday wishes and help make their day extra memorable.`;
+                dismissLbl.textContent = 'Will do! 🎈';
+                dismissBtn.className = 'bday-dismiss-btn purple';
+            } else if (type === 'anniversary_self') {
+                header.classList.add('anniversary');
+                emoji.textContent    = '🏆';
+                headline.textContent = `Happy Work Anniversary!`;
+                subHl.textContent    = `${person.years} Year${person.years !== 1 ? 's' : ''} with ${COMPANY_NAME}!`;
+                msgEl.textContent    = `${person.years} year${person.years !== 1 ? 's' : ''} of amazing dedication, hard work, and growth. We are so grateful to have you on the team. Here's to many more! 🥂`;
+                dismissLbl.textContent = 'Cheers to that! 🥂';
+                dismissBtn.className = 'bday-dismiss-btn anniv';
+            } else if (type === 'anniversary_others') {
+                header.classList.add('anniversary');
+                emoji.textContent    = '🌟';
+                headline.textContent = `${person.name}'s Work Anniversary!`;
+                subHl.textContent    = `${person.years} Year${person.years !== 1 ? 's' : ''} at ${COMPANY_NAME}!`;
+                msgEl.textContent    = `Today marks ${person.name}'s ${person.years}-year work anniversary! Help celebrate this milestone by sending them your warmest congratulations.`;
+                dismissLbl.textContent = 'Congrats to them! 🎊';
+                dismissBtn.className = 'bday-dismiss-btn anniv';
+            } else if (type === 'belated_self') {
+                header.classList.add('belated');
+                emoji.textContent    = '🥳';
+                headline.textContent = `Happy Belated Birthday!`;
+                subHl.textContent    = `From everyone at ${COMPANY_NAME}`;
+                msgEl.textContent    = `Your birthday fell on the weekend, but the celebration continues! We hope you had a fantastic time and that your week ahead is just as wonderful. 🎂🎉`;
+                dismissLbl.textContent = 'Thanks so much! 💙';
+                dismissBtn.className = 'bday-dismiss-btn belated';
+            } else if (type === 'belated_others') {
+                header.classList.add('belated-others');
+                emoji.textContent    = '💛';
+                headline.textContent = `Belated Birthday Reminder!`;
+                subHl.textContent    = `${person.name}'s birthday was on the weekend`;
+                msgEl.textContent    = `${person.name}'s birthday fell over the weekend. Now that it's Monday, be sure to wish them a happy belated birthday and brighten their first day back! 🎊`;
+                dismissLbl.textContent = 'I'll wish them now! 🎂';
+                dismissBtn.className = 'bday-dismiss-btn belated-others';
+            }
+
+            buildConfetti(header);
+            overlay.classList.add('show');
+        }
+
+        function dismissBdayOverlay() {
+            document.getElementById('bday-overlay').classList.remove('show');
+        }
+
+        /**
+         * Generate a birthday card as a PDF-quality canvas and trigger download.
+         */
+        function downloadBirthdayCard() {
+            const name = (currentUserData && currentUserData.name) ? currentUserData.name : 'Valued Employee';
+            const canvas = document.createElement('canvas');
+            canvas.width  = 1200;
+            canvas.height = 800;
+            const ctx = canvas.getContext('2d');
+
+            // Background gradient
+            const grad = ctx.createLinearGradient(0, 0, 1200, 800);
+            grad.addColorStop(0, '#667eea');
+            grad.addColorStop(0.5, '#764ba2');
+            grad.addColorStop(1, '#f093fb');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 1200, 800);
+
+            // Decorative circles
+            ctx.globalAlpha = 0.12;
+            ctx.fillStyle = '#fff';
+            ctx.beginPath(); ctx.arc(100, 100, 180, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(1100, 700, 220, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(1050, 80, 120, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(180, 720, 140, 0, Math.PI*2); ctx.fill();
+            ctx.globalAlpha = 1;
+
+            // Inner white rounded rectangle
+            ctx.fillStyle = 'rgba(255,255,255,0.12)';
+            roundRect(ctx, 60, 60, 1080, 680, 40, true, false);
+
+            // Confetti dots
+            const confColors = ['#FFD700','#FF6B6B','#4ECDC4','#45B7D1','#FFEAA7','#DDA0DD'];
+            for (let i = 0; i < 60; i++) {
+                ctx.fillStyle = confColors[i % confColors.length];
+                ctx.globalAlpha = 0.55;
+                ctx.beginPath();
+                ctx.arc(
+                    80 + Math.sin(i * 137.5) * 500 + 500,
+                    80 + Math.cos(i * 137.5) * 320 + 350,
+                    3 + (i % 4), 0, Math.PI*2
+                );
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+
+            // Big emoji
+            ctx.font = '120px serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('🎂', 600, 230);
+
+            // "Happy Birthday" heading
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 72px "Inter", sans-serif';
+            ctx.shadowColor = 'rgba(0,0,0,0.3)';
+            ctx.shadowBlur = 12;
+            ctx.fillText('Happy Birthday!', 600, 340);
+
+            // Recipient name
+            ctx.font = 'bold 52px "Inter", sans-serif';
+            ctx.fillStyle = '#FFD700';
+            ctx.shadowBlur = 8;
+            ctx.fillText(name, 600, 420);
+
+            // Message line
+            ctx.font = '28px "Inter", sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.92)';
+            ctx.shadowBlur = 4;
+            ctx.fillText('Wishing you a day full of joy, laughter and love.', 600, 490);
+            ctx.fillText('From all of us at ' + COMPANY_NAME, 600, 535);
+
+            // Company branding strip
+            ctx.fillStyle = 'rgba(255,255,255,0.18)';
+            ctx.fillRect(0, 700, 1200, 100);
+            ctx.font = 'bold 30px "Inter", sans-serif';
+            ctx.fillStyle = '#fff';
+            ctx.shadowBlur = 0;
+            ctx.fillText(COMPANY_NAME + ' · Employee Portal', 600, 757);
+
+            // Reset shadow
+            ctx.shadowBlur = 0;
+
+            // Convert to PNG blob and download via a link
+            canvas.toBlob(function(blob) {
+                // We'll make a multi-page PDF manually using only canvas
+                // Since we can't load jsPDF from CDN easily without import, we do a
+                // clever trick: embed the image in an HTML page printed as PDF via data: URL
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imgData = e.target.result;
+                    const printHtml = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Birthday Card - ${name}</title>
+<style>
+  * { margin:0; padding:0; box-sizing: border-box; }
+  body { background: #fff; }
+  @page { size: A4 landscape; margin: 0; }
+  @media print { body { margin: 0; } }
+  img { width: 100%; height: 100vh; object-fit: contain; display: block; }
+</style>
+</head>
+<body>
+<img src="${imgData}" alt="Birthday Card">
+<script>
+  window.onload = function() { window.print(); };
+<\/script>
+</body>
+</html>`;
+                    const blob2 = new Blob([printHtml], { type: 'text/html' });
+                    const url = URL.createObjectURL(blob2);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `Birthday_Card_${name.replace(/\s+/g,'_')}.html`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+
+                    // Also offer a direct PNG download
+                    const a2 = document.createElement('a');
+                    a2.href = URL.createObjectURL(blob);
+                    a2.download = `Birthday_Card_${name.replace(/\s+/g,'_')}.png`;
+                    a2.click();
+                };
+                reader.readAsDataURL(blob);
+            }, 'image/png');
+        }
+
+        function roundRect(ctx, x, y, w, h, r, fill, stroke) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+            ctx.lineTo(x + w, y + h - r);
+            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            ctx.lineTo(x + r, y + h);
+            ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+            ctx.lineTo(x, y + r);
+            ctx.quadraticCurveTo(x, y, x + r, y);
+            ctx.closePath();
+            if (fill) ctx.fill();
+            if (stroke) ctx.stroke();
+        }
+
+        /**
+         * Main check: fired once after user data loads.
+         * Fetches all employees from Firebase, checks birthdays and work anniversaries.
+         * Also handles the "belated on Monday" case.
+         */
+        async function checkBirthdayAndAnniversary() {
+            if (!currentUserData) return;
+
+            // Prevent double-showing within same session
+            const sessionKey = `bday_shown_${getLocalDateStr()}`;
+            if (sessionStorage.getItem(sessionKey)) return;
+
+            try {
+                const snap = await db.ref('employees').once('value');
+                if (!snap.exists()) return;
+
+                const today = todayMMDD();
+                const myId  = currentUserData.id;
+
+                // We'll collect all matching events and prioritise:
+                // 1. Own birthday (today exact)
+                // 2. Own birthday (belated Monday)
+                // 3. Others birthday (today exact) — show only first found
+                // 4. Others birthday (belated Monday)
+                // 5. Own anniversary
+                // 6. Others anniversary
+                // Only ONE overlay is shown per app-open session.
+
+                const events = [];
+
+                snap.forEach(child => {
+                    const emp = child.val();
+                    const id  = child.key;
+
+                    // ---- BIRTHDAY CHECK ----
+                    if (emp.dateOfBirth) {
+                        const bdayMMDD = toMMDD(emp.dateOfBirth);
+                        const isMine   = id === myId;
+
+                        if (bdayMMDD === today) {
+                            events.push({
+                                priority: isMine ? 1 : 3,
+                                type: isMine ? 'birthday_self' : 'birthday_others',
+                                person: { name: emp.name || 'Colleague' }
+                            });
+                        } else if (wasBirthdayOnWeekend(bdayMMDD)) {
+                            events.push({
+                                priority: isMine ? 2 : 4,
+                                type: isMine ? 'belated_self' : 'belated_others',
+                                person: { name: emp.name || 'Colleague' }
+                            });
+                        }
+                    }
+
+                    // ---- WORK ANNIVERSARY CHECK ----
+                    if (emp.startDate) {
+                        const annivMMDD = toMMDD(emp.startDate);
+                        const years     = yearsSince(emp.startDate);
+                        const isMine    = id === myId;
+                        if (years > 0 && annivMMDD === today) {
+                            events.push({
+                                priority: isMine ? 1.5 : 5,
+                                type: isMine ? 'anniversary_self' : 'anniversary_others',
+                                person: { name: emp.name || 'Colleague', years }
+                            });
+                        }
+                    }
+                });
+
+                if (events.length === 0) return;
+
+                // Sort by priority (lower = more important) and show the most important one
+                events.sort((a, b) => a.priority - b.priority);
+                const topEvent = events[0];
+
+                // Mark shown for this session
+                sessionStorage.setItem(sessionKey, '1');
+
+                // Small delay so the app finishes rendering first
+                setTimeout(() => {
+                    showBdayOverlay(topEvent.type, topEvent.person);
+                }, 800);
+
+            } catch(e) {
+                console.warn('Birthday/Anniversary check failed:', e);
+            }
+        }
 
         // ============================================================
         // PWA SERVICE WORKER

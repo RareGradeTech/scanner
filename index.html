@@ -342,9 +342,42 @@
             0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
             100% { transform: translateY(160px) rotate(720deg); opacity: 0; }
         }
+
+        /* ============================================================
+           SMART SWIPE GESTURE
+        ============================================================ */
+        #app-content {
+            will-change: transform;
+            transition: transform 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                        opacity 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        #app-content.swipe-transitioning {
+            pointer-events: none;
+        }
+        #swipe-hint-left,
+        #swipe-hint-right {
+            position: fixed;
+            top: 50%;
+            width: 4px;
+            height: 56px;
+            border-radius: 4px;
+            background: rgba(37, 99, 235, 0.55);
+            z-index: 9000;
+            pointer-events: none;
+            opacity: 0;
+            transition: transform 0.12s ease, opacity 0.12s ease;
+        }
+        #swipe-hint-left  { left: 0;  transform: translateY(-50%) scaleX(0); transform-origin: left center; border-radius: 0 4px 4px 0; }
+        #swipe-hint-right { right: 0; transform: translateY(-50%) scaleX(0); transform-origin: right center; border-radius: 4px 0 0 4px; }
+        #swipe-hint-left.visible  { opacity: 1; transform: translateY(-50%) scaleX(1); }
+        #swipe-hint-right.visible { opacity: 1; transform: translateY(-50%) scaleX(1); }
     </style>
 </head>
 <body class="h-screen flex flex-col relative bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+
+    <!-- Smart swipe edge indicators -->
+    <div id="swipe-hint-left"></div>
+    <div id="swipe-hint-right"></div>
 
     <div id="global-spinner">
         <div class="spinner-ring"></div>
@@ -1253,40 +1286,166 @@
         }
 
         // ============================================================
-        // SWIPE GESTURE NAVIGATION
+        // SMART SWIPE GESTURE NAVIGATION
         // ============================================================
-        let touchStartX = 0;
-        let touchEndX = 0;
-        const swipeThreshold = 50; 
         const navTabs = ['home', 'support', 'leave', 'chat', 'profile', 'settings'];
 
-        document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
-        document.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; handleSwipeGesture(); }, { passive: true });
+        let swipe = {
+            startX: 0, startY: 0,
+            startTime: 0,
+            lastX: 0,
+            tracking: false,
+            blocked: false
+        };
 
-        function handleSwipeGesture() {
+        // Elements that should block swipe when scrolled horizontally inside them
+        const SWIPE_BLOCKED_SELECTORS = [
+            'input', 'textarea', 'select',
+            '.sig-pad', '#chat-messages', '.calendar-grid'
+        ];
+
+        function isSwipeBlocked(target) {
+            return SWIPE_BLOCKED_SELECTORS.some(sel => target.closest(sel));
+        }
+
+        function getCurrentTabId() {
+            if (!document.getElementById('view-chat').classList.contains('hidden')) return 'chat';
+            const activeNav = document.querySelector('.nav-item.active');
+            return activeNav ? activeNav.id.replace('nav-', '') : 'home';
+        }
+
+        function isSwipeable() {
             const loginView = document.getElementById('login-view');
             const scannerView = document.getElementById('view-scanner');
-            if (!loginView.classList.contains('hidden') && loginView.classList.contains('active')) return;
-            if (!scannerView.classList.contains('hidden')) return;
+            const bdayOverlay = document.getElementById('bday-overlay');
+            // Block if login modal is open
+            if (loginView && loginView.classList.contains('active')) return false;
+            // Block if scanner is open
+            if (scannerView && !scannerView.classList.contains('hidden')) return false;
+            // Block if birthday overlay is open
+            if (bdayOverlay && bdayOverlay.classList.contains('show')) return false;
+            return true;
+        }
 
-            let currentTabId = 'home';
-            if (!document.getElementById('view-chat').classList.contains('hidden')) {
-                currentTabId = 'chat';
+        function showSwipeHint(dir) {
+            const hintLeft  = document.getElementById('swipe-hint-left');
+            const hintRight = document.getElementById('swipe-hint-right');
+            if (!hintLeft || !hintRight) return;
+            if (dir === 'left') {
+                hintRight.classList.add('visible');
+                hintLeft.classList.remove('visible');
+            } else if (dir === 'right') {
+                hintLeft.classList.add('visible');
+                hintRight.classList.remove('visible');
             } else {
-                const activeNav = document.querySelector('.nav-item.active');
-                if (activeNav) currentTabId = activeNav.id.replace('nav-', '');
+                hintLeft.classList.remove('visible');
+                hintRight.classList.remove('visible');
+            }
+        }
+
+        function doSwipeTransition(direction, callback) {
+            const content = document.getElementById('app-content');
+            if (!content) { callback(); return; }
+            const offset = direction === 'left' ? '-18px' : '18px';
+            content.classList.add('swipe-transitioning');
+            content.style.transform = 'translateX(' + offset + ')';
+            content.style.opacity = '0.7';
+            setTimeout(() => {
+                callback();
+                // Snap from opposite side
+                const fromOffset = direction === 'left' ? '18px' : '-18px';
+                content.style.transition = 'none';
+                content.style.transform = 'translateX(' + fromOffset + ')';
+                content.style.opacity = '0.7';
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        content.style.transition = '';
+                        content.style.transform = 'translateX(0)';
+                        content.style.opacity = '1';
+                        setTimeout(() => {
+                            content.classList.remove('swipe-transitioning');
+                        }, 300);
+                    });
+                });
+            }, 200);
+        }
+
+        document.addEventListener('touchstart', function(e) {
+            if (!isSwipeable()) { swipe.blocked = true; return; }
+            if (isSwipeBlocked(e.target)) { swipe.blocked = true; return; }
+            const t = e.changedTouches[0];
+            swipe.startX   = t.clientX;
+            swipe.startY   = t.clientY;
+            swipe.lastX    = t.clientX;
+            swipe.startTime = Date.now();
+            swipe.tracking = true;
+            swipe.blocked  = false;
+        }, { passive: true });
+
+        document.addEventListener('touchmove', function(e) {
+            if (!swipe.tracking || swipe.blocked) return;
+            const t = e.changedTouches[0];
+            const dx = t.clientX - swipe.startX;
+            const dy = t.clientY - swipe.startY;
+            swipe.lastX = t.clientX;
+
+            // If movement is more vertical than horizontal, block swipe
+            if (Math.abs(dy) > Math.abs(dx) + 8) {
+                swipe.blocked = true;
+                showSwipeHint(null);
+                return;
             }
 
+            // Show edge hint pill when dragging enough
+            if (Math.abs(dx) > 20) {
+                const currentTabId = getCurrentTabId();
+                const currentIndex = navTabs.indexOf(currentTabId);
+                if (dx < 0 && currentIndex < navTabs.length - 1) showSwipeHint('left');
+                else if (dx > 0 && currentIndex > 0) showSwipeHint('right');
+                else showSwipeHint(null);
+            } else {
+                showSwipeHint(null);
+            }
+        }, { passive: true });
+
+        document.addEventListener('touchend', function(e) {
+            showSwipeHint(null);
+            if (!swipe.tracking || swipe.blocked) { swipe.tracking = false; return; }
+            swipe.tracking = false;
+
+            const t = e.changedTouches[0];
+            const dx = t.clientX - swipe.startX;
+            const dy = t.clientY - swipe.startY;
+            const dt = Date.now() - swipe.startTime;
+
+            // Must be more horizontal than vertical
+            if (Math.abs(dy) > Math.abs(dx) * 0.75) return;
+
+            // Velocity = pixels per ms
+            const velocity = Math.abs(dx) / dt;
+            // Qualify as swipe if: distance > 55px OR (distance > 25px AND velocity > 0.35px/ms)
+            const isSwipe = Math.abs(dx) > 55 || (Math.abs(dx) > 25 && velocity > 0.35);
+            if (!isSwipe) return;
+
+            // Must not start too close to top (header) or bottom (nav) edges
+            const startY = swipe.startY;
+            const winH = window.innerHeight;
+            if (startY < 70 || startY > winH - 80) return;
+
+            const currentTabId = getCurrentTabId();
             const currentIndex = navTabs.indexOf(currentTabId);
             if (currentIndex === -1) return;
 
-            if (touchEndX < touchStartX - swipeThreshold) {
-                if (currentIndex < navTabs.length - 1) switchTab(navTabs[currentIndex + 1]);
+            if (dx < 0 && currentIndex < navTabs.length - 1) {
+                // Swipe left → next tab
+                if (navigator.vibrate) navigator.vibrate(8);
+                doSwipeTransition('left', () => switchTab(navTabs[currentIndex + 1]));
+            } else if (dx > 0 && currentIndex > 0) {
+                // Swipe right → previous tab
+                if (navigator.vibrate) navigator.vibrate(8);
+                doSwipeTransition('right', () => switchTab(navTabs[currentIndex - 1]));
             }
-            if (touchEndX > touchStartX + swipeThreshold) {
-                if (currentIndex > 0) switchTab(navTabs[currentIndex - 1]);
-            }
-        }
+        }, { passive: true });
 
         // ============================================================
         // BIOMETRIC STATE

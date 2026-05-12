@@ -1298,7 +1298,7 @@
         // ============================================================
         // METHOD PICKER
         // ============================================================
-        function selectVerifyMethod(method) {
+        async function selectVerifyMethod(method) {
             currentVerifyMethod = method;
             document.getElementById('method-picker').classList.add('hidden');
 
@@ -1306,11 +1306,45 @@
                 document.getElementById('face-panel').classList.remove('hidden');
                 document.getElementById('fingerprint-panel').classList.add('hidden');
                 startWebcam();
-                loadFaceApi();
+                await loadFaceApi();
+                // Check if face is registered; if yes auto-scan, if no show register prompt immediately
+                await checkFaceRegistrationAndAct();
             } else {
                 document.getElementById('fingerprint-panel').classList.remove('hidden');
                 document.getElementById('face-panel').classList.add('hidden');
                 stopWebcam();
+            }
+        }
+
+        async function checkFaceRegistrationAndAct() {
+            if (!currentUserData) return;
+            try {
+                setFaceBadge('Checking face registration...', 'neutral');
+                const snap = await db.ref(`employees/${currentUserData.id}/faceDescriptor`).once('value');
+                const verifyBtn = document.getElementById('btn-verify-face');
+                const regBtn = document.getElementById('btn-register-face');
+                const hint = document.getElementById('face-hint');
+
+                if (!snap.exists()) {
+                    // Face NOT registered — show register prompt, hide scan button
+                    setFaceBadge('⚠️ Face not registered', 'warn');
+                    if (verifyBtn) verifyBtn.classList.add('hidden');
+                    if (regBtn) regBtn.classList.remove('hidden');
+                    if (hint) hint.textContent = 'Your face is not registered. Please register your face first to use face scanning.';
+                    showToast('Face not registered — please register your face first', 'error');
+                } else {
+                    // Face IS registered — show scan button, hide register, auto-trigger scan
+                    if (verifyBtn) verifyBtn.classList.remove('hidden');
+                    if (regBtn) regBtn.classList.add('hidden');
+                    if (hint) hint.textContent = 'Hold still — scanning your face automatically...';
+                    setFaceBadge('Preparing to scan...', 'neutral');
+                    // Small delay to let camera stabilise then auto-scan
+                    await new Promise(r => setTimeout(r, 1200));
+                    captureAndVerifyFace();
+                }
+            } catch(e) {
+                console.error('Face registration check error:', e);
+                setFaceBadge('Could not check registration', 'error');
             }
         }
 
@@ -1414,60 +1448,70 @@
             const canvas = document.getElementById('snapshot-canvas');
             if (!video || !video.videoWidth) { showToast('Camera not ready', 'error'); return; }
 
+            // First, verify face IS registered before allowing any scan
+            const regSnap = await db.ref(`employees/${currentUserData.id}/faceDescriptor`).once('value');
+            if (!regSnap.exists()) {
+                setFaceBadge('⚠️ Face not registered', 'warn');
+                const verifyBtn = document.getElementById('btn-verify-face');
+                const regBtn = document.getElementById('btn-register-face');
+                if (verifyBtn) verifyBtn.classList.add('hidden');
+                if (regBtn) regBtn.classList.remove('hidden');
+                document.getElementById('face-hint').textContent = 'Your face is not registered. Please register your face first.';
+                showToast('Face not registered — please register your face first', 'error');
+                if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                return;
+            }
+
             // Detect face + get descriptor from live video
-            setFaceBadge('Detecting face...', 'neutral');
+            setFaceBadge('Scanning face...', 'neutral');
             const btn = document.getElementById('btn-verify-face');
             if (btn) { btn.disabled = true; btn.textContent = 'Scanning...'; }
 
             try {
-                const detection = await faceapi
-                    .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.5 }))
-                    .withFaceLandmarks()
-                    .withFaceDescriptor();
+                // Take 3 captures and pick the best descriptor (most confident)
+                const detections = [];
+                for (let i = 0; i < 3; i++) {
+                    await new Promise(r => setTimeout(r, 300));
+                    const det = await faceapi
+                        .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.6 }))
+                        .withFaceLandmarks()
+                        .withFaceDescriptor();
+                    if (det) detections.push(det);
+                }
 
-                if (!detection) {
+                if (detections.length === 0) {
                     setFaceBadge('No face detected — look at camera', 'warn');
                     showToast('No face detected. Please look directly at the camera.', 'error');
                     if (btn) { btn.disabled = false; btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/></svg> Scan & Verify Face'; }
                     return;
                 }
 
-                setFaceBadge('Face found — matching identity...', 'neutral');
-                const liveDescriptor = detection.descriptor; // Float32Array
+                setFaceBadge('Matching identity...', 'neutral');
 
-                // Load stored descriptor from Firebase
-                const snap = await db.ref(`employees/${currentUserData.id}/faceDescriptor`).once('value');
-
-                if (!snap.exists()) {
-                    // No face registered — prompt to register
-                    setFaceBadge('Face not registered', 'warn');
-                    if (btn) { btn.disabled = false; btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/></svg> Scan & Verify Face'; }
-                    const regBtn = document.getElementById('btn-register-face');
-                    if (regBtn) regBtn.classList.remove('hidden');
-                    document.getElementById('face-hint').textContent = 'Your face is not registered. Register it first to use face scanning.';
-                    showToast('Face not registered — please register your face first', 'error');
-                    return;
-                }
+                // Use the detection with the highest detection score
+                const best = detections.reduce((a, b) => (a.detection.score > b.detection.score ? a : b));
+                const liveDescriptor = best.descriptor; // Float32Array
 
                 // Convert stored array back to Float32Array
-                const storedArray = Object.values(snap.val());
+                const storedArray = Object.values(regSnap.val());
                 const storedDescriptor = new Float32Array(storedArray);
 
-                // Calculate Euclidean distance (threshold 0.50 = strict, 0.60 = moderate)
+                // Calculate Euclidean distance — strict threshold 0.42
                 const distance = faceapi.euclideanDistance(liveDescriptor, storedDescriptor);
-                const THRESHOLD = 0.52;
+                const THRESHOLD = 0.42;
 
                 if (distance <= THRESHOLD) {
                     // ✅ MATCH
                     setFaceBadge('✅ Identity Verified!', 'success');
-                    showToast('✅ Face Verified!');
+                    showToastFast('✅ Face Verified!', 'success');
                     if (btn) { btn.disabled = false; btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/></svg> Scan & Verify Face'; }
                     stopWebcam();
                     processAttendanceUpdate(currentUserData.id);
                 } else {
-                    // ❌ NO MATCH
-                    setFaceBadge('❌ Face not recognised', 'error');
-                    showToast('Face not recognised. This does not match your registered face.', 'error');
+                    // ❌ NO MATCH — vibrate and show "Face Not Recognized"
+                    setFaceBadge('❌ Face Not Recognized', 'error');
+                    showToast('❌ Face not recognized. Access denied.', 'error');
+                    if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 300]);
                     if (btn) { btn.disabled = false; btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/></svg> Scan & Verify Face'; }
                     console.log('Face distance:', distance.toFixed(4), '> threshold', THRESHOLD);
                 }
@@ -1523,8 +1567,13 @@
                 setFaceBadge('✅ Face registered successfully!', 'success');
                 showToast('✅ Face registered! You can now scan to clock in.');
                 if (regBtn) { regBtn.classList.add('hidden'); }
-                document.getElementById('face-hint').textContent = 'Face registered. Tap Scan & Verify Face to clock in.';
+                const verifyBtn = document.getElementById('btn-verify-face');
+                if (verifyBtn) verifyBtn.classList.remove('hidden');
+                document.getElementById('face-hint').textContent = 'Face registered. Hold still — scanning automatically...';
                 if (regBtn) { regBtn.disabled = false; }
+                // Auto-scan immediately after registration
+                await new Promise(r => setTimeout(r, 1000));
+                captureAndVerifyFace();
 
             } catch(err) {
                 console.error('Face registration error:', err);
@@ -3165,6 +3214,18 @@ ${sigUrl}
             }
             t.classList.remove('opacity-0', 'translate-y-10', 'pointer-events-none');
             setTimeout(() => t.classList.add('opacity-0', 'translate-y-10', 'pointer-events-none'), 3000);
+        }
+        // Fast-dismiss toast for face verification success — disappears quickly
+        function showToastFast(msg, type="success") {
+            const t = document.getElementById('toast');
+            document.getElementById('toastMsg').innerHTML = msg;
+            if (type === "error") {
+                t.classList.add('bg-red-500'); t.classList.remove('bg-gray-900', 'dark:bg-white');
+            } else {
+                t.classList.remove('bg-red-500'); t.classList.add('bg-gray-900', 'dark:bg-white');
+            }
+            t.classList.remove('opacity-0', 'translate-y-10', 'pointer-events-none');
+            setTimeout(() => t.classList.add('opacity-0', 'translate-y-10', 'pointer-events-none'), 1200);
         }
 
         // ============================================================

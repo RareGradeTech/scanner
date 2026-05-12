@@ -1396,16 +1396,10 @@
             if (!isSwipeable()) { swipe.blocked = true; return; }
             if (isSwipeBlocked(e.target)) { swipe.blocked = true; return; }
 
-            // When inside the chat view, only allow swipes that START on the
-            // chat header bar (the green strip at the top) OR the bottom input bar.
-            // Swiping inside the messages list should scroll, not navigate.
-            if (swipe.inChat) {
-                const chatMessages = document.getElementById('chat-messages');
-                if (chatMessages && chatMessages.contains(e.target)) {
-                    swipe.blocked = true;
-                    return;
-                }
-            }
+            // When inside the chat view, allow swipes from anywhere in the view.
+            // The existing horizontal/vertical detection in touchmove & touchend
+            // ensures that a vertical scroll gesture won't trigger tab navigation,
+            // while a clear horizontal swipe will navigate to the next/previous tab.
 
             const t = e.changedTouches[0];
             swipe.startX    = t.clientX;
@@ -1422,8 +1416,13 @@
             const dy = t.clientY - swipe.startY;
             swipe.lastX = t.clientX;
 
-            // Cancel if motion is more vertical than horizontal
-            if (Math.abs(dy) > Math.abs(dx) + 8) {
+            // Cancel if motion is more vertical than horizontal.
+            // Inside the chat view use a stricter ratio so vertical message
+            // scrolling does not accidentally trigger tab navigation.
+            const cancelCondition = swipe.inChat
+                ? Math.abs(dy) > Math.abs(dx) * 1.2
+                : Math.abs(dy) > Math.abs(dx) + 8;
+            if (cancelCondition) {
                 swipe.blocked = true;
                 showSwipeHint(null);
                 return;
@@ -1451,12 +1450,18 @@
             const dy = t.clientY - swipe.startY;
             const dt = Date.now() - swipe.startTime;
 
-            // Must be primarily horizontal
-            if (Math.abs(dy) > Math.abs(dx) * 0.75) return;
+            // Must be primarily horizontal.
+            // Use a stricter threshold inside the chat view so vertical
+            // scrolling in the messages list is never mistaken for a swipe.
+            const horizontalRatio = swipe.inChat ? 0.55 : 0.75;
+            if (Math.abs(dy) > Math.abs(dx) * horizontalRatio) return;
 
-            // Velocity (px/ms) — fast flick counts even if short
+            // Velocity (px/ms) — fast flick counts even if short.
+            // Inside chat, require a slightly longer swipe to avoid
+            // conflicting with natural message-scrolling gestures.
             const velocity = Math.abs(dx) / dt;
-            const isSwipe  = Math.abs(dx) > 55 || (Math.abs(dx) > 25 && velocity > 0.35);
+            const minDist  = swipe.inChat ? 70 : 55;
+            const isSwipe  = Math.abs(dx) > minDist || (Math.abs(dx) > 30 && velocity > 0.40);
             if (!isSwipe) return;
 
             // In the normal (non-chat) views, guard against accidental swipes
